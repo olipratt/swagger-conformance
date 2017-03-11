@@ -1,0 +1,216 @@
+{
+  "host": "127.0.0.1:5000",
+   "schemes":[
+      "http"
+   ],
+  "paths": {
+    "/apps": {
+      "get": {
+        "tags": [
+          "apps"
+        ],
+        "operationId": "get_apps_collection",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/App name"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "type": "string",
+            "format": "mask",
+            "in": "header",
+            "name": "X-Fields",
+            "description": "An optional fields mask"
+          }
+        ],
+        "summary": "Returns the list of apps"
+      }
+    },
+    "/apps/{appid}": {
+      "get": {
+        "tags": [
+          "apps"
+        ],
+        "operationId": "get_apps_resource",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/App with data"
+            }
+          },
+          "404": {
+            "description": "App not found."
+          }
+        },
+        "parameters": [
+          {
+            "type": "string",
+            "format": "mask",
+            "in": "header",
+            "name": "X-Fields",
+            "description": "An optional fields mask"
+          }
+        ],
+        "summary": "Returns the data associated with an app"
+      },
+      "parameters": [
+        {
+          "type": "string",
+          "required": true,
+          "name": "appid",
+          "in": "path"
+        }
+      ],
+      "put": {
+        "operationId": "put_apps_resource",
+        "responses": {
+          "204": {
+            "description": "App successfully updated."
+          },
+          "404": {
+            "description": "App not found."
+          }
+        },
+        "parameters": [
+          {
+            "required": true,
+            "name": "payload",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/App data"
+            }
+          }
+        ],
+        "summary": "Updates an app",
+        "description": "Use this method to add, or change the data stored for, an app.\n* Send a JSON object with the new data in the request body.\n\n```\n{\n  \"data\": {\n    \"any_data\": \"you_like_here\"\n  }\n}\n```\n\n* Specify the name of the app to modify in the request URL path.",
+        "tags": [
+          "apps"
+        ]
+      },
+      "delete": {
+        "operationId": "delete_apps_resource",
+        "responses": {
+          "204": {
+            "description": "App successfully deleted."
+          },
+          "404": {
+            "description": "App not found."
+          }
+        },
+        "tags": [
+          "apps"
+        ],
+        "summary": "Deletes an app"
+      }
+    },
+    "/schema": {
+      "get": {
+        "operationId": "get_schema_resource",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "tags": [
+          "schema"
+        ],
+        "summary": "Return the OpenAPI schema"
+      }
+    }
+  },
+  "responses": {
+    "MaskError": {
+      "description": "When any error occurs on mask"
+    },
+    "ParseError": {
+      "description": "When a mask can't be parsed"
+    }
+  },
+  "basePath": "/api",
+  "produces": [
+    "application/json"
+  ],
+  "definitions": {
+    "App data": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "example": {
+            "any_data": "you_like_goes_here"
+          },
+          "type": "object",
+          "description": "App data"
+        }
+      },
+      "required": [
+        "data"
+      ]
+    },
+    "App name": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "example": "My App",
+          "type": "string",
+          "description": "App name"
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "App with data": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/App name"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "data": {
+              "example": {
+                "any_data": "you_like_goes_here"
+              },
+              "type": "object",
+              "description": "App data"
+            }
+          },
+          "required": [
+            "data"
+          ]
+        }
+      ]
+    }
+  },
+  "swagger": "2.0",
+  "consumes": [
+    "application/json"
+  ],
+  "info": {
+    "title": "Simple Datastore API",
+    "version": "1.0",
+    "description": "A simple REST datastore API"
+  },
+  "tags": [
+    {
+      "description": "Default namespace",
+      "name": "default"
+    },
+    {
+      "description": "App data related operations",
+      "name": "apps"
+    },
+    {
+      "description": "This API's schema operations",
+      "name": "schema"
+    }
+  ]
+}

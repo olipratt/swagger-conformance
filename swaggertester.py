@@ -18,6 +18,10 @@ class ParameterTemplate:
         assert parameter.name is not None
         self._name = parameter.name
 
+    def __repr__(self):
+        return "ParameterTemplate(name={}, type={})".format(self._name,
+                                                            self._type)
+
 
 class EndpointCollection:
 
@@ -35,6 +39,10 @@ class EndpointCollection:
         self._expanded_paths = {}
         for path in self._paths:
             self._expanded_paths[path] = self._expand_path(path)
+
+    @property
+    def endpoints(self):
+        return self._expanded_paths
 
     def _expand_path(self, path):
         log.debug("Expanding path: %r", path)
@@ -59,11 +67,15 @@ class EndpointCollection:
                         log.warning("SKIPPING SCHEMA PARAM - NOT IMPLEMENTED")
 
         log.debug("Expanded path as: %r", operations_map)
+        return operations_map
 
 
 def main(schema_path):
     endpoints = EndpointCollection(schema_path)
     log.debug("Expanded endpoints as: %r", endpoints)
+
+    operation = endpoints.endpoints['/apps/{appid}']['get']
+
 
 
 if __name__ == '__main__':
