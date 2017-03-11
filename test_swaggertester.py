@@ -18,11 +18,21 @@ class EndpointCollectionTestCase(unittest.TestCase):
         pass
 
     def test_schema_parse(self):
-        endpoints = swaggertester.EndpointCollection(TEST_SCHEMA_PATH)
+        endpoints_clctn = swaggertester.EndpointCollection(TEST_SCHEMA_PATH)
         expected_endpoints = {'/schema', '/apps', '/apps/{appid}'}
-        self.assertSetEqual(set(endpoints.endpoints.keys()),
+        self.assertSetEqual(set(endpoints_clctn.endpoints.keys()),
                             expected_endpoints)
 
+    def test_endpoint(self):
+        endpoints_clctn = swaggertester.EndpointCollection(TEST_SCHEMA_PATH)
+        endpoint = endpoints_clctn.endpoints['/apps/{appid}']
+        self.assertIn('get', endpoint)
+        endpoint_op = endpoint['get']
+        self.assertEqual(len(endpoint_op.parameters), 2)
+        self.assertEqual(endpoint_op.parameters['appid'].type, 'string')
+        params = {'appid': 'test_string'}
+        result = endpoint_op.operation(**params)
+        # self.assertEqual(result, 404)
 
 if __name__ == '__main__':
     log_format = '%(asctime)s:%(levelname)-7s:%(funcName)s:%(message)s'
