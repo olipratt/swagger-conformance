@@ -3,12 +3,7 @@ import logging
 import hypothesis
 import hypothesis.strategies as hy_st
 
-from pyswagger import App, Security
-from pyswagger.contrib.client.requests import Client
-# pyswagger makes INFO level logs regularly by default, so lower its logging
-# level to prevent the spam.
-logging.getLogger("pyswagger").setLevel(logging.WARNING)
-logging.getLogger("requests").setLevel(logging.WARNING)
+from client import SwaggerClient
 
 
 log = logging.getLogger(__name__)
@@ -20,35 +15,6 @@ JSON_STRATEGY = hy_st.recursive(
     max_leaves=5)
 
 JSON_OBJECT_STRATEGY = hy_st.dictionaries(hy_st.text(), JSON_STRATEGY)
-
-
-class SwaggerClient:
-    """Client to use to access the Swagger application."""
-
-    def __init__(self, schema_path):
-        self._schema_path = schema_path
-        self._app = App.create(schema_path)
-
-    def __repr__(self):
-        return "{}(schema_path={})".format(self.__class__.__name__,
-                                           self._schema_path)
-
-    @property
-    def app(self):
-        return self._app
-
-    def request(self, operation, parameters):
-        """Perform a request.
-
-        :param operation: The operation to perform.
-        :type operation: OperationTemplate
-        :param parameters: The parameters to use on the operation.
-        :type parameters: dict
-        """
-        client = Client(Security(self._app))
-        result = client.request(operation.operation(**parameters))
-
-        return result
 
 
 class ParameterTemplate:
