@@ -20,14 +20,14 @@ class EndpointCollectionTestCase(unittest.TestCase):
         pass
 
     def test_schema_parse(self):
-        endpoints_clctn = swaggertester.EndpointCollection(self.client)
+        endpoints_clctn = swaggertester.APITemplate(self.client)
         expected_endpoints = {'/schema', '/apps', '/apps/{appid}'}
         self.assertSetEqual(set(endpoints_clctn.endpoints.keys()),
                             expected_endpoints)
 
     @responses.activate
     def test_endpoint(self):
-        endpoints_clctn = swaggertester.EndpointCollection(self.client)
+        endpoints_clctn = swaggertester.APITemplate(self.client)
         endpoint = endpoints_clctn.endpoints['/apps/{appid}']
         self.assertIn('get', endpoint)
         endpoint_op = endpoint['get']
