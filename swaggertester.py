@@ -161,7 +161,7 @@ class OperationTemplate:
 
 class EndpointCollection:
 
-    operations = ["get", "put"]
+    operations = ["get", "put", "post", "delete"]
 
     def __init__(self, client):
         log.debug("Creating new endpoint collection for: %r", client)
@@ -249,6 +249,7 @@ def main(schema_path):
     for endpoint in endpoints_clctn.endpoints:
         log.debug("Testing endpoint: %r", endpoint)
         for operation_type in endpoints_clctn.endpoints[endpoint]:
+            log.debug("Testing operation type: %r", operation_type)
             operation = endpoints_clctn.endpoints[endpoint][operation_type]
             log.info("Got operation: %r", operation)
 

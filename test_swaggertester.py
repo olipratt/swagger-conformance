@@ -31,7 +31,7 @@ class EndpointCollectionTestCase(unittest.TestCase):
         endpoint = endpoints_clctn.endpoints['/apps/{appid}']
         self.assertIn('get', endpoint)
         endpoint_op = endpoint['get']
-        self.assertEqual(len(endpoint_op.parameters), 2)
+        self.assertEqual(len(endpoint_op.parameters), 1)
         self.assertEqual(endpoint_op.parameters['appid'].type, 'string')
         params = {'appid': 'test_string'}
 
