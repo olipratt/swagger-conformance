@@ -11,6 +11,7 @@ log = logging.getLogger(__name__)
 
 
 class SwaggerClient:
+    """Client to use to access the Swagger application."""
 
     def __init__(self, schema_path):
         self._app = App.create(schema_path)
@@ -18,6 +19,19 @@ class SwaggerClient:
     @property
     def app(self):
         return self._app
+
+    def request(self, operation, parameters):
+        """Perform a request.
+
+        :param operation: The operation to perform.
+        :type operation: OperationTemplate
+        :param parameters: The parameters to use on the operation.
+        :type parameters: dict
+        """
+        client = Client(Security(self._app))
+        result = client.request(operation.operation(**parameters))
+
+        return result
 
 
 class ParameterTemplate:
