@@ -10,6 +10,16 @@ logging.getLogger("pyswagger").setLevel(logging.WARNING)
 log = logging.getLogger(__name__)
 
 
+class SwaggerClient:
+
+    def __init__(self, schema_path):
+        self._app = App.create(schema_path)
+
+    @property
+    def app(self):
+        return self._app
+
+
 class ParameterTemplate:
     """Template for a parameter to pass to an operation on an endpoint."""
 
@@ -73,11 +83,10 @@ class EndpointCollection:
 
     operations = ["get", "put"]
 
-    def __init__(self, schema_path):
-        log.debug("Creating new endpoint collection for: %r", schema_path)
-        self._schema_path = schema_path
-
-        self._app = App.create(schema_path)
+    def __init__(self, client):
+        log.debug("Creating new endpoint collection for: %r", client)
+        self._client = client
+        self._app = client.app
 
         self._paths = self._app.root.paths.keys()
         log.debug("Found paths as: %s", self._paths)
@@ -107,7 +116,8 @@ class EndpointCollection:
 
 
 def main(schema_path):
-    endpoints = EndpointCollection(schema_path)
+    client = SwaggerClient(schema_path)
+    endpoints = EndpointCollection(client)
     log.debug("Expanded endpoints as: %r", endpoints)
 
     operation = endpoints.endpoints['/apps/{appid}']['get']
