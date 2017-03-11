@@ -7,6 +7,9 @@ from pyswagger.contrib.client.requests import Client
 logging.getLogger("pyswagger").setLevel(logging.WARNING)
 
 
+import hypothesis.strategies
+
+
 log = logging.getLogger(__name__)
 
 
@@ -68,9 +71,9 @@ class OperationTemplate:
         self._populate_parameters()
 
     def __repr__(self):
-        return "{}(name={}, type={})".format(self.__class__.__name__,
-                                             self._operation,
-                                             self._parameters)
+        return "{}(operation={}, params={})".format(self.__class__.__name__,
+                                                    self._operation,
+                                                    self._parameters)
 
     @property
     def operation(self):
@@ -84,7 +87,9 @@ class OperationTemplate:
         for parameter in self._operation.parameters:
             log.debug("Handling parameter: %r", parameter.name)
 
-            if parameter.schema is None:
+            if parameter.name == 'X-Fields':
+                log.warning("SKIPPING X-Fields PARAM - NOT IMPLEMENTED")
+            elif parameter.schema is None:
                 log.debug("Fully defined parameter")
                 param_template = ParameterTemplate(parameter)
                 self._parameters[parameter.name] = param_template
@@ -129,13 +134,38 @@ class EndpointCollection:
         return operations_map
 
 
+def hypothesize_parameters(parameters):
+    """Generate hypothesis fixed dictionary mapping of parameters.
+    :param parameters: The dictionary of parameter templates to generate from.
+    :type parameters: dict
+    """
+    strategy_type_map = {'string': hypothesis.strategies.text}
+    hypothesis_mapping = {}
+
+    for parameter_name, parameter_template in parameters.items():
+        hypothesized_param = strategy_type_map[parameter_template.type]()
+        hypothesis_mapping[parameter_name] = hypothesized_param
+
+    return hypothesis.strategies.fixed_dictionaries(hypothesis_mapping)
+
+
 def main(schema_path):
     client = SwaggerClient(schema_path)
     endpoints = EndpointCollection(client)
     log.debug("Expanded endpoints as: %r", endpoints)
 
     operation = endpoints.endpoints['/apps/{appid}']['get']
-    print(operation)
+    log.info("Got operation: %r", operation)
+
+    strategy = hypothesize_parameters(operation.parameters)
+
+    @hypothesis.given(strategy)
+    def single_operation_test(params):
+        log.info("Testing with params: %r", params)
+        result = client.request(operation, params)
+        assert result.status == 404
+
+    single_operation_test()
 
 
 if __name__ == '__main__':
