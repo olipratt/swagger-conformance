@@ -18,12 +18,13 @@ def main(schema_path):
     for operation in api_template.iter_template_operations():
         strategy = hypothesize_parameters(operation.parameters)
 
-        @hypothesis.settings(max_examples=1)
+        @hypothesis.settings(max_examples=20)
         @hypothesis.given(strategy)
         def single_operation_test(params):
             log.info("Testing with params: %r", params)
             result = client.request(operation, params)
-            assert result.status < 500
+            assert result.status in operation.response_codes, \
+                "{} not in {}".format(result.status, operation.response_codes)
 
         single_operation_test()
 

@@ -81,6 +81,7 @@ class OperationTemplate:
         self._app = app
         self._operation = operation
         self._parameters = {}
+        self._response_codes = [int(code) for code in operation.responses]
 
         self._populate_parameters()
 
@@ -96,6 +97,10 @@ class OperationTemplate:
     @property
     def parameters(self):
         return self._parameters
+
+    @property
+    def response_codes(self):
+        return self._response_codes
 
     def _populate_parameters(self):
         for parameter in self._operation.parameters:
