@@ -10,7 +10,7 @@ SCHEMA_URL_BASE = 'http://127.0.0.1:5000/api'
 CONTENT_TYPE_JSON = 'application/json'
 
 
-class EndpointCollectionTestCase(unittest.TestCase):
+class APITemplateTestCase(unittest.TestCase):
 
     def setUp(self):
         self.client = swaggertester.SwaggerClient(TEST_SCHEMA_PATH)
@@ -26,19 +26,29 @@ class EndpointCollectionTestCase(unittest.TestCase):
                             expected_endpoints)
 
     @responses.activate
-    def test_endpoint(self):
-        endpoints_clctn = swaggertester.APITemplate(self.client)
-        endpoint = endpoints_clctn.endpoints['/apps/{appid}']
-        self.assertIn('get', endpoint)
-        endpoint_op = endpoint['get']
-        self.assertEqual(len(endpoint_op.parameters), 1)
-        self.assertEqual(endpoint_op.parameters['appid'].type, 'string')
-        params = {'appid': 'test_string'}
+    def test_endpoint_manually(self):
+        api_template = swaggertester.APITemplate(self.client)
 
+        # Find the template GET operation on the /apps/{appid} endpoint.
+        app_id_get_op = None
+        for operation_template in api_template.iter_template_operations():
+            if (operation_template.operation.method == 'get' and
+                    operation_template.operation.path == '/apps/{appid}'):
+                self.assertIsNone(app_id_get_op)
+                app_id_get_op = operation_template
+        self.assertIsNotNone(app_id_get_op)
+
+        # The operation takes one parameter, 'appid', which is a string.
+        self.assertEqual(list(app_id_get_op.parameters.keys()), ['appid'])
+        self.assertEqual(app_id_get_op.parameters['appid'].type, 'string')
+
+        # Send an example parameter in to the endpoint manually, catch the
+        # request, and respond.
+        params = {'appid': 'test_string'}
         responses.add(responses.GET, SCHEMA_URL_BASE + '/apps/test_string',
                       json={}, status=404,
                       content_type=CONTENT_TYPE_JSON)
-        result = self.client.request(endpoint_op, params)
+        result = self.client.request(app_id_get_op, params)
         self.assertEqual(result.status, 404)
 
 
