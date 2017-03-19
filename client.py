@@ -1,6 +1,9 @@
 import logging
 
 from pyswagger import App, Security
+from pyswagger.primitives import SwaggerPrimitive
+from pyswagger.primitives._int import validate_int, create_int
+from pyswagger.primitives._float import validate_float, create_float
 from pyswagger.contrib.client.requests import Client
 # pyswagger and requests make INFO level logs regularly by default, so lower
 # their logging levels to prevent the spam.
@@ -21,7 +24,16 @@ class SwaggerClient:
         :type schema_path: str
         """
         self._schema_path = schema_path
-        self._app = App.create(schema_path)
+
+        # Pyswagger doesn't support integers or floats without a 'format', even
+        # though it does seem valid for a spec to not have one.
+        # We work around this by adding support for these types without format.
+        # See here: https://github.com/mission-liao/pyswagger/issues/65
+        factory = SwaggerPrimitive()
+        factory.register('integer', None, create_int, validate_int)
+        factory.register('number', None, create_float, validate_float)
+        self._app = App.load(schema_path, prim=factory)
+        self._app.prepare()
 
     def __repr__(self):
         return "{}(schema_path={})".format(self.__class__.__name__,

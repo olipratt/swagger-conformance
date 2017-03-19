@@ -1,11 +1,13 @@
 import logging
 import unittest
+import re
 
 import responses
 
 import swaggertester
 
 TEST_SCHEMA_PATH = 'test_schema.json'
+FULL_PUT_SCHEMA_PATH = 'test_schemas/full_put_schema.json'
 SCHEMA_URL_BASE = 'http://127.0.0.1:5000/api'
 CONTENT_TYPE_JSON = 'application/json'
 
@@ -50,6 +52,26 @@ class APITemplateTestCase(unittest.TestCase):
                       content_type=CONTENT_TYPE_JSON)
         result = self.client.request(app_id_get_op, params)
         self.assertEqual(result.status, 404)
+
+
+class ParameterTypesTestCase(unittest.TestCase):
+
+    @responses.activate
+    def test_full_put(self):
+        responses.add(responses.GET, SCHEMA_URL_BASE + '/schema',
+                      json=None, status=200,
+                      content_type=CONTENT_TYPE_JSON)
+        responses.add(responses.GET, SCHEMA_URL_BASE + '/example',
+                      json=None, status=200,
+                      content_type=CONTENT_TYPE_JSON)
+        responses.add(responses.DELETE, SCHEMA_URL_BASE + '/example',
+                      json=None, status=204,
+                      content_type=CONTENT_TYPE_JSON)
+        url_re = re.compile(SCHEMA_URL_BASE + r'/example/.*')
+        responses.add(responses.PUT, url_re,
+                      json=None, status=204,
+                      content_type=CONTENT_TYPE_JSON)
+        swaggertester.validate_schema(FULL_PUT_SCHEMA_PATH)
 
 
 if __name__ == '__main__':

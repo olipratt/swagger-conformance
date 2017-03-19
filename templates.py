@@ -4,6 +4,27 @@ import logging
 log = logging.getLogger(__name__)
 
 
+class IntegerTemplate:
+    """Template for an integer value with constraints."""
+
+    def __init__(self):
+        pass
+
+
+class StringTemplate:
+    """Template for a string value with constraints."""
+
+    def __init__(self):
+        pass
+
+
+class FloatTemplate:
+    """Template for a floating point value with constraints."""
+
+    def __init__(self):
+        pass
+
+
 class ParameterTemplate:
     """Template for a parameter to pass to an operation on an endpoint."""
 
@@ -69,6 +90,15 @@ class ModelTemplate:
                     child = ModelTemplate(self._app,
                                           schema.properties[prop_name])
                     self._contents[prop_name] = child
+        elif schema.type == 'integer':
+            log.debug("Model is integer")
+            self._contents = IntegerTemplate()
+        elif schema.type == 'string':
+            log.debug("Model is string")
+            self._contents = StringTemplate()
+        elif schema.type == 'number':
+            log.debug("Model is float")
+            self._contents = FloatTemplate()
         else:
             log.warning("SKIPPING SCHEMA TYPE: %r - NOT IMPLEMENTED",
                         schema.type)

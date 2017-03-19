@@ -2,7 +2,8 @@ import logging
 
 import hypothesis.strategies as hy_st
 
-from templates import ParameterTemplate, ModelTemplate
+from templates import (ParameterTemplate, ModelTemplate,
+                       IntegerTemplate, StringTemplate, FloatTemplate)
 
 
 log = logging.getLogger(__name__)
@@ -35,6 +36,12 @@ def hypothesize_model(model_template):
             log.debug("Hypothesizing key: %r", name)
             model_dict[name] = hypothesize_model(model)
         return hy_st.fixed_dictionaries(model_dict)
+    elif isinstance(contents, IntegerTemplate):
+        return hy_st.integers()
+    elif isinstance(contents, StringTemplate):
+        return hy_st.text()
+    elif isinstance(contents, FloatTemplate):
+        return hy_st.floats()
 
     assert False
 
@@ -45,7 +52,9 @@ def hypothesize_parameters(parameters):
     :param parameters: The dictionary of parameter templates to generate from.
     :type parameters: dict
     """
-    strategy_type_map = {'string': hy_st.text}
+    strategy_type_map = {'string': hy_st.text,
+                         'integer': hy_st.integers,
+                         'float': hy_st.floats}
     hypothesis_mapping = {}
 
     for parameter_name, parameter_template in parameters.items():

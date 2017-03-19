@@ -10,25 +10,29 @@ from strategies import hypothesize_parameters
 log = logging.getLogger(__name__)
 
 
-def main(schema_path):
+def validate_schema(schema_path):
     client = SwaggerClient(schema_path)
     api_template = APITemplate(client)
     log.debug("Expanded endpoints as: %r", api_template)
 
     for operation in api_template.iter_template_operations():
-        strategy = hypothesize_parameters(operation.parameters)
+        validate_operation(client, operation)
 
-        @hypothesis.settings(max_examples=20)
-        @hypothesis.given(strategy)
-        def single_operation_test(params):
-            log.info("Testing with params: %r", params)
-            result = client.request(operation, params)
-            assert result.status in operation.response_codes, \
-                "{} not in {}".format(result.status, operation.response_codes)
 
-        single_operation_test()
+def validate_operation(client, operation):
+    strategy = hypothesize_parameters(operation.parameters)
+
+    @hypothesis.settings(max_examples=20, suppress_health_check=[hypothesis.HealthCheck.too_slow])
+    @hypothesis.given(strategy)
+    def single_operation_test(client, params):
+        log.info("Testing with params: %r", params)
+        result = client.request(operation, params)
+        assert result.status in operation.response_codes, \
+            "{} not in {}".format(result.status, operation.response_codes)
+
+    single_operation_test(client)
 
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
-    main('http://127.0.0.1:5000/api/schema')
+    validate_schema('http://127.0.0.1:5000/api/schema')

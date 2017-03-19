@@ -1,0 +1,154 @@
+{
+  "host": "127.0.0.1:5000",
+   "schemes":[
+      "http"
+   ],
+  "definitions": {
+    "Example": {
+      "type": "object",
+      "properties": {
+        "raw": {
+          "description": "Raw data",
+          "type": "object",
+          "example": {
+            "any_data": "you_like_goes_here"
+          }
+        },
+        "data": {
+          "description": "String data",
+          "type": "string",
+          "example": "Some string"
+        },
+        "whole": {
+          "description": "number data",
+          "type": "integer",
+          "example": 1234
+        },
+        "real": {
+          "description": "real data",
+          "type": "number",
+          "example": 123.456
+        }
+      },
+      "required": [
+        "data",
+        "raw",
+        "real",
+        "whole"
+      ]
+    }
+  },
+  "swagger": "2.0",
+  "paths": {
+    "/example": {
+      "get": {
+        "summary": "Return a string",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "get_example_collection",
+        "tags": [
+          "example"
+        ]
+      },
+      "delete": {
+        "summary": "Just return",
+        "responses": {
+          "204": {
+            "description": "Successful delete."
+          }
+        },
+        "operationId": "delete_example_collection",
+        "tags": [
+          "example"
+        ]
+      }
+    },
+    "/example/{exint}": {
+      "put": {
+        "summary": "Takes in data",
+        "responses": {
+          "204": {
+            "description": "App successfully updated."
+          }
+        },
+        "operationId": "put_example_resource",
+        "parameters": [
+          {
+            "schema": {
+              "$ref": "#/definitions/Example"
+            },
+            "name": "payload",
+            "required": true,
+            "in": "body"
+          }
+        ],
+        "tags": [
+          "example"
+        ]
+      },
+      "parameters": [
+        {
+          "type": "integer",
+          "name": "exint",
+          "in": "path",
+          "required": true
+        }
+      ]
+    },
+    "/schema": {
+      "get": {
+        "summary": "Return the OpenAPI schema",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "get_schema_resource",
+        "tags": [
+          "schema"
+        ]
+      }
+    }
+  },
+  "basePath": "/api",
+  "produces": [
+    "application/json"
+  ],
+  "responses": {
+    "ParseError": {
+      "description": "When a mask can't be parsed"
+    },
+    "MaskError": {
+      "description": "When any error occurs on mask"
+    }
+  },
+  "tags": [
+    {
+      "description": "Default namespace",
+      "name": "default"
+    },
+    {
+      "description": "App data related operations",
+      "name": "apps"
+    },
+    {
+      "description": "This API's schema operations",
+      "name": "schema"
+    },
+    {
+      "description": "Example operations",
+      "name": "example"
+    }
+  ],
+  "info": {
+    "description": "A simple REST datastore API",
+    "version": "1.0",
+    "title": "Simple Datastore API"
+  },
+  "consumes": [
+    "application/json"
+  ]
+}
