@@ -11,6 +11,7 @@ TEST_SCHEMA_DIR = osp.relpath(osp.join(osp.dirname(osp.realpath(__file__)),
                                        'test_schemas/'))
 TEST_SCHEMA_PATH = osp.join(TEST_SCHEMA_DIR, 'test_schema.json')
 FULL_PUT_SCHEMA_PATH = osp.join(TEST_SCHEMA_DIR, 'full_put_schema.json')
+PETSTORE_SCHEMA_PATH = osp.join(TEST_SCHEMA_DIR, 'petstore.json')
 SCHEMA_URL_BASE = 'http://127.0.0.1:5000/api'
 CONTENT_TYPE_JSON = 'application/json'
 
@@ -82,6 +83,31 @@ class ParameterTypesTestCase(unittest.TestCase):
         # Now just kick off the validation process.
         swaggertester.validate_schema(FULL_PUT_SCHEMA_PATH)
 
+@unittest.skip
+class ExternalExamplesTestCase(unittest.TestCase):
+
+    @responses.activate
+    def test_swaggerio_petstore(self):
+        # Handle all the basic endpoints.
+        responses.add(responses.GET, SCHEMA_URL_BASE + '/pet',
+                      json=None, status=200,
+                      content_type=CONTENT_TYPE_JSON)
+        responses.add(responses.GET, SCHEMA_URL_BASE + '/store',
+                      json=None, status=200,
+                      content_type=CONTENT_TYPE_JSON)
+        responses.add(responses.GET, SCHEMA_URL_BASE + '/user',
+                      json=None, status=200,
+                      content_type=CONTENT_TYPE_JSON)
+
+        # Handle the PUT requests on the endpoint which expects an integer path
+        # parameter. Don't validate the body as we expect pyswagger to do so.
+        url_re = re.compile(SCHEMA_URL_BASE + r'/example/-?\d+')
+        responses.add(responses.PUT, url_re,
+                      json=None, status=204,
+                      content_type=CONTENT_TYPE_JSON)
+
+        # Now just kick off the validation process.
+        swaggertester.validate_schema(PETSTORE_SCHEMA_PATH)
 
 if __name__ == '__main__':
     LOG_FORMAT = '%(asctime)s:%(levelname)-7s:%(funcName)s:%(message)s'
