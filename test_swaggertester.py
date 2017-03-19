@@ -1,15 +1,16 @@
 import logging
 import unittest
 import re
-import os.path
+import os.path as osp
 
 import responses
 
 import swaggertester
 
-TEST_SCHEMA_DIR = 'test_schemas/'
-TEST_SCHEMA_PATH = os.path.join(TEST_SCHEMA_DIR, 'test_schema.json')
-FULL_PUT_SCHEMA_PATH = os.path.join(TEST_SCHEMA_DIR, 'full_put_schema.json')
+TEST_SCHEMA_DIR = osp.relpath(osp.join(osp.dirname(osp.realpath(__file__)),
+                              'test_schemas/'))
+TEST_SCHEMA_PATH = osp.join(TEST_SCHEMA_DIR, 'test_schema.json')
+FULL_PUT_SCHEMA_PATH = osp.join(TEST_SCHEMA_DIR, 'full_put_schema.json')
 SCHEMA_URL_BASE = 'http://127.0.0.1:5000/api'
 CONTENT_TYPE_JSON = 'application/json'
 
@@ -84,5 +85,5 @@ class ParameterTypesTestCase(unittest.TestCase):
 
 if __name__ == '__main__':
     LOG_FORMAT = '%(asctime)s:%(levelname)-7s:%(funcName)s:%(message)s'
-    logging.basicConfig(format=LOG_FORMAT, level=logging.INFO)
+    logging.basicConfig(format=LOG_FORMAT, level=logging.DEBUG)
     unittest.main()
