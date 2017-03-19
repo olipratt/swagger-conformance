@@ -60,6 +60,7 @@ class ParameterTypesTestCase(unittest.TestCase):
 
     @responses.activate
     def test_full_put(self):
+        # Handle all the basic endpoints.
         responses.add(responses.GET, SCHEMA_URL_BASE + '/schema',
                       json=None, status=200,
                       content_type=CONTENT_TYPE_JSON)
@@ -69,10 +70,15 @@ class ParameterTypesTestCase(unittest.TestCase):
         responses.add(responses.DELETE, SCHEMA_URL_BASE + '/example',
                       json=None, status=204,
                       content_type=CONTENT_TYPE_JSON)
-        url_re = re.compile(SCHEMA_URL_BASE + r'/example/.*')
+
+        # Handle the PUT requests on the endpoint which expects an integer path
+        # parameter. Don't validate the body as we expect pyswagger to do so.
+        url_re = re.compile(SCHEMA_URL_BASE + r'/example/-?\d+')
         responses.add(responses.PUT, url_re,
                       json=None, status=204,
                       content_type=CONTENT_TYPE_JSON)
+
+        # Now just kick off the validation process.
         swaggertester.validate_schema(FULL_PUT_SCHEMA_PATH)
 
 
