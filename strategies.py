@@ -3,7 +3,8 @@ import logging
 import hypothesis.strategies as hy_st
 
 from templates import (ParameterTemplate, ModelTemplate,
-                       IntegerTemplate, StringTemplate, FloatTemplate)
+                       IntegerTemplate, StringTemplate, FloatTemplate,
+                       BoolTemplate)
 
 
 log = logging.getLogger(__name__)
@@ -42,6 +43,8 @@ def hypothesize_model(model_template):
         return hy_st.text()
     elif isinstance(contents, FloatTemplate):
         return hy_st.floats()
+    elif isinstance(contents, BoolTemplate):
+        return hy_st.booleans()
 
     assert False
 

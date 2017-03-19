@@ -23,6 +23,11 @@
                     "example": 123.456,
                     "type": "number"
                 },
+                "truthy": {
+                    "description": "Bool data",
+                    "example": true,
+                    "type": "boolean"
+                },
                 "whole": {
                     "description": "number data",
                     "example": 1234,
@@ -33,6 +38,7 @@
                 "data",
                 "raw",
                 "real",
+                "truthy",
                 "whole"
             ],
             "type": "object"

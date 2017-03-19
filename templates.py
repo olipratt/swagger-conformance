@@ -25,6 +25,13 @@ class FloatTemplate:
         pass
 
 
+class BoolTemplate:
+    """Template for a boolean with constraints."""
+
+    def __init__(self):
+        pass
+
+
 class ParameterTemplate:
     """Template for a parameter to pass to an operation on an endpoint."""
 
@@ -99,6 +106,9 @@ class ModelTemplate:
         elif schema.type == 'number':
             log.debug("Model is float")
             self._contents = FloatTemplate()
+        elif schema.type == 'boolean':
+            log.debug("Model is boolean")
+            self._contents = BoolTemplate()
         else:
             log.warning("SKIPPING SCHEMA TYPE: %r - NOT IMPLEMENTED",
                         schema.type)

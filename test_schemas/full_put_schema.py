@@ -54,6 +54,9 @@ ExampleObj = api.model('Example', {
     'data': fields.String(required=True,
                           description='String data',
                           example="Some string"),
+    'truthy': fields.Boolean(required=True,
+                             description='Bool data',
+                             example=True),
 })
 
 @example_ns.route('')
