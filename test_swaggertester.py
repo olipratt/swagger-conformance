@@ -1,13 +1,15 @@
 import logging
 import unittest
 import re
+import os.path
 
 import responses
 
 import swaggertester
 
-TEST_SCHEMA_PATH = 'test_schema.json'
-FULL_PUT_SCHEMA_PATH = 'test_schemas/full_put_schema.json'
+TEST_SCHEMA_DIR = 'test_schemas/'
+TEST_SCHEMA_PATH = os.path.join(TEST_SCHEMA_DIR, 'test_schema.json')
+FULL_PUT_SCHEMA_PATH = os.path.join(TEST_SCHEMA_DIR, 'full_put_schema.json')
 SCHEMA_URL_BASE = 'http://127.0.0.1:5000/api'
 CONTENT_TYPE_JSON = 'application/json'
 
@@ -75,6 +77,6 @@ class ParameterTypesTestCase(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    log_format = '%(asctime)s:%(levelname)-7s:%(funcName)s:%(message)s'
-    logging.basicConfig(format=log_format, level=logging.INFO)
+    LOG_FORMAT = '%(asctime)s:%(levelname)-7s:%(funcName)s:%(message)s'
+    logging.basicConfig(format=LOG_FORMAT, level=logging.INFO)
     unittest.main()
