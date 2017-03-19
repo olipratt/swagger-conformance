@@ -51,7 +51,7 @@ class SwaggerClient:
         :param parameters: The parameters to use on the operation.
         :type parameters: dict
 
-        :rtype pyswagger.
+        :rtype: pyswagger.io.Response
         """
         client = Client(Security(self._app))
         result = client.request(operation.operation(**parameters))
