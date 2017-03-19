@@ -121,7 +121,10 @@ class OperationTemplate:
         self._app = app
         self._operation = operation
         self._parameters = {}
-        self._response_codes = [int(code) for code in operation.responses]
+        # 'default' is a special value to cover undocumented response codes:
+        # https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#fixed-fields-9
+        self._response_codes = [int(code) for code in operation.responses
+                                if code != "default"]
 
         self._populate_parameters()
 
