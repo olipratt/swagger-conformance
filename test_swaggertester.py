@@ -8,7 +8,7 @@ import responses
 import swaggertester
 
 TEST_SCHEMA_DIR = osp.relpath(osp.join(osp.dirname(osp.realpath(__file__)),
-                              'test_schemas/'))
+                                       'test_schemas/'))
 TEST_SCHEMA_PATH = osp.join(TEST_SCHEMA_DIR, 'test_schema.json')
 FULL_PUT_SCHEMA_PATH = osp.join(TEST_SCHEMA_DIR, 'full_put_schema.json')
 SCHEMA_URL_BASE = 'http://127.0.0.1:5000/api'
