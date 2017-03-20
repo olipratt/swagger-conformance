@@ -43,7 +43,10 @@ def hypothesize_model(model_template):
     elif model_template.type == 'integer':
         created_model = hy_st.integers()
     elif model_template.type == 'string':
-        created_model = hy_st.text()
+        if model_template.enum is not None:
+            created_model = hy_st.sampled_from(model_template.enum)
+        else:
+            created_model = hy_st.text()
     elif model_template.type == 'number':
         created_model = hy_st.floats()
     elif model_template.type == 'boolean':

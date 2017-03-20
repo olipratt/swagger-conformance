@@ -11,6 +11,17 @@
                     "example": "Some string",
                     "type": "string"
                 },
+                "enumeration": {
+                    "description": "Specific string from enum",
+                    "enum": [
+                        "A",
+                        "B",
+                        "C",
+                        "D"
+                    ],
+                    "example": "C",
+                    "type": "string"
+                },
                 "list": {
                     "description": "List data",
                     "example": [
@@ -48,6 +59,7 @@
             },
             "required": [
                 "data",
+                "enumeration",
                 "list",
                 "raw",
                 "real",

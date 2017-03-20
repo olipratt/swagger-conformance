@@ -53,7 +53,9 @@ class ModelTemplate:
 
     @property
     def children(self):
-        """The children of this model - may be `None` if there are none."""
+        """The children of this model - may be `None` if there are none.
+        :rtype: dict or ModelTemplate or None
+        """
         return self._children
 
     @property
@@ -62,6 +64,13 @@ class ModelTemplate:
         :rtype: str
         """
         return self._schema.type
+
+    @property
+    def enum(self):
+        """The valid enum values of this model.
+        :rtype: list
+        """
+        return self._schema.enum
 
     def _resolve_schema(self, schema):
         """If the schema for this model is a reference, dereference it."""
