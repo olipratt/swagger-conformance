@@ -1,3 +1,7 @@
+"""
+Templates for key parts of a Swagger-defined API which can be used to generate
+specific API requests adhering to the definition.
+"""
 import logging
 
 
@@ -20,10 +24,16 @@ class ParameterTemplate:
 
     @property
     def name(self):
+        """The name of this parameter.
+        :rtype: str
+        """
         return self._name
 
     @property
     def type(self):
+        """The type of this parameter.
+        :rtype: str
+        """
         return self._type
 
 
@@ -43,10 +53,14 @@ class ModelTemplate:
 
     @property
     def children(self):
+        """The children of this model - may be `None` if there are none."""
         return self._children
 
     @property
     def type(self):
+        """The type of this model.
+        :rtype: str
+        """
         return self._schema.type
 
     def _resolve_schema(self, schema):
@@ -102,14 +116,23 @@ class OperationTemplate:
 
     @property
     def operation(self):
+        """The actual API operation this template represents.
+        :rtype: pyswagger.spec.v2_0.objects.Operation
+        """
         return self._operation
 
     @property
     def parameters(self):
+        """Mapping of the names of the parameters to their templates.
+        :rtype: dict(str, ParameterTemplate)
+        """
         return self._parameters
 
     @property
     def response_codes(self):
+        """List of HTTP response codes this operation might return.
+        :rtype: list(int)
+        """
         return self._response_codes
 
     def _populate_parameters(self):
@@ -132,6 +155,7 @@ class OperationTemplate:
 
 
 class APITemplate:
+    """Template for an entire Swagger API."""
 
     operations = ["get", "put", "post", "delete"]
 
@@ -149,6 +173,9 @@ class APITemplate:
 
     @property
     def endpoints(self):
+        """Mapping of the endpoints of this API to their operations.
+        :rtype: dict
+        """
         return self._expanded_paths
 
     def iter_template_operations(self):

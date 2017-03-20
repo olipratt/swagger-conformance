@@ -1,3 +1,7 @@
+"""
+Functions for generating hypothesis strategies for swagger-defined models and
+properties.
+"""
 import logging
 
 import hypothesis.strategies as hy_st

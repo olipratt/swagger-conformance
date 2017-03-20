@@ -1,3 +1,6 @@
+"""
+A client for accessing a remote swagger-defined API.
+"""
 import logging
 
 from pyswagger import App, Security

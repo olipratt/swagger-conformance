@@ -11,6 +11,7 @@ log = logging.getLogger(__name__)
 
 
 def validate_schema(schema_path):
+    """Fully validate the API defined by the given schema."""
     client = SwaggerClient(schema_path)
     api_template = APITemplate(client)
     log.debug("Expanded endpoints as: %r", api_template)
@@ -20,6 +21,7 @@ def validate_schema(schema_path):
 
 
 def validate_operation(client, operation):
+    """Fully validate the API operation using the provided client."""
     strategy = hypothesize_parameters(operation.parameters)
 
     @hypothesis.settings(max_examples=20)
