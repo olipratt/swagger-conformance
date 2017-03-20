@@ -22,6 +22,18 @@
                     "example": "C",
                     "type": "string"
                 },
+                "isod": {
+                    "description": "ISO date",
+                    "example": "1990-12-31",
+                    "format": "date",
+                    "type": "string"
+                },
+                "isodt": {
+                    "description": "ISO datetime",
+                    "example": "1985-04-12T23:20:50.52Z",
+                    "format": "date-time",
+                    "type": "string"
+                },
                 "list": {
                     "description": "List data",
                     "example": [
@@ -60,6 +72,8 @@
             "required": [
                 "data",
                 "enumeration",
+                "isod",
+                "isodt",
                 "list",
                 "raw",
                 "real",

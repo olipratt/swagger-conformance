@@ -65,6 +65,12 @@ ExampleObj = api.model('Example', {
                         required=True,
                         description='List data',
                         example=["some", "strings", "here"]),
+    'isod': fields.Date(required=True,
+                        description='ISO date',
+                        example='1990-12-31'),
+    'isodt': fields.DateTime(required=True,
+                             description='ISO datetime',
+                             example='1985-04-12T23:20:50.52Z'),
 })
 
 @example_ns.route('')

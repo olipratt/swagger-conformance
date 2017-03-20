@@ -28,10 +28,10 @@ DATE_STRATEGY = hy_st.builds(
 
 TIME_STRATEGY = hy_st.builds(
     datetime.time,
-    hour=hy_st.integers(min_value=0, max_value=24),
-    minute=hy_st.integers(min_value=0, max_value=60),
-    second=hy_st.integers(min_value=0, max_value=60),
-    microsecond=hy_st.integers(min_value=0, max_value=1000000)
+    hour=hy_st.integers(min_value=0, max_value=23),
+    minute=hy_st.integers(min_value=0, max_value=59),
+    second=hy_st.integers(min_value=0, max_value=59),
+    microsecond=hy_st.integers(min_value=0, max_value=999999)
 )
 
 DATETIME_STRATEGY = hy_st.builds(datetime.datetime.combine,
