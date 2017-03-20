@@ -3,6 +3,7 @@ Functions for generating hypothesis strategies for swagger-defined models and
 properties.
 """
 import logging
+import datetime
 
 import hypothesis.strategies as hy_st
 
@@ -15,9 +16,27 @@ log = logging.getLogger(__name__)
 JSON_STRATEGY = hy_st.recursive(
     hy_st.floats() | hy_st.booleans() | hy_st.text() | hy_st.none(),
     lambda children: hy_st.dictionaries(hy_st.text(), children),
-    max_leaves=5)
+    max_leaves=5
+)
 
 JSON_OBJECT_STRATEGY = hy_st.dictionaries(hy_st.text(), JSON_STRATEGY)
+
+DATE_STRATEGY = hy_st.builds(
+    datetime.date.fromordinal,
+    hy_st.integers(min_value=1, max_value=datetime.date.max.toordinal())
+)
+
+TIME_STRATEGY = hy_st.builds(
+    datetime.time,
+    hour=hy_st.integers(min_value=0, max_value=24),
+    minute=hy_st.integers(min_value=0, max_value=60),
+    second=hy_st.integers(min_value=0, max_value=60),
+    microsecond=hy_st.integers(min_value=0, max_value=1000000)
+)
+
+DATETIME_STRATEGY = hy_st.builds(datetime.datetime.combine,
+                                 DATE_STRATEGY,
+                                 TIME_STRATEGY)
 
 
 def hypothesize_model(model_template):
@@ -45,6 +64,10 @@ def hypothesize_model(model_template):
     elif model_template.type == 'string':
         if model_template.enum is not None:
             created_model = hy_st.sampled_from(model_template.enum)
+        elif model_template.format == 'date':
+            created_model = DATE_STRATEGY
+        elif model_template.format == 'date-time':
+            created_model = DATETIME_STRATEGY
         else:
             created_model = hy_st.text()
     elif model_template.type == 'number':

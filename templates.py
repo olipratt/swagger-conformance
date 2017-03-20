@@ -66,6 +66,13 @@ class ModelTemplate:
         return self._schema.type
 
     @property
+    def format(self):
+        """The format of this model.
+        :rtype: str
+        """
+        return self._schema.format
+
+    @property
     def enum(self):
         """The valid enum values of this model.
         :rtype: list
@@ -115,6 +122,9 @@ class OperationTemplate:
         # https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#fixed-fields-9
         self._response_codes = [int(code) for code in operation.responses
                                 if code != "default"]
+        if len(self._response_codes) == 0:
+            assert "default" in operation.responses, "No response codes"
+            self._response_codes = list(range(200, 300))
 
         self._populate_parameters()
 
