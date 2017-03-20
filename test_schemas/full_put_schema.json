@@ -11,6 +11,18 @@
                     "example": "Some string",
                     "type": "string"
                 },
+                "list": {
+                    "description": "List data",
+                    "example": [
+                        "some",
+                        "strings",
+                        "here"
+                    ],
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
                 "raw": {
                     "description": "Raw data",
                     "example": {
@@ -36,6 +48,7 @@
             },
             "required": [
                 "data",
+                "list",
                 "raw",
                 "real",
                 "truthy",

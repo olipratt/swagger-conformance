@@ -4,34 +4,6 @@ import logging
 log = logging.getLogger(__name__)
 
 
-class IntegerTemplate:
-    """Template for an integer value with constraints."""
-
-    def __init__(self):
-        pass
-
-
-class StringTemplate:
-    """Template for a string value with constraints."""
-
-    def __init__(self):
-        pass
-
-
-class FloatTemplate:
-    """Template for a floating point value with constraints."""
-
-    def __init__(self):
-        pass
-
-
-class BoolTemplate:
-    """Template for a boolean with constraints."""
-
-    def __init__(self):
-        pass
-
-
 class ParameterTemplate:
     """Template for a parameter to pass to an operation on an endpoint."""
 
@@ -64,54 +36,49 @@ class ModelTemplate:
 
     def __init__(self, app, schema):
         self._app = app
-        self._schema = schema
-        self._contents = None
+        self._schema = self._resolve_schema(schema)
+        self._children = None
 
-        self._build()
+        self._populate_children()
 
     @property
-    def contents(self):
-        return self._contents
+    def children(self):
+        return self._children
 
-    def _build(self):
-        # The object may actually be a reference to the definition - if so
-        # resolve it.
-        ref = getattr(self._schema, '$ref')
+    @property
+    def type(self):
+        return self._schema.type
+
+    def _resolve_schema(self, schema):
+        """If the schema for this model is a reference, dereference it."""
+        ref = getattr(schema, '$ref')
         log.debug("Ref is: %r", ref)
         if ref is not None:
             schema = self._app.resolve(ref)
-        else:
-            schema = self._schema
         log.debug("Schema: %r", schema)
-        log.debug("Schema name: %r", schema.name)
+        log.debug("Schema name: %r", schema)
 
-        # Populate the model based on its type.
-        if schema.type == 'object':
+        return schema
+
+    def _populate_children(self):
+        assert self._schema.type in ['object', 'integer', 'number', 'string',
+                                     'boolean', 'array']
+
+        # Populate the model children based on its type.
+        if self._schema.type == 'object':
             # If this is an oject with no properties, treat it as a freeform
             # JSON object - which we leave denoted by None.
-            log.debug("Properties: %r", schema.properties)
-            if len(schema.properties) > 0:
-                self._contents = {}
-                for prop_name in schema.properties:
+            log.debug("Properties: %r", self._schema.properties)
+            if len(self._schema.properties) > 0:
+                self._children = {}
+                for prop_name in self._schema.properties:
                     log.debug("This prop: %r", prop_name)
                     child = ModelTemplate(self._app,
-                                          schema.properties[prop_name])
-                    self._contents[prop_name] = child
-        elif schema.type == 'integer':
-            log.debug("Model is integer")
-            self._contents = IntegerTemplate()
-        elif schema.type == 'string':
-            log.debug("Model is string")
-            self._contents = StringTemplate()
-        elif schema.type == 'number':
-            log.debug("Model is float")
-            self._contents = FloatTemplate()
-        elif schema.type == 'boolean':
-            log.debug("Model is boolean")
-            self._contents = BoolTemplate()
-        else:
-            log.warning("SKIPPING SCHEMA TYPE: %r - NOT IMPLEMENTED",
-                        schema.type)
+                                          self._schema.properties[prop_name])
+                    self._children[prop_name] = child
+        elif self._schema.type == 'array':
+            log.debug("Model is array")
+            self._children = ModelTemplate(self._app, self._schema.items)
 
 
 class OperationTemplate:

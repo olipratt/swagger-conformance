@@ -41,6 +41,10 @@ class SwaggerClient:
 
     @property
     def app(self):
+        """The App representing the API of the server.
+
+        :rtype: pyswagger.App
+        """
         return self._app
 
     def request(self, operation, parameters):

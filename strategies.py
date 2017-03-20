@@ -2,9 +2,7 @@ import logging
 
 import hypothesis.strategies as hy_st
 
-from templates import (ParameterTemplate, ModelTemplate,
-                       IntegerTemplate, StringTemplate, FloatTemplate,
-                       BoolTemplate)
+from templates import ParameterTemplate, ModelTemplate
 
 
 log = logging.getLogger(__name__)
@@ -25,28 +23,34 @@ def hypothesize_model(model_template):
     :type model_template: ModelTemplate
     """
     log.debug("Hypothesizing a model")
-    contents = model_template.contents
-    if contents is None:
-        log.debug("Model is arbitrary object")
-        return JSON_OBJECT_STRATEGY
+    created_model = None
 
-    if isinstance(contents, dict):
-        log.debug("Model is object with specified keys")
-        model_dict = {}
-        for name, model in contents.items():
-            log.debug("Hypothesizing key: %r", name)
-            model_dict[name] = hypothesize_model(model)
-        return hy_st.fixed_dictionaries(model_dict)
-    elif isinstance(contents, IntegerTemplate):
-        return hy_st.integers()
-    elif isinstance(contents, StringTemplate):
-        return hy_st.text()
-    elif isinstance(contents, FloatTemplate):
-        return hy_st.floats()
-    elif isinstance(contents, BoolTemplate):
-        return hy_st.booleans()
+    if model_template.type == 'object':
+        if model_template.children is None:
+            log.debug("Model is arbitrary object")
+            created_model = JSON_OBJECT_STRATEGY
+        else:
+            log.debug("Model is object with specified keys")
+            model_dict = {}
+            for name, model in model_template.children.items():
+                log.debug("Hypothesizing key: %r", name)
+                model_dict[name] = hypothesize_model(model)
+            created_model = hy_st.fixed_dictionaries(model_dict)
+    elif model_template.type == 'integer':
+        created_model = hy_st.integers()
+    elif model_template.type == 'string':
+        created_model = hy_st.text()
+    elif model_template.type == 'number':
+        created_model = hy_st.floats()
+    elif model_template.type == 'boolean':
+        created_model = hy_st.booleans()
+    elif model_template.type == 'array':
+        created_model = hy_st.lists(hypothesize_model(model_template.children))
 
-    assert False
+    assert created_model is not None, \
+        "Unrecognised model type: {}".format(model_template.type)
+
+    return created_model
 
 
 def hypothesize_parameters(parameters):
