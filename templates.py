@@ -49,6 +49,34 @@ class ParameterTemplate:
         return self._parameter.type
 
     @property
+    def is_path(self):
+        """Does this parameter appear in the URL path?
+        :rtype: bool
+        """
+        return getattr(self._parameter, 'in', '') == 'path'
+
+    @property
+    def is_header(self):
+        """Does this parameter appear in a header?
+        :rtype: bool
+        """
+        return getattr(self._parameter, 'in', '') == 'header'
+
+    @property
+    def enum(self):
+        """The valid enum values of this parameter.
+        :rtype: list(str)
+        """
+        return self._parameter.enum
+
+    @property
+    def format(self):
+        """The format of this parameter.
+        :rtype: str
+        """
+        return self._parameter.format
+
+    @property
     def children(self):
         """The children of this parameter - may be `None` if there are none.
         :rtype: ParameterTemplate or None

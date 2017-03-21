@@ -4,6 +4,7 @@ properties.
 """
 import logging
 import datetime
+import io
 
 import hypothesis.strategies as hy_st
 
@@ -37,6 +38,9 @@ TIME_STRATEGY = hy_st.builds(
 DATETIME_STRATEGY = hy_st.builds(datetime.datetime.combine,
                                  DATE_STRATEGY,
                                  TIME_STRATEGY)
+
+FILE_STRATEGY = hy_st.builds(io.BytesIO,
+                             hy_st.binary()).map(lambda x: {'data': x})
 
 
 def hypothesize_model(model_template):
@@ -90,11 +94,29 @@ def hypothesize_parameter(parameter_template):
     if parameter_template.type == 'array':
         hypothesized_param = \
             hy_st.lists(hypothesize_parameter(parameter_template.children))
-    else:
-        strategy_type_map = {'string': hy_st.text,
-                             'integer': hy_st.integers,
-                             'float': hy_st.floats}
-        hypothesized_param = strategy_type_map[parameter_template.type]()
+    elif parameter_template.type == 'string':
+        if parameter_template.enum is not None:
+            hypothesized_param = hy_st.sampled_from(parameter_template.enum)
+        elif parameter_template.format == 'date':
+            hypothesized_param = DATE_STRATEGY
+        elif parameter_template.format == 'date-time':
+            hypothesized_param = DATETIME_STRATEGY
+        else:
+            if parameter_template.is_path:
+                hypothesized_param = hy_st.text(min_size=1)
+            elif parameter_template.is_header:
+                hypothesized_param = hy_st.text().map(str.lstrip)
+            else:
+                hypothesized_param = hy_st.text()
+    elif parameter_template.type == 'integer':
+        hypothesized_param = hy_st.integers()
+    elif parameter_template.type == 'number':
+        hypothesized_param = hy_st.floats()
+    elif parameter_template.type == 'file':
+        hypothesized_param = FILE_STRATEGY
+
+    assert hypothesized_param is not None, \
+        "Unrecognised parameter type: {}".format(parameter_template.type)
 
     return hypothesized_param
 
