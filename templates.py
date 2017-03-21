@@ -9,32 +9,51 @@ log = logging.getLogger(__name__)
 
 
 class ParameterTemplate:
-    """Template for a parameter to pass to an operation on an endpoint."""
+    """Template for a parameter to pass to an operation on an endpoint.
+
+    Since a Swagger `Items` object maybe a child of a `Parameter`, model that
+    as a parameter as well since it's sufficiently similar we don't care about
+    the distinction. `Items` don't have names though, so be careful of that.
+
+    :type parameter: pyswagger.spec.v2_0.objects.Parameter or
+                     pyswagger.spec.v2_0.objects.Items
+    """
 
     def __init__(self, parameter):
-        assert parameter.type is not None
-        self._type = parameter.type
-        assert parameter.name is not None
-        self._name = parameter.name
+        self._parameter = parameter
+        self._children = None
+
+        self._populate_children()
 
     def __repr__(self):
         return "{}(name={}, type={})".format(self.__class__.__name__,
-                                             self._name,
-                                             self._type)
+                                             self.name,
+                                             self.type)
+
+    def _populate_children(self):
+        if self.type == 'array':
+            self._children = ParameterTemplate(self._parameter.items)
 
     @property
     def name(self):
-        """The name of this parameter.
-        :rtype: str
+        """The name of this parameter, if it has one.
+        :rtype: str or None
         """
-        return self._name
+        return getattr(self._parameter, 'name', None)
 
     @property
     def type(self):
         """The type of this parameter.
         :rtype: str
         """
-        return self._type
+        return self._parameter.type
+
+    @property
+    def children(self):
+        """The children of this parameter - may be `None` if there are none.
+        :rtype: ParameterTemplate or None
+        """
+        return self._children
 
 
 class ModelTemplate:
@@ -42,6 +61,9 @@ class ModelTemplate:
     defining the model it follows.
 
     In the Swagger/OpenAPI world, this maps to a `Schema Object`.
+
+    :type app: pyswagger.App
+    :type schema: pyswagger.spec.v2_0.objects.Schema
     """
 
     def __init__(self, app, schema):
@@ -112,7 +134,10 @@ class ModelTemplate:
 
 
 class OperationTemplate:
-    """Template for an operation on an endpoint."""
+    """Template for an operation on an endpoint.
+    :type app: pyswagger.App
+    :type operation: pyswagger.spec.v2_0.objects.Operation
+    """
 
     def __init__(self, app, operation):
         self._app = app
@@ -120,11 +145,17 @@ class OperationTemplate:
         self._parameters = {}
         # 'default' is a special value to cover undocumented response codes:
         # https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#fixed-fields-9
+        # If only that value is specified, assume that any successful response
+        # code is allowed.
         self._response_codes = [int(code) for code in operation.responses
                                 if code != "default"]
         if len(self._response_codes) == 0:
-            assert "default" in operation.responses, "No response codes"
+            assert "default" in operation.responses, "No response codes at all"
+            log.warning("Only 'default' response defined - allowing any 2XX")
             self._response_codes = list(range(200, 300))
+        if all((x > 299 or x < 200) for x in self._response_codes):
+            log.warning("No success responses defined - allowing 200")
+            self._response_codes.append(200)
 
         self._populate_parameters()
 
@@ -174,7 +205,9 @@ class OperationTemplate:
 
 
 class APITemplate:
-    """Template for an entire Swagger API."""
+    """Template for an entire Swagger API.
+    :type client: client.SwaggerClient
+    """
 
     operations = ["get", "put", "post", "delete"]
 

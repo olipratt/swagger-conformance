@@ -83,21 +83,34 @@ def hypothesize_model(model_template):
     return created_model
 
 
+def hypothesize_parameter(parameter_template):
+    """Generate hypothesis strategy for a single Parameter.
+    :type parameter_template: ParameterTemplate
+    """
+    if parameter_template.type == 'array':
+        hypothesized_param = \
+            hy_st.lists(hypothesize_parameter(parameter_template.children))
+    else:
+        strategy_type_map = {'string': hy_st.text,
+                             'integer': hy_st.integers,
+                             'float': hy_st.floats}
+        hypothesized_param = strategy_type_map[parameter_template.type]()
+
+    return hypothesized_param
+
+
 def hypothesize_parameters(parameters):
     """Generate hypothesis fixed dictionary mapping of parameters.
 
     :param parameters: The dictionary of parameter templates to generate from.
     :type parameters: dict
     """
-    strategy_type_map = {'string': hy_st.text,
-                         'integer': hy_st.integers,
-                         'float': hy_st.floats}
     hypothesis_mapping = {}
 
     for parameter_name, parameter_template in parameters.items():
         if isinstance(parameter_template, ParameterTemplate):
             log.debug("Simple parameter strategy: %r", parameter_name)
-            hypothesized_param = strategy_type_map[parameter_template.type]()
+            hypothesized_param = hypothesize_parameter(parameter_template)
             hypothesis_mapping[parameter_name] = hypothesized_param
         else:
             log.debug("Model parameter strategy: %r", parameter_name)
