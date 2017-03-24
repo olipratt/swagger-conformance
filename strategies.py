@@ -105,7 +105,8 @@ def hypothesize_parameter(parameter_template):
             if parameter_template.is_path:
                 hypothesized_param = hy_st.text(min_size=1)
             elif parameter_template.is_header:
-                hypothesized_param = hy_st.text().map(str.lstrip)
+                hypothesized_param = hy_st.text().map(
+                    lambda x: x.lstrip().replace('\n', '').replace('\r', ''))
             else:
                 hypothesized_param = hy_st.text()
     elif parameter_template.type == 'integer':
