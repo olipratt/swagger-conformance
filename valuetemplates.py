@@ -5,6 +5,7 @@ import logging
 import datetime
 import io
 import urllib.parse
+import math
 
 import hypothesis.strategies as hy_st
 
@@ -92,31 +93,15 @@ class NumericTemplate(ValueTemplate):
                  minimum=None, exclusive_minimum=None,
                  multiple_of=None):
         super().__init__(type_name, format_name)
+        if exclusive_maximum and (maximum is None):
+            raise ValueError("Can't have exclusive max set and no max")
+        if exclusive_minimum and (minimum is None):
+            raise ValueError("Can't have exclusive min set and no min")
         self._maximum = maximum
         self._exclusive_maximum = exclusive_maximum
         self._minimum = minimum
         self._exclusive_minimum = exclusive_minimum
         self._multiple_of = multiple_of
-
-    @property
-    def maximum(self):
-        return self._maximum
-
-    @property
-    def exclusive_maximum(self):
-        return self._exclusive_maximum
-
-    @property
-    def minimum(self):
-        return self._minimum
-
-    @property
-    def exclusive_minimum(self):
-        return self._exclusive_minimum
-
-    @property
-    def multiple_of(self):
-        return self._multiple_of
 
 
 class IntegerTemplate(NumericTemplate):
@@ -132,18 +117,26 @@ class IntegerTemplate(NumericTemplate):
     def hypothesize(self):
         # Note that hypotheis requires integer bounds, but we may be provided
         # with float values.
-        inclusive_max = self.maximum
+        inclusive_max = self._maximum
         if inclusive_max is not None:
-            inclusive_max = (int(self.maximum - 1)
-                             if self.exclusive_maximum else int(self.maximum))
-        inclusive_min = self.minimum
+            inclusive_max = (int(self._maximum - 1)
+                             if self._exclusive_maximum else
+                             int(self._maximum))
+            if self._multiple_of is not None:
+                inclusive_max = math.floor(inclusive_max /
+                                           int(self._multiple_of))
+        inclusive_min = self._minimum
         if inclusive_min is not None:
-            inclusive_min = (int(self.minimum + 1)
-                             if self.exclusive_minimum else int(self.minimum))
+            inclusive_min = (int(self._minimum + 1)
+                             if self._exclusive_minimum else
+                             int(self._minimum))
+            if self._multiple_of is not None:
+                inclusive_min = math.ceil(inclusive_min /
+                                          int(self._multiple_of))
         strategy = hy_st.integers(min_value=inclusive_min,
                                   max_value=inclusive_max)
-        if self.multiple_of is not None:
-            strategy = strategy.map(lambda x: x * self.multiple_of)
+        if self._multiple_of is not None:
+            strategy = strategy.map(lambda x: x * self._multiple_of)
 
         return strategy
 
@@ -159,11 +152,22 @@ class FloatTemplate(NumericTemplate):
                          minimum, exclusive_minimum, multiple_of)
 
     def hypothesize(self):
-        strategy = hy_st.floats(min_value=self.minimum, max_value=self.maximum)
-        if self.exclusive_maximum:
-            strategy = strategy.filter(lambda x: x < self.maximum)
-        if self.exclusive_minimum:
-            strategy = strategy.filter(lambda x: x > self.minimum)
+        if self._multiple_of is not None:
+            maximum = self._maximum
+            if maximum is not None:
+                maximum = math.floor(maximum / self._multiple_of)
+            minimum = self._minimum
+            if minimum is not None:
+                minimum = math.ceil(minimum / self._multiple_of)
+            strategy = hy_st.floats(min_value=minimum, max_value=maximum)
+            strategy = strategy.map(lambda x: x * self._multiple_of)
+        else:
+            strategy = hy_st.floats(min_value=self._minimum,
+                                    max_value=self._maximum)
+        if self._exclusive_maximum:
+            strategy = strategy.filter(lambda x: x < self._maximum)
+        if self._exclusive_minimum:
+            strategy = strategy.filter(lambda x: x > self._minimum)
 
         return strategy
 
@@ -181,37 +185,17 @@ class StringTemplate(ValueTemplate):
         self._enum = enum
         self._blacklist_chars = blacklist_chars
 
-    @property
-    def max_length(self):
-        return self._max_length
-
-    @property
-    def min_length(self):
-        return self._min_length
-
-    @property
-    def pattern(self):
-        return self._pattern
-
-    @property
-    def enum(self):
-        return self._enum
-
-    @property
-    def blacklist_chars(self):
-        return self._blacklist_chars
-
     def hypothesize(self):
-        if self.enum is not None:
-            return hy_st.sampled_from(self.enum)
+        if self._enum is not None:
+            return hy_st.sampled_from(self._enum)
 
         alphabet = None
-        if self.blacklist_chars:
+        if self._blacklist_chars:
             alphabet = hy_st.characters(
-                blacklist_characters=self.blacklist_chars)
+                blacklist_characters=self._blacklist_chars)
         strategy = hy_st.text(alphabet=alphabet,
-                              min_size=self.min_length,
-                              max_size=self.max_length)
+                              min_size=self._min_length,
+                              max_size=self._max_length)
 
         return strategy
 
@@ -282,23 +266,11 @@ class ArrayTemplate(ValueTemplate):
         self._min_items = min_items
         self._unique_items = unique_items
 
-    @property
-    def max_items(self):
-        return self._max_items
-
-    @property
-    def min_items(self):
-        return self._min_items
-
-    @property
-    def unique_items(self):
-        return self._unique_items
-
     def hypothesize(self, elements):
         return hy_st.lists(elements=elements,
-                           min_size=self.min_items,
-                           max_size=self.max_items,
-                           unique=self.unique_items)
+                           min_size=self._min_items,
+                           max_size=self._max_items,
+                           unique=self._unique_items)
 
 
 class ObjectTemplate(ValueTemplate):
@@ -311,14 +283,6 @@ class ObjectTemplate(ValueTemplate):
         self._min_properties = min_properties
         self._additional_properties = additional_properties
 
-    @property
-    def max_properties(self):
-        return self._max_properties
-
-    @property
-    def min_properties(self):
-        return self._min_properties
-
     def hypothesize(self, properties):
         # The result must contain the specified propereties.
         result = hy_st.fixed_dictionaries(properties)
@@ -328,12 +292,12 @@ class ObjectTemplate(ValueTemplate):
         if self._additional_properties:
             # Generate enough to stay within the allowed bounds, but don't
             # generate
-            min_properties = (0 if self.min_properties is None else
-                              self.min_properties)
+            min_properties = (0 if self._min_properties is None else
+                              self._min_properties)
             min_properties = max(0, min_properties - len(properties))
-            max_properties = (10 if self.max_properties is None else
-                              self.max_properties)
-            max_properties = min(10, max_properties - len(properties))
+            max_properties = (5 if self._max_properties is None else
+                              self._max_properties)
+            max_properties = min(5, max_properties - len(properties))
             max_properties = max(max_properties, min_properties)
             extra = hy_st.dictionaries(hy_st.text(),
                                        JSON_STRATEGY,
