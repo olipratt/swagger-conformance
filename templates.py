@@ -140,6 +140,13 @@ class ModelTemplate:
         return self._schema.type
 
     @property
+    def name(self):
+        """The name of this parameter, if it has one.
+        :rtype: str or None
+        """
+        return getattr(self._schema, 'name', None)
+
+    @property
     def format(self):
         """The format of this model.
         :rtype: str
@@ -175,17 +182,12 @@ class ModelTemplate:
         assert self._schema.type in ['object', 'integer', 'number', 'string',
                                      'boolean', 'array']
 
-        # Populate the model children based on its type.
+        # Populate the model children based on the model's type.
         if self._schema.type == 'object':
-            # If this is an oject with no properties, treat it as a freeform
-            # JSON object - which we leave denoted by None.
             log.debug("Properties: %r", self._schema.properties)
-            self._children = {}
-            for prop_name in self._schema.properties:
-                log.debug("This prop: %r", prop_name)
-                child = ModelTemplate(self._app,
-                                      self._schema.properties[prop_name])
-                self._children[prop_name] = child
+            self._children = {prop_name: ModelTemplate(self._app, prop_value)
+                              for prop_name, prop_value in
+                              self._schema.properties.items()}
         elif self._schema.type == 'array':
             log.debug("Model is array")
             self._children = ModelTemplate(self._app, self._schema.items)

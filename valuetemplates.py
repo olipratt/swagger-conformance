@@ -41,8 +41,6 @@ DATETIME_STRATEGY = hy_st.builds(datetime.datetime.combine,
 FILE_STRATEGY = hy_st.builds(io.BytesIO,
                              hy_st.binary()).map(lambda x: {'data': x})
 
-CHARS_NO_RETURN_STRATEGY = hy_st.characters(blacklist_characters=['\r', '\n'])
-
 
 class ValueTemplate:
     """Template for a single value of any specified type."""
@@ -237,6 +235,9 @@ class ArrayTemplate(ValueTemplate):
 
 class ObjectTemplate(ValueTemplate):
     """Template for a JSON object value."""
+    # Limit on the number of additional properties to add to objects.
+    # Setting this too high might cause data generation to time out.
+    MAX_ADDITIONAL_PROPERTIES = 5
 
     def __init__(self, max_properties=None, min_properties=None,
                  additional_properties=False):
@@ -253,13 +254,15 @@ class ObjectTemplate(ValueTemplate):
         # then update it with the fixed ones to ensure they are retained.
         if self._additional_properties:
             # Generate enough to stay within the allowed bounds, but don't
-            # generate
+            # generate more than a fixed maximum.
             min_properties = (0 if self._min_properties is None else
                               self._min_properties)
             min_properties = max(0, min_properties - len(properties))
-            max_properties = (5 if self._max_properties is None else
+            max_properties = (self.MAX_ADDITIONAL_PROPERTIES
+                              if self._max_properties is None else
                               self._max_properties)
-            max_properties = min(5, max_properties - len(properties))
+            max_properties = min(self.MAX_ADDITIONAL_PROPERTIES,
+                                 max_properties - len(properties))
             max_properties = max(max_properties, min_properties)
             extra = hy_st.dictionaries(hy_st.text(),
                                        JSON_STRATEGY,
