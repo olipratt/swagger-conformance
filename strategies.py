@@ -6,47 +6,30 @@ import logging
 
 import hypothesis.strategies as hy_st
 
-from templates import ParameterTemplate, ModelTemplate
-
 
 log = logging.getLogger(__name__)
 
 
-def hypothesize_model(model_template):
-    """Generate hypothesis strategies for a model.
-
-    :param model_template: The model template to prepare a strategy for.
-    :type model_template: ModelTemplate
-    """
-    log.debug("Hypothesizing a model")
-
-    if model_template.type == 'array':
-        elements = hypothesize_model(model_template.children)
-        created_model = model_template.value_template.hypothesize(elements)
-    elif model_template.type == 'object':
-        properties = {}
-        for name, model in model_template.children.items():
-            log.debug("Hypothesizing key: %r", name)
-            properties[name] = hypothesize_model(model)
-        created_model = model_template.value_template.hypothesize(properties)
-    else:
-        created_model = model_template.value_template.hypothesize()
-
-    return created_model
-
-
-def hypothesize_parameter(parameter_template):
+def hypothesize_base_parameter(base_parameter_template):
     """Generate hypothesis strategy for a single Parameter.
-    :type parameter_template: ParameterTemplate
+    :type parameter_template: templates.BaseParameterTemplate
     """
     log.debug("Hypothesizing a parameter")
 
-    if parameter_template.type == 'array':
-        elements = hypothesize_parameter(parameter_template.children)
+    if base_parameter_template.type == 'array':
+        elements = hypothesize_base_parameter(base_parameter_template.children)
         hypothesized_param = \
-            parameter_template.value_template.hypothesize(elements)
+            base_parameter_template.value_template.hypothesize(elements)
+    elif base_parameter_template.type == 'object':
+        properties = {}
+        for name, model in base_parameter_template.children.items():
+            log.debug("Hypothesizing key: %r", name)
+            properties[name] = hypothesize_base_parameter(model)
+        hypothesized_param = \
+            base_parameter_template.value_template.hypothesize(properties)
     else:
-        hypothesized_param = parameter_template.value_template.hypothesize()
+        hypothesized_param = \
+            base_parameter_template.value_template.hypothesize()
 
     return hypothesized_param
 
@@ -60,14 +43,7 @@ def hypothesize_parameters(parameters):
     hypothesis_mapping = {}
 
     for parameter_name, parameter_template in parameters.items():
-        if isinstance(parameter_template, ParameterTemplate):
-            log.debug("Simple parameter strategy: %r", parameter_name)
-            hypothesized_param = hypothesize_parameter(parameter_template)
-            hypothesis_mapping[parameter_name] = hypothesized_param
-        else:
-            log.debug("Model parameter strategy: %r", parameter_name)
-            assert isinstance(parameter_template, ModelTemplate)
-            hypothesized_model = hypothesize_model(parameter_template)
-            hypothesis_mapping[parameter_name] = hypothesized_model
+        hypothesized_param = hypothesize_base_parameter(parameter_template)
+        hypothesis_mapping[parameter_name] = hypothesized_param
 
     return hy_st.fixed_dictionaries(hypothesis_mapping)
