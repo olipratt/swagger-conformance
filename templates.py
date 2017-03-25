@@ -14,7 +14,7 @@ class BaseParameterTemplate:
     """Common base class for Swagger API operation paramters."""
 
     def __init__(self, swagger_app, swagger_definition):
-        self._app = swagger_app
+        self._swagger_app = swagger_app
         self._swagger_definition = self._prepare_definition(swagger_definition)
         self._children = None
         self._value_template = None
@@ -28,61 +28,74 @@ class BaseParameterTemplate:
                                              self.type)
 
     def _prepare_definition(self, swagger_definition):
+        """Can be overridden in derived class to modify the provided swagger
+        definition if required."""
         return swagger_definition
 
     def _populate_children(self):
         if self.type == 'array':
-            self._children = self.__class__(self._app,
+            self._children = self.__class__(self._swagger_app,
                                             self._swagger_definition.items)
+
+    def _populate_bool_value(self):
+        self._value_template = vts.BooleanTemplate()
+
+    def _populate_integer_value(self):
+        self._value_template = vts.IntegerTemplate(
+            maximum=self._swagger_definition.maximum,
+            exclusive_maximum=self._swagger_definition.exclusiveMaximum,
+            minimum=self._swagger_definition.minimum,
+            exclusive_minimum=self._swagger_definition.exclusiveMinimum,
+            multiple_of=self._swagger_definition.multipleOf)
+
+    def _populate_float_value(self):
+        self._value_template = vts.FloatTemplate(
+            maximum=self._swagger_definition.maximum,
+            exclusive_maximum=self._swagger_definition.exclusiveMaximum,
+            minimum=self._swagger_definition.minimum,
+            exclusive_minimum=self._swagger_definition.exclusiveMinimum,
+            multiple_of=self._swagger_definition.multipleOf)
+
+    def _populate_date_value(self):
+        self._value_template = vts.DateTemplate()
+
+    def _populate_datetime_value(self):
+        self._value_template = vts.DateTimeTemplate()
+
+    def _populate_file_value(self):
+        self._value_template = vts.FileTemplate()
+
+    def _populate_string_value(self):
+        self._value_template = vts.StringTemplate(
+            max_length=self._swagger_definition.maxLength,
+            min_length=self._swagger_definition.minLength,
+            pattern=self._swagger_definition.pattern,
+            enum=self._swagger_definition.enum)
+
+    def _populate_array_value(self):
+        self._value_template = vts.ArrayTemplate(
+            max_items=self._swagger_definition.maxItems,
+            min_items=self._swagger_definition.minItems,
+            unique_items=self._swagger_definition.uniqueItems)
 
     def _populate_value(self):
         if self.type == 'boolean':
-            self._value_template = vts.BooleanTemplate()
-        elif self.type in ['integer', 'number']:
-            template_type = {'integer': vts.IntegerTemplate,
-                             'number': vts.FloatTemplate}[self.type]
-            self._value_template = template_type(
-                maximum=self._swagger_definition.maximum,
-                exclusive_maximum=self._swagger_definition.exclusiveMaximum,
-                minimum=self._swagger_definition.minimum,
-                exclusive_minimum=self._swagger_definition.exclusiveMinimum,
-                multiple_of=self._swagger_definition.multipleOf)
+            self._populate_bool_value()
+        elif self.type == 'integer':
+            self._populate_integer_value()
+        elif self.type == 'number':
+            self._populate_float_value()
         elif self.type == 'string':
             if self.format == 'date':
-                self._value_template = vts.DateTemplate()
+                self._populate_date_value()
             elif self.format == 'date-time':
-                self._value_template = vts.DateTimeTemplate()
+                self._populate_datetime_value()
             else:
-                if getattr(self._swagger_definition, 'in', '') == 'path':
-                    template_type = vts.URLPathStringTemplate
-                elif getattr(self._swagger_definition, 'in', '') == 'header':
-                    template_type = vts.HTTPHeaderStringTemplate
-                else:
-                    template_type = vts.StringTemplate
-                self._value_template = template_type(
-                    max_length=self._swagger_definition.maxLength,
-                    min_length=self._swagger_definition.minLength,
-                    pattern=self._swagger_definition.pattern,
-                    enum=self._swagger_definition.enum)
-        elif self.type == 'array':
-            self._value_template = vts.ArrayTemplate(
-                max_items=self._swagger_definition.maxItems,
-                min_items=self._swagger_definition.minItems,
-                unique_items=self._swagger_definition.uniqueItems)
+                self._populate_string_value()
         elif self.type == 'file':
-            self._value_template = vts.FileTemplate()
-        elif self.type == 'object':
-            log.debug("Properties: %r", self._swagger_definition.properties)
-            # If there are no fixed properties then allow arbitrary ones to be
-            # added.
-            additional = (self._swagger_definition.additionalProperties not in
-                          (None, False))
-            additional = (additional or
-                          len(self._swagger_definition.properties) == 0)
-            self._value_template = vts.ObjectTemplate(
-                max_properties=self._swagger_definition.maxProperties,
-                min_properties=self._swagger_definition.minProperties,
-                additional_properties=additional)
+            self._populate_file_value()
+        elif self.type == 'array':
+            self._populate_array_value()
 
         assert self._value_template is not None, \
             "Unsupported type: {}".format(self.type)
@@ -135,6 +148,19 @@ class ParameterTemplate(BaseParameterTemplate):
                               pyswagger.spec.v2_0.objects.Items
     """
 
+    def _populate_string_value(self):
+        if getattr(self._swagger_definition, 'in', '') == 'path':
+            template_type = vts.URLPathStringTemplate
+        elif getattr(self._swagger_definition, 'in', '') == 'header':
+            template_type = vts.HTTPHeaderStringTemplate
+        else:
+            template_type = vts.StringTemplate
+        self._value_template = template_type(
+            max_length=self._swagger_definition.maxLength,
+            min_length=self._swagger_definition.minLength,
+            pattern=self._swagger_definition.pattern,
+            enum=self._swagger_definition.enum)
+
 
 class ModelTemplate(BaseParameterTemplate):
     """Template for a generic parameter, which may be one of many types,
@@ -151,7 +177,7 @@ class ModelTemplate(BaseParameterTemplate):
         ref = getattr(schema, '$ref')
         log.debug("Ref is: %r", ref)
         if ref is not None:
-            schema = self._app.resolve(ref)
+            schema = self._swagger_app.resolve(ref)
         log.debug("Schema: %r", schema)
         log.debug("Schema name: %r", schema)
 
@@ -160,25 +186,29 @@ class ModelTemplate(BaseParameterTemplate):
     def _populate_children(self):
         if self.type == 'object':
             log.debug("Properties: %r", self._swagger_definition.properties)
-            self._children = {prop_name: self.__class__(self._app, prop_value)
+            self._children = {prop_name: self.__class__(self._swagger_app,
+                                                        prop_value)
                               for prop_name, prop_value in
                               self._swagger_definition.properties.items()}
 
         super()._populate_children()
 
+    def _populate_object_value(self):
+        log.debug("Properties: %r", self._swagger_definition.properties)
+        # If there are no fixed properties then allow arbitrary ones to be
+        # added.
+        additional = (self._swagger_definition.additionalProperties not in
+                      (None, False))
+        additional = (additional or
+                      len(self._swagger_definition.properties) == 0)
+        self._value_template = vts.ObjectTemplate(
+            max_properties=self._swagger_definition.maxProperties,
+            min_properties=self._swagger_definition.minProperties,
+            additional_properties=additional)
+
     def _populate_value(self):
         if self.type == 'object':
-            log.debug("Properties: %r", self._swagger_definition.properties)
-            # If there are no fixed properties then allow arbitrary ones to be
-            # added.
-            additional = (self._swagger_definition.additionalProperties not in
-                          (None, False))
-            additional = (additional or
-                          len(self._swagger_definition.properties) == 0)
-            self._value_template = vts.ObjectTemplate(
-                max_properties=self._swagger_definition.maxProperties,
-                min_properties=self._swagger_definition.minProperties,
-                additional_properties=additional)
+            self._populate_object_value()
 
         super()._populate_value()
 
@@ -224,7 +254,7 @@ class OperationTemplate:
     @property
     def parameters(self):
         """Mapping of the names of the parameters to their templates.
-        :rtype: dict(str, ParameterTemplate)
+        :rtype: dict(str, BaseParameterTemplate)
         """
         return self._parameters
 
