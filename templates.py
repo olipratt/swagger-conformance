@@ -92,39 +92,18 @@ class ParameterTemplate:
         return self._parameter.type
 
     @property
-    def value_template(self):
-        """The template for the value of this parameter.
-        :rtype: valuetemplates.ValueTemplate
-        """
-        return self._value_template
-
-    @property
-    def is_path(self):
-        """Does this parameter appear in the URL path?
-        :rtype: bool
-        """
-        return getattr(self._parameter, 'in', '') == 'path'
-
-    @property
-    def is_header(self):
-        """Does this parameter appear in a header?
-        :rtype: bool
-        """
-        return getattr(self._parameter, 'in', '') == 'header'
-
-    @property
-    def enum(self):
-        """The valid enum values of this parameter.
-        :rtype: list(str)
-        """
-        return self._parameter.enum
-
-    @property
     def format(self):
         """The format of this parameter.
         :rtype: str
         """
         return self._parameter.format
+
+    @property
+    def value_template(self):
+        """The template for the value of this parameter.
+        :rtype: valuetemplates.ValueTemplate
+        """
+        return self._value_template
 
     @property
     def children(self):
@@ -148,15 +127,10 @@ class ModelTemplate:
         self._app = app
         self._schema = self._resolve_schema(schema)
         self._children = None
+        self._value_template = None
 
+        self._populate_value()
         self._populate_children()
-
-    @property
-    def children(self):
-        """The children of this model - may be `None` if there are none.
-        :rtype: dict or ModelTemplate or None
-        """
-        return self._children
 
     @property
     def type(self):
@@ -173,11 +147,18 @@ class ModelTemplate:
         return self._schema.format
 
     @property
-    def enum(self):
-        """The valid enum values of this model.
-        :rtype: list
+    def children(self):
+        """The children of this model - may be `None` if there are none.
+        :rtype: dict or ModelTemplate or None
         """
-        return self._schema.enum
+        return self._children
+
+    @property
+    def value_template(self):
+        """The template for the value of this parameter.
+        :rtype: valuetemplates.ValueTemplate
+        """
+        return self._value_template
 
     def _resolve_schema(self, schema):
         """If the schema for this model is a reference, dereference it."""
@@ -199,16 +180,58 @@ class ModelTemplate:
             # If this is an oject with no properties, treat it as a freeform
             # JSON object - which we leave denoted by None.
             log.debug("Properties: %r", self._schema.properties)
-            if len(self._schema.properties) > 0:
-                self._children = {}
-                for prop_name in self._schema.properties:
-                    log.debug("This prop: %r", prop_name)
-                    child = ModelTemplate(self._app,
-                                          self._schema.properties[prop_name])
-                    self._children[prop_name] = child
+            self._children = {}
+            for prop_name in self._schema.properties:
+                log.debug("This prop: %r", prop_name)
+                child = ModelTemplate(self._app,
+                                      self._schema.properties[prop_name])
+                self._children[prop_name] = child
         elif self._schema.type == 'array':
             log.debug("Model is array")
             self._children = ModelTemplate(self._app, self._schema.items)
+
+    def _populate_value(self):
+        value = None
+        if self.type == 'boolean':
+            value = vts.BooleanTemplate()
+        elif self.type in ['integer', 'number']:
+            template_type = {'integer': vts.IntegerTemplate,
+                             'number': vts.FloatTemplate}[self.type]
+            value = template_type(
+                maximum=self._schema.maximum,
+                exclusive_maximum=self._schema.exclusiveMaximum,
+                minimum=self._schema.minimum,
+                exclusive_minimum=self._schema.exclusiveMinimum,
+                multiple_of=self._schema.multipleOf)
+        elif self.type == 'string':
+            if self.format == 'date':
+                value = vts.DateTemplate()
+            elif self.format == 'date-time':
+                value = vts.DateTimeTemplate()
+            else:
+                value = vts.StringTemplate(max_length=self._schema.maxLength,
+                                           min_length=self._schema.minLength,
+                                           pattern=self._schema.pattern,
+                                           enum=self._schema.enum)
+        elif self.type == 'array':
+            value = vts.ArrayTemplate(max_items=self._schema.maxItems,
+                                      min_items=self._schema.minItems,
+                                      unique_items=self._schema.uniqueItems)
+        elif self.type == 'file':
+            value = vts.FileTemplate()
+        elif self.type == 'object':
+            log.debug("Properties: %r", self._schema.properties)
+            # If there are no fixed properties then allow arbitrary ones to be
+            # added.
+            additional = self._schema.additionalProperties not in (None, False)
+            additional = additional or len(self._schema.properties) == 0
+            value = vts.ObjectTemplate(
+                max_properties=self._schema.maxProperties,
+                min_properties=self._schema.minProperties,
+                additional_properties=additional)
+
+        assert value is not None, "Unsupported type: {}".format(self.type)
+        self._value_template = value
 
 
 class OperationTemplate:

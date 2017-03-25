@@ -304,10 +304,12 @@ class ArrayTemplate(ValueTemplate):
 class ObjectTemplate(ValueTemplate):
     """Template for a JSON object value."""
 
-    def __init__(self, max_properties=None, min_properties=None):
+    def __init__(self, max_properties=None, min_properties=None,
+                 additional_properties=False):
         super().__init__(TYPE_OBJECT, None)
         self._max_properties = max_properties
         self._min_properties = min_properties
+        self._additional_properties = additional_properties
 
     @property
     def max_properties(self):
@@ -317,10 +319,27 @@ class ObjectTemplate(ValueTemplate):
     def min_properties(self):
         return self._min_properties
 
-    def hypothesize(self, fixed_dict=None):
-        if fixed_dict is None:
-            return hy_st.dictionaries(hy_st.text(),
-                                      JSON_STRATEGY,
-                                      min_size=self.min_properties,
-                                      max_size=self.max_properties)
-        return hy_st.fixed_dictionaries(fixed_dict)
+    def hypothesize(self, properties):
+        # The result must contain the specified propereties.
+        result = hy_st.fixed_dictionaries(properties)
+
+        # If we allow arbitrary additional properties, create a dict with some
+        # then update it with the fixed ones to ensure they are retained.
+        if self._additional_properties:
+            # Generate enough to stay within the allowed bounds, but don't
+            # generate
+            min_properties = (0 if self.min_properties is None else
+                              self.min_properties)
+            min_properties = max(0, min_properties - len(properties))
+            max_properties = (10 if self.max_properties is None else
+                              self.max_properties)
+            max_properties = min(10, max_properties - len(properties))
+            max_properties = max(max_properties, min_properties)
+            extra = hy_st.dictionaries(hy_st.text(),
+                                       JSON_STRATEGY,
+                                       min_size=min_properties,
+                                       max_size=max_properties)
+
+            result = hy_st.builds(lambda x, y: x.update(y), extra, result)
+
+        return result
