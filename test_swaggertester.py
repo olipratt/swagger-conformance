@@ -2,6 +2,7 @@ import logging
 import unittest
 import re
 import os.path as osp
+import json
 
 import responses
 
@@ -83,19 +84,123 @@ class ParameterTypesTestCase(unittest.TestCase):
         # Now just kick off the validation process.
         swaggertester.validate_schema(FULL_PUT_SCHEMA_PATH)
 
-@unittest.skip
+
 class ExternalExamplesTestCase(unittest.TestCase):
 
     @responses.activate
     def test_swaggerio_petstore(self):
+        # Example responses matching the required models.
+        pet = {
+            "id": 0,
+            "category": {
+                "id": 0,
+                "name": "string"
+            },
+            "name": "doggie",
+            "photoUrls": [
+                "string"
+            ],
+            "tags": [
+                {
+                    "id": 0,
+                    "name": "string"
+                }
+            ],
+            "status": "available"
+        }
+        pets = [pet]
+        inventory = {"additionalProp1": 0, "additionalProp2": 0}
+        order = {"id": 0,
+                 "petId": 0,
+                 "quantity": 0,
+                 "shipDate": "2017-03-21T23:13:44.949Z",
+                 "status": "placed",
+                 "complete": True}
+        api_response = {"code": 0, "type": "string", "message": "string"}
+        user = {"id": 0,
+                "username": "string",
+                "firstName": "string",
+                "lastName": "string",
+                "email": "string",
+                "password": "string",
+                "phone": "string",
+                "userStatus": 0}
+
         # Handle all the basic endpoints.
         responses.add(responses.GET, SCHEMA_URL_BASE + '/pet',
                       json=None, status=200,
                       content_type=CONTENT_TYPE_JSON)
+        responses.add(responses.POST, SCHEMA_URL_BASE + '/pet',
+                      json=None, status=200,
+                      content_type=CONTENT_TYPE_JSON)
+        responses.add(responses.PUT, SCHEMA_URL_BASE + '/pet',
+                      json=None, status=200,
+                      content_type=CONTENT_TYPE_JSON)
+        url_re = re.compile(SCHEMA_URL_BASE + r'/pet/-?\d+')
+        responses.add(responses.GET, url_re,
+                      json=pet, status=200,
+                      content_type=CONTENT_TYPE_JSON)
+        responses.add(responses.POST, url_re,
+                      json=api_response, status=200,
+                      content_type=CONTENT_TYPE_JSON)
+        responses.add(responses.DELETE, url_re,
+                      json=None, status=200,
+                      content_type=CONTENT_TYPE_JSON)
+        responses.add(responses.GET, SCHEMA_URL_BASE + '/pet/findByStatus',
+                      json=pets, status=200,
+                      content_type=CONTENT_TYPE_JSON)
+        responses.add(responses.GET, SCHEMA_URL_BASE + '/pet/findByTags',
+                      json=pets, status=200,
+                      content_type=CONTENT_TYPE_JSON)
         responses.add(responses.GET, SCHEMA_URL_BASE + '/store',
                       json=None, status=200,
                       content_type=CONTENT_TYPE_JSON)
+        responses.add(responses.GET, SCHEMA_URL_BASE + '/store/inventory',
+                      json=inventory, status=200,
+                      content_type=CONTENT_TYPE_JSON)
+        responses.add(responses.POST, SCHEMA_URL_BASE + '/store/order',
+                      json=order, status=200,
+                      content_type=CONTENT_TYPE_JSON)
+        url_re = re.compile(SCHEMA_URL_BASE + r'/store/order/-?\d+')
+        responses.add(responses.GET, url_re,
+                      json=order, status=200,
+                      content_type=CONTENT_TYPE_JSON)
+        responses.add(responses.DELETE, url_re,
+                      json=None, status=200,
+                      content_type=CONTENT_TYPE_JSON)
         responses.add(responses.GET, SCHEMA_URL_BASE + '/user',
+                      json=None, status=200,
+                      content_type=CONTENT_TYPE_JSON)
+        responses.add(responses.POST, SCHEMA_URL_BASE + '/user',
+                      json=None, status=200,
+                      content_type=CONTENT_TYPE_JSON)
+        responses.add(responses.DELETE, SCHEMA_URL_BASE + '/user',
+                      json=None, status=200,
+                      content_type=CONTENT_TYPE_JSON)
+        url_re = re.compile(SCHEMA_URL_BASE + r'/user/(?!login).+')
+        responses.add(responses.GET, url_re,
+                      json=user, status=200,
+                      content_type=CONTENT_TYPE_JSON)
+        responses.add(responses.PUT, url_re,
+                      json=None, status=200,
+                      content_type=CONTENT_TYPE_JSON)
+        responses.add(responses.DELETE, url_re,
+                      json=None, status=200,
+                      content_type=CONTENT_TYPE_JSON)
+        url_re = re.compile(SCHEMA_URL_BASE +
+                            r'/user/login\?username=.*&password=.*')
+        responses.add(responses.GET, url_re,
+                      json="example", status=200,
+                      content_type=CONTENT_TYPE_JSON)
+        responses.add(responses.GET, SCHEMA_URL_BASE + '/user/logout',
+                      json=None, status=200,
+                      content_type=CONTENT_TYPE_JSON)
+        responses.add(responses.POST,
+                      SCHEMA_URL_BASE + '/user/createWithArray',
+                      json=None, status=200,
+                      content_type=CONTENT_TYPE_JSON)
+        responses.add(responses.POST,
+                      SCHEMA_URL_BASE + '/user/createWithList',
                       json=None, status=200,
                       content_type=CONTENT_TYPE_JSON)
 
@@ -108,6 +213,7 @@ class ExternalExamplesTestCase(unittest.TestCase):
 
         # Now just kick off the validation process.
         swaggertester.validate_schema(PETSTORE_SCHEMA_PATH)
+
 
 if __name__ == '__main__':
     LOG_FORMAT = '%(asctime)s:%(levelname)-7s:%(funcName)s:%(message)s'

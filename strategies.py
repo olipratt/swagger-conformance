@@ -42,6 +42,8 @@ DATETIME_STRATEGY = hy_st.builds(datetime.datetime.combine,
 FILE_STRATEGY = hy_st.builds(io.BytesIO,
                              hy_st.binary()).map(lambda x: {'data': x})
 
+CHARS_NO_RETURN_STRATEGY = hy_st.characters(blacklist_characters=['\r', '\n'])
+
 
 def hypothesize_model(model_template):
     """Generate hypothesis strategies for a model.
@@ -92,29 +94,36 @@ def hypothesize_parameter(parameter_template):
     :type parameter_template: ParameterTemplate
     """
     if parameter_template.type == 'array':
+        elements = hypothesize_parameter(parameter_template.children)
         hypothesized_param = \
-            hy_st.lists(hypothesize_parameter(parameter_template.children))
-    elif parameter_template.type == 'string':
-        if parameter_template.enum is not None:
-            hypothesized_param = hy_st.sampled_from(parameter_template.enum)
-        elif parameter_template.format == 'date':
-            hypothesized_param = DATE_STRATEGY
-        elif parameter_template.format == 'date-time':
-            hypothesized_param = DATETIME_STRATEGY
-        else:
-            if parameter_template.is_path:
-                hypothesized_param = hy_st.text(min_size=1)
-            elif parameter_template.is_header:
-                hypothesized_param = hy_st.text().map(
-                    lambda x: x.lstrip().replace('\n', '').replace('\r', ''))
-            else:
-                hypothesized_param = hy_st.text()
-    elif parameter_template.type == 'integer':
-        hypothesized_param = hy_st.integers()
-    elif parameter_template.type == 'number':
-        hypothesized_param = hy_st.floats()
-    elif parameter_template.type == 'file':
-        hypothesized_param = FILE_STRATEGY
+            parameter_template.value_template.hypothesize(elements)
+    else:
+        hypothesized_param = parameter_template.value_template.hypothesize()
+
+    # if parameter_template.type == 'array':
+    #     hypothesized_param = \
+    #         hy_st.lists(hypothesize_parameter(parameter_template.children))
+    # elif parameter_template.type == 'string':
+    #     if parameter_template.enum is not None:
+    #         hypothesized_param = hy_st.sampled_from(parameter_template.enum)
+    #     elif parameter_template.format == 'date':
+    #         hypothesized_param = DATE_STRATEGY
+    #     elif parameter_template.format == 'date-time':
+    #         hypothesized_param = DATETIME_STRATEGY
+    #     else:
+    #         if parameter_template.is_path:
+    #             hypothesized_param = hy_st.text(min_size=1)
+    #         elif parameter_template.is_header:
+    #             hypothesized_param = hy_st.text(
+    #                 alphabet=CHARS_NO_RETURN_STRATEGY).map(str.lstrip)
+    #         else:
+    #             hypothesized_param = hy_st.text()
+    # elif parameter_template.type == 'integer':
+    #     hypothesized_param = hy_st.integers()
+    # elif parameter_template.type == 'number':
+    #     hypothesized_param = hy_st.floats()
+    # elif parameter_template.type == 'file':
+    #     hypothesized_param = FILE_STRATEGY
 
     assert hypothesized_param is not None, \
         "Unrecognised parameter type: {}".format(parameter_template.type)

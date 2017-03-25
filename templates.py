@@ -4,6 +4,8 @@ specific API requests adhering to the definition.
 """
 import logging
 
+import valuetemplates as vts
+
 
 log = logging.getLogger(__name__)
 
@@ -22,7 +24,9 @@ class ParameterTemplate:
     def __init__(self, parameter):
         self._parameter = parameter
         self._children = None
+        self._value_template = None
 
+        self._populate_value()
         self._populate_children()
 
     def __repr__(self):
@@ -33,6 +37,45 @@ class ParameterTemplate:
     def _populate_children(self):
         if self.type == 'array':
             self._children = ParameterTemplate(self._parameter.items)
+
+    def _populate_value(self):
+        value = None
+        if self.type == 'boolean':
+            value = vts.BooleanTemplate()
+        elif self.type in ['integer', 'number']:
+            template_type = {'integer': vts.IntegerTemplate,
+                             'number': vts.FloatTemplate}[self.type]
+            value = template_type(
+                maximum=self._parameter.maximum,
+                exclusive_maximum=self._parameter.exclusiveMaximum,
+                minimum=self._parameter.minimum,
+                exclusive_minimum=self._parameter.exclusiveMinimum,
+                multiple_of=self._parameter.multipleOf)
+        elif self.type == 'string':
+            if self.format == 'date':
+                value = vts.DateTemplate()
+            elif self.format == 'date-time':
+                value = vts.DateTimeTemplate()
+            else:
+                if getattr(self._parameter, 'in', '') == 'path':
+                    template_type = vts.URLPathStringTemplate
+                elif getattr(self._parameter, 'in', '') == 'header':
+                    template_type = vts.HTTPHeaderStringTemplate
+                else:
+                    template_type = vts.StringTemplate
+                value = template_type(max_length=self._parameter.maxLength,
+                                      min_length=self._parameter.minLength,
+                                      pattern=self._parameter.pattern,
+                                      enum=self._parameter.enum)
+        elif self.type == 'array':
+            value = vts.ArrayTemplate(max_items=self._parameter.maxItems,
+                                      min_items=self._parameter.minItems,
+                                      unique_items=self._parameter.uniqueItems)
+        elif self.type == 'file':
+            value = vts.FileTemplate()
+
+        assert value is not None, "Unsupported type: {}".format(self.type)
+        self._value_template = value
 
     @property
     def name(self):
@@ -47,6 +90,13 @@ class ParameterTemplate:
         :rtype: str
         """
         return self._parameter.type
+
+    @property
+    def value_template(self):
+        """The template for the value of this parameter.
+        :rtype: valuetemplates.ValueTemplate
+        """
+        return self._value_template
 
     @property
     def is_path(self):
