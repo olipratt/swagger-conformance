@@ -44,31 +44,8 @@ FILE_STRATEGY = hy_st.builds(io.BytesIO,
 CHARS_NO_RETURN_STRATEGY = hy_st.characters(blacklist_characters=['\r', '\n'])
 
 
-TYPE_BOOLEAN = 'boolean'
-TYPE_INTEGER = 'integer'
-TYPE_FLOAT = 'float'
-TYPE_STRING = 'string'
-TYPE_ARRAY = 'array'
-TYPE_OBJECT = 'object'
-TYPE_DATE = 'date'
-TYPE_DATETIME = 'date-time'
-TYPE_FILE = 'file'
-
-
 class ValueTemplate:
     """Template for a single value of any specified type."""
-
-    def __init__(self, type_name, format_name):
-        self._type = type_name
-        self._format = format_name
-
-    @property
-    def type(self):
-        return self._type
-
-    @property
-    def format(self):
-        return self._format
 
     def hypothesize(self):
         """Return a hypothesis strategy defining this value."""
@@ -78,9 +55,6 @@ class ValueTemplate:
 class BooleanTemplate(ValueTemplate):
     """Template for a Boolean value."""
 
-    def __init__(self):
-        super().__init__(TYPE_BOOLEAN, None)
-
     def hypothesize(self):
         return hy_st.booleans()
 
@@ -88,11 +62,10 @@ class BooleanTemplate(ValueTemplate):
 class NumericTemplate(ValueTemplate):
     """Template for a numeric value."""
 
-    def __init__(self, type_name, format_name,
-                 maximum=None, exclusive_maximum=None,
+    def __init__(self, maximum=None, exclusive_maximum=None,
                  minimum=None, exclusive_minimum=None,
                  multiple_of=None):
-        super().__init__(type_name, format_name)
+        super().__init__()
         if exclusive_maximum and (maximum is None):
             raise ValueError("Can't have exclusive max set and no max")
         if exclusive_minimum and (minimum is None):
@@ -107,11 +80,10 @@ class NumericTemplate(ValueTemplate):
 class IntegerTemplate(NumericTemplate):
     """Template for an integer value."""
 
-    def __init__(self,
-                 maximum=None, exclusive_maximum=None,
+    def __init__(self, maximum=None, exclusive_maximum=None,
                  minimum=None, exclusive_minimum=None,
                  multiple_of=None):
-        super().__init__(TYPE_INTEGER, None, maximum, exclusive_maximum,
+        super().__init__(maximum, exclusive_maximum,
                          minimum, exclusive_minimum, multiple_of)
 
     def hypothesize(self):
@@ -144,11 +116,10 @@ class IntegerTemplate(NumericTemplate):
 class FloatTemplate(NumericTemplate):
     """Template for a floating point value."""
 
-    def __init__(self,
-                 maximum=None, exclusive_maximum=None,
+    def __init__(self, maximum=None, exclusive_maximum=None,
                  minimum=None, exclusive_minimum=None,
                  multiple_of=None):
-        super().__init__(TYPE_FLOAT, None, maximum, exclusive_maximum,
+        super().__init__(maximum, exclusive_maximum,
                          minimum, exclusive_minimum, multiple_of)
 
     def hypothesize(self):
@@ -178,7 +149,7 @@ class StringTemplate(ValueTemplate):
     def __init__(self, max_length=None, min_length=None,
                  pattern=None, enum=None,
                  blacklist_chars=None):
-        super().__init__(TYPE_STRING, None)
+        super().__init__()
         self._max_length = max_length
         self._min_length = min_length
         self._pattern = pattern
@@ -230,9 +201,6 @@ class HTTPHeaderStringTemplate(StringTemplate):
 class DateTemplate(ValueTemplate):
     """Template for a Date value."""
 
-    def __init__(self):
-        super().__init__(TYPE_DATE, None)
-
     def hypothesize(self):
         return DATE_STRATEGY
 
@@ -240,18 +208,12 @@ class DateTemplate(ValueTemplate):
 class DateTimeTemplate(ValueTemplate):
     """Template for a Date-Time value."""
 
-    def __init__(self):
-        super().__init__(TYPE_DATETIME, None)
-
     def hypothesize(self):
         return DATETIME_STRATEGY
 
 
 class FileTemplate(ValueTemplate):
     """Template for a File value."""
-
-    def __init__(self):
-        super().__init__(TYPE_FILE, None)
 
     def hypothesize(self):
         return FILE_STRATEGY
@@ -261,7 +223,7 @@ class ArrayTemplate(ValueTemplate):
     """Template for an array value."""
 
     def __init__(self, max_items=None, min_items=None, unique_items=None):
-        super().__init__(TYPE_ARRAY, None)
+        super().__init__()
         self._max_items = max_items
         self._min_items = min_items
         self._unique_items = unique_items
@@ -278,7 +240,7 @@ class ObjectTemplate(ValueTemplate):
 
     def __init__(self, max_properties=None, min_properties=None,
                  additional_properties=False):
-        super().__init__(TYPE_OBJECT, None)
+        super().__init__()
         self._max_properties = max_properties
         self._min_properties = min_properties
         self._additional_properties = additional_properties
