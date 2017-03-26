@@ -1,0 +1,12 @@
+[BASIC]
+good-names=i,j,k,ex,Run,_,log,app,api
+
+[TYPECHECK]
+ignored-classes=responses
+
+[FORMAT]
+# Maximum number of characters on a single line.
+max-line-length=79
+
+[MASTER]
+init-hook='import sys; sys.path.append(".")'
