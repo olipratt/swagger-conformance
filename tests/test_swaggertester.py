@@ -2,14 +2,15 @@ import logging
 import unittest
 import re
 import os.path as osp
-import json
 
 import responses
 
-import swaggertester
+import swaggerconformance
+import swaggerconformance.template
+import swaggerconformance.client
 
 TEST_SCHEMA_DIR = osp.relpath(osp.join(osp.dirname(osp.realpath(__file__)),
-                                       'test_schemas/'))
+                                       '../test_schemas/'))
 TEST_SCHEMA_PATH = osp.join(TEST_SCHEMA_DIR, 'test_schema.json')
 FULL_PUT_SCHEMA_PATH = osp.join(TEST_SCHEMA_DIR, 'full_put_schema.json')
 PETSTORE_SCHEMA_PATH = osp.join(TEST_SCHEMA_DIR, 'petstore.json')
@@ -20,21 +21,21 @@ CONTENT_TYPE_JSON = 'application/json'
 class APITemplateTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.client = swaggertester.SwaggerClient(TEST_SCHEMA_PATH)
+        self.client = swaggerconformance.client.SwaggerClient(TEST_SCHEMA_PATH)
 
     def tearDown(self):
         # No teardown of test fixtures required.
         pass
 
     def test_schema_parse(self):
-        endpoints_clctn = swaggertester.APITemplate(self.client)
+        endpoints_clctn = swaggerconformance.template.APITemplate(self.client)
         expected_endpoints = {'/schema', '/apps', '/apps/{appid}'}
         self.assertSetEqual(set(endpoints_clctn.endpoints.keys()),
                             expected_endpoints)
 
     @responses.activate
     def test_endpoint_manually(self):
-        api_template = swaggertester.APITemplate(self.client)
+        api_template = swaggerconformance.template.APITemplate(self.client)
 
         # Find the template GET operation on the /apps/{appid} endpoint.
         app_id_get_op = None
@@ -82,7 +83,7 @@ class ParameterTypesTestCase(unittest.TestCase):
                       content_type=CONTENT_TYPE_JSON)
 
         # Now just kick off the validation process.
-        swaggertester.validate_schema(FULL_PUT_SCHEMA_PATH)
+        swaggerconformance.validate_schema(FULL_PUT_SCHEMA_PATH)
 
 
 class ExternalExamplesTestCase(unittest.TestCase):
@@ -212,7 +213,7 @@ class ExternalExamplesTestCase(unittest.TestCase):
                       content_type=CONTENT_TYPE_JSON)
 
         # Now just kick off the validation process.
-        swaggertester.validate_schema(PETSTORE_SCHEMA_PATH)
+        swaggerconformance.validate_schema(PETSTORE_SCHEMA_PATH)
 
 
 if __name__ == '__main__':

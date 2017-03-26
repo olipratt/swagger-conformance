@@ -2,9 +2,9 @@ import logging
 
 import hypothesis
 
-from client import SwaggerClient
-from templates import APITemplate
-from strategies import hypothesize_parameters
+from .client import SwaggerClient
+from .template import APITemplate
+from .strategies import hypothesize_parameters
 
 
 log = logging.getLogger(__name__)
@@ -46,8 +46,3 @@ def validate_operation(client, operation):
             "application/json not in {}".format(result.header['Content-Type'])
 
     single_operation_test(client, operation)
-
-
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
-    validate_schema('http://127.0.0.1:5000/api/schema')
