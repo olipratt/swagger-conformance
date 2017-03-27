@@ -4,8 +4,8 @@ specific API requests adhering to the definition.
 """
 import logging
 
-from .parametertemplate import ParameterTemplate, ModelTemplate
-
+from .parametertemplate import ParameterTemplate
+from .swaggerparameter import SwaggerParameter
 
 log = logging.getLogger(__name__)
 
@@ -73,9 +73,11 @@ class OperationTemplate:
                 log.warning("SKIPPING X-Fields PARAM - NOT IMPLEMENTED")
             elif parameter.schema is None:
                 log.debug("Fully defined parameter")
-                param_template = ParameterTemplate(self._app, parameter)
+                param_template = ParameterTemplate(
+                    SwaggerParameter(self._app, parameter))
                 self._parameters[parameter.name] = param_template
             else:
                 log.debug("Schema defined parameter")
-                model_template = ModelTemplate(self._app, parameter.schema)
+                model_template = ParameterTemplate(
+                    SwaggerParameter(self._app, parameter.schema))
                 self._parameters[parameter.name] = model_template

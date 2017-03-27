@@ -9,15 +9,13 @@ from . import valuetemplates as vts
 log = logging.getLogger(__name__)
 
 
-class BaseValueFactory:
+class ValueFactory:
     """Common factory for building ValueTemplates from swagger definitions."""
 
     @classmethod
     def create_value(cls, swagger_definition):
         """Create a ValueTemplate for the value specified by the definition.
-        :type swagger_definition: pyswagger.spec.v2_0.objects.Parameter or
-                                  pyswagger.spec.v2_0.objects.Items or
-                                  pyswagger.spec.v2_0.objects.Schema
+        :type swagger_definition: swaggerparameter.SwaggerParameter
         """
         value = None
         if swagger_definition.type == 'boolean':
@@ -37,6 +35,8 @@ class BaseValueFactory:
             value = cls._create_file_value(swagger_definition)
         elif swagger_definition.type == 'array':
             value = cls._create_array_value(swagger_definition)
+        elif swagger_definition.type == 'object':
+            return cls._create_object_value(swagger_definition)
 
         if value is None:
             raise ValueError("Unsupported type, format: {}, {}".format(
@@ -80,28 +80,9 @@ class BaseValueFactory:
 
     @staticmethod
     def _create_string_value(swagger_definition):
-        return vts.StringTemplate(
-            max_length=swagger_definition.maxLength,
-            min_length=swagger_definition.minLength,
-            pattern=swagger_definition.pattern,
-            enum=swagger_definition.enum)
-
-    @staticmethod
-    def _create_array_value(swagger_definition):
-        return vts.ArrayTemplate(
-            max_items=swagger_definition.maxItems,
-            min_items=swagger_definition.minItems,
-            unique_items=swagger_definition.uniqueItems)
-
-
-class ParameterValueFactory(BaseValueFactory):
-    """Factory for building ValueTemplates from Parameter definitions."""
-
-    @staticmethod
-    def _create_string_value(swagger_definition):
-        if getattr(swagger_definition, 'in', '') == 'path':
+        if swagger_definition.location == 'path':
             template_type = vts.URLPathStringTemplate
-        elif getattr(swagger_definition, 'in', '') == 'header':
+        elif swagger_definition.location == 'header':
             template_type = vts.HTTPHeaderStringTemplate
         else:
             template_type = vts.StringTemplate
@@ -110,16 +91,12 @@ class ParameterValueFactory(BaseValueFactory):
                              pattern=swagger_definition.pattern,
                              enum=swagger_definition.enum)
 
-
-class ModelValueFactory(BaseValueFactory):
-    """Factory for building ValueTemplates from Model definitions."""
-
-    @classmethod
-    def create_value(cls, swagger_definition):
-        if swagger_definition.type == 'object':
-            return cls._create_object_value(swagger_definition)
-
-        return super(ModelValueFactory, cls).create_value(swagger_definition)
+    @staticmethod
+    def _create_array_value(swagger_definition):
+        return vts.ArrayTemplate(
+            max_items=swagger_definition.maxItems,
+            min_items=swagger_definition.minItems,
+            unique_items=swagger_definition.uniqueItems)
 
     @staticmethod
     def _create_object_value(swagger_definition):
