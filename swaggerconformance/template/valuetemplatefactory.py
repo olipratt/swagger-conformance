@@ -29,6 +29,8 @@ class ValueFactory:
                 value = cls._create_date_value(swagger_definition)
             elif swagger_definition.format == 'date-time':
                 value = cls._create_datetime_value(swagger_definition)
+            elif swagger_definition.format == 'uuid':
+                value = cls._create_uuid_value(swagger_definition)
             else:
                 value = cls._create_string_value(swagger_definition)
         elif swagger_definition.type == 'file':
@@ -73,6 +75,10 @@ class ValueFactory:
     @staticmethod
     def _create_datetime_value(swagger_definition):
         return vts.DateTimeTemplate()
+
+    @staticmethod
+    def _create_uuid_value(swagger_definition):
+        return vts.UUIDTemplate()
 
     @staticmethod
     def _create_file_value(swagger_definition):

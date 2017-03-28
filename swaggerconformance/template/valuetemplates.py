@@ -278,6 +278,13 @@ class DateTimeTemplate(ValueTemplate):
         return DATETIME_STRATEGY
 
 
+class UUIDTemplate(ValueTemplate):
+    """Template for a UUID value."""
+
+    def hypothesize(self):
+        return hy_st.uuids()
+
+
 class FileTemplate(ValueTemplate):
     """Template for a File value."""
 
