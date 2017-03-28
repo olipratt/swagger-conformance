@@ -42,6 +42,71 @@ FILE_STRATEGY = hy_st.builds(io.BytesIO,
                              hy_st.binary()).map(lambda x: {'data': x})
 
 
+class CollectionTemplate:
+    """Abstract base class template for a collection any specified type."""
+
+    def hypothesize(self, elements):
+        """Return a hypothesis strategy defining this collection."""
+        raise NotImplementedError("Abstract method")
+
+
+class ArrayTemplate(CollectionTemplate):
+    """Template for an array value."""
+
+    def __init__(self, max_items=None, min_items=None, unique_items=None):
+        super().__init__()
+        self._max_items = max_items
+        self._min_items = min_items
+        self._unique_items = unique_items
+
+    def hypothesize(self, elements):
+        return hy_st.lists(elements=elements,
+                           min_size=self._min_items,
+                           max_size=self._max_items,
+                           unique=self._unique_items)
+
+
+class ObjectTemplate(CollectionTemplate):
+    """Template for a JSON object value."""
+    # Limit on the number of additional properties to add to objects.
+    # Setting this too high might cause data generation to time out.
+    MAX_ADDITIONAL_PROPERTIES = 5
+
+    def __init__(self, max_properties=None, min_properties=None,
+                 additional_properties=False):
+        super().__init__()
+        self._max_properties = max_properties
+        self._min_properties = min_properties
+        self._additional_properties = additional_properties
+
+    def hypothesize(self, properties):
+        # The result must contain the specified propereties.
+        result = hy_st.fixed_dictionaries(properties)
+
+        # If we allow arbitrary additional properties, create a dict with some
+        # then update it with the fixed ones to ensure they are retained.
+        if self._additional_properties:
+            # Generate enough to stay within the allowed bounds, but don't
+            # generate more than a fixed maximum.
+            min_properties = (0 if self._min_properties is None else
+                              self._min_properties)
+            min_properties = max(0, min_properties - len(properties))
+            max_properties = (self.MAX_ADDITIONAL_PROPERTIES
+                              if self._max_properties is None else
+                              self._max_properties)
+            max_properties = min(self.MAX_ADDITIONAL_PROPERTIES,
+                                 max_properties - len(properties))
+            max_properties = max(max_properties, min_properties)
+            extra = hy_st.dictionaries(hy_st.text(),
+                                       JSON_STRATEGY,
+                                       min_size=min_properties,
+                                       max_size=max_properties)
+
+            result = hy_st.builds(lambda x, y: x.update(y), extra, result)
+
+        return result
+
+
 class ValueTemplate:
     """Template for a single value of any specified type."""
 
@@ -58,7 +123,7 @@ class BooleanTemplate(ValueTemplate):
 
 
 class NumericTemplate(ValueTemplate):
-    """Template for a numeric value."""
+    """Abstract template for a numeric value."""
 
     def __init__(self, maximum=None, exclusive_maximum=None,
                  minimum=None, exclusive_minimum=None,
@@ -73,6 +138,9 @@ class NumericTemplate(ValueTemplate):
         self._minimum = minimum
         self._exclusive_minimum = exclusive_minimum
         self._multiple_of = multiple_of
+
+    def hypothesize(self):
+        raise NotImplementedError("Abstract method")
 
 
 class IntegerTemplate(NumericTemplate):
@@ -215,60 +283,3 @@ class FileTemplate(ValueTemplate):
 
     def hypothesize(self):
         return FILE_STRATEGY
-
-
-class ArrayTemplate(ValueTemplate):
-    """Template for an array value."""
-
-    def __init__(self, max_items=None, min_items=None, unique_items=None):
-        super().__init__()
-        self._max_items = max_items
-        self._min_items = min_items
-        self._unique_items = unique_items
-
-    def hypothesize(self, elements):
-        return hy_st.lists(elements=elements,
-                           min_size=self._min_items,
-                           max_size=self._max_items,
-                           unique=self._unique_items)
-
-
-class ObjectTemplate(ValueTemplate):
-    """Template for a JSON object value."""
-    # Limit on the number of additional properties to add to objects.
-    # Setting this too high might cause data generation to time out.
-    MAX_ADDITIONAL_PROPERTIES = 5
-
-    def __init__(self, max_properties=None, min_properties=None,
-                 additional_properties=False):
-        super().__init__()
-        self._max_properties = max_properties
-        self._min_properties = min_properties
-        self._additional_properties = additional_properties
-
-    def hypothesize(self, properties):
-        # The result must contain the specified propereties.
-        result = hy_st.fixed_dictionaries(properties)
-
-        # If we allow arbitrary additional properties, create a dict with some
-        # then update it with the fixed ones to ensure they are retained.
-        if self._additional_properties:
-            # Generate enough to stay within the allowed bounds, but don't
-            # generate more than a fixed maximum.
-            min_properties = (0 if self._min_properties is None else
-                              self._min_properties)
-            min_properties = max(0, min_properties - len(properties))
-            max_properties = (self.MAX_ADDITIONAL_PROPERTIES
-                              if self._max_properties is None else
-                              self._max_properties)
-            max_properties = min(self.MAX_ADDITIONAL_PROPERTIES,
-                                 max_properties - len(properties))
-            max_properties = max(max_properties, min_properties)
-            extra = hy_st.dictionaries(hy_st.text(),
-                                       JSON_STRATEGY,
-                                       min_size=min_properties,
-                                       max_size=max_properties)
-
-            result = hy_st.builds(lambda x, y: x.update(y), extra, result)
-
-        return result

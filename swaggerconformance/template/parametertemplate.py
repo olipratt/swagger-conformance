@@ -15,8 +15,9 @@ class ParameterTemplate:
 
     def __init__(self, swagger_definition):
         self._swagger_definition = swagger_definition
-        self._children = None
         self._value_template = None
+        self._items = None
+        self._properties = None
 
         self._populate_value()
         self._populate_children()
@@ -28,12 +29,12 @@ class ParameterTemplate:
 
     def _populate_children(self):
         if self.type == 'array':
-            self._children = self.__class__(self._swagger_definition.items)
+            self._items = self.__class__(self._swagger_definition.items)
         if self.type == 'object':
             log.debug("Properties: %r", self._swagger_definition.properties)
-            self._children = {prop_name: self.__class__(prop_value)
-                              for prop_name, prop_value in
-                              self._swagger_definition.properties.items()}
+            self._properties = {prop_name: self.__class__(prop_value)
+                                for prop_name, prop_value in
+                                self._swagger_definition.properties.items()}
 
     def _populate_value(self):
         self._value_template = self.VALUE_FACTORY.create_value(
@@ -68,8 +69,15 @@ class ParameterTemplate:
         return self._value_template
 
     @property
-    def children(self):
-        """The children of this parameter - may be `None` if there are none.
+    def items(self):
+        """The children of this parameter if it's an array - `None` otherwise.
         :rtype: ParameterTemplate or None
         """
-        return self._children
+        return self._items
+
+    @property
+    def properties(self):
+        """The children of this parameter if it's a dict - `None` otherwise.
+        :rtype: dict(str, ParameterTemplate) or None
+        """
+        return self._properties

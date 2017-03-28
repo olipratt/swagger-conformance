@@ -17,12 +17,12 @@ def hypothesize_base_parameter(base_parameter_template):
     log.debug("Hypothesizing a parameter")
 
     if base_parameter_template.type == 'array':
-        elements = hypothesize_base_parameter(base_parameter_template.children)
+        elements = hypothesize_base_parameter(base_parameter_template.items)
         hypothesized_param = \
             base_parameter_template.value_template.hypothesize(elements)
     elif base_parameter_template.type == 'object':
         properties = {}
-        for name, model in base_parameter_template.children.items():
+        for name, model in base_parameter_template.properties.items():
             log.debug("Hypothesizing key: %r", name)
             properties[name] = hypothesize_base_parameter(model)
         hypothesized_param = \
