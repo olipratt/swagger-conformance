@@ -14,6 +14,7 @@ TEST_SCHEMA_DIR = osp.relpath(osp.join(osp.dirname(osp.realpath(__file__)),
 TEST_SCHEMA_PATH = osp.join(TEST_SCHEMA_DIR, 'test_schema.json')
 FULL_PUT_SCHEMA_PATH = osp.join(TEST_SCHEMA_DIR, 'full_put_schema.json')
 PETSTORE_SCHEMA_PATH = osp.join(TEST_SCHEMA_DIR, 'petstore.json')
+UBER_SCHEMA_PATH = osp.join(TEST_SCHEMA_DIR, 'uber.json')
 SCHEMA_URL_BASE = 'http://127.0.0.1:5000/api'
 CONTENT_TYPE_JSON = 'application/json'
 
@@ -214,6 +215,50 @@ class ExternalExamplesTestCase(unittest.TestCase):
 
         # Now just kick off the validation process.
         swaggerconformance.validate_schema(PETSTORE_SCHEMA_PATH)
+
+    @responses.activate
+    def test_openapi_uber(self):
+        profile = {"first_name": "steve",
+                   "last_name": "stevenson",
+                   "email": "example@stevemail.com",
+                   "picture": "http://steve.com/stevepic.png",
+                   "promo_code": "12341234"}
+        activities = {"offset": 123,
+                      "limit": 99,
+                      "count": 432,
+                      "history": [{"uuid": 9876543210}]}
+        product = {"product_id": "example",
+                   "description": "it's a product",
+                   "display_name": "bestproductno1",
+                   "capacity": "4 hippos",
+                   "image": "http://hippotransports.com/hippocar.png"}
+        products = [product]
+        price_estimate = {"product_id": "example",
+                          "currency_code": "gbp",
+                          "display_name": "it's a product",
+                          "estimate": "123.50",
+                          "low_estimate": 123,
+                          "high_estimate": 124,
+                          "surge_multiplier": 22.2}
+        price_estimates = [price_estimate]
+        responses.add(responses.GET, SCHEMA_URL_BASE + '/estimates/price',
+                      json=price_estimates, status=200,
+                      content_type=CONTENT_TYPE_JSON)
+        responses.add(responses.GET, SCHEMA_URL_BASE + '/estimates/time',
+                      json=products, status=200,
+                      content_type=CONTENT_TYPE_JSON)
+        responses.add(responses.GET, SCHEMA_URL_BASE + '/history',
+                      json=activities, status=200,
+                      content_type=CONTENT_TYPE_JSON)
+        responses.add(responses.GET, SCHEMA_URL_BASE + '/me',
+                      json=profile, status=200,
+                      content_type=CONTENT_TYPE_JSON)
+        responses.add(responses.GET, SCHEMA_URL_BASE + '/products',
+                      json=products, status=200,
+                      content_type=CONTENT_TYPE_JSON)
+
+        # Now just kick off the validation process.
+        swaggerconformance.validate_schema(UBER_SCHEMA_PATH)
 
 
 if __name__ == '__main__':
