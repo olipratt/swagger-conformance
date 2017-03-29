@@ -19,21 +19,10 @@ class OperationTemplate:
     def __init__(self, app, operation):
         self._app = app
         self._operation = operation
+        self._response_codes = None
         self._parameters = {}
-        # 'default' is a special value to cover undocumented response codes:
-        # https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#fixed-fields-9
-        # If only that value is specified, assume that any successful response
-        # code is allowed.
-        self._response_codes = [int(code) for code in operation.responses
-                                if code != "default"]
-        if len(self._response_codes) == 0:
-            assert "default" in operation.responses, "No response codes at all"
-            log.warning("Only 'default' response defined - allowing any 2XX")
-            self._response_codes = list(range(200, 300))
-        if all((x > 299 or x < 200) for x in self._response_codes):
-            log.warning("No success responses defined - allowing 200")
-            self._response_codes.append(200)
 
+        self._populate_response_codes()
         self._populate_parameters()
 
     def __repr__(self):
@@ -61,6 +50,22 @@ class OperationTemplate:
         :rtype: list(int)
         """
         return self._response_codes
+
+    def _populate_response_codes(self):
+        # 'default' is a special value to cover undocumented response codes:
+        # https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#fixed-fields-9
+        # If only that value is specified, assume that any successful response
+        # code is allowed.
+        self._response_codes = [int(code) for code in self._operation.responses
+                                if code != "default"]
+        if len(self._response_codes) == 0:
+            assert "default" in self._operation.responses, \
+                "No response codes at all"
+            log.warning("Only 'default' response defined - allowing any 2XX")
+            self._response_codes = list(range(200, 300))
+        if all((x > 299 or x < 200) for x in self._response_codes):
+            log.warning("No success responses defined - allowing 200")
+            self._response_codes.append(200)
 
     def _populate_parameters(self):
         for parameter in self._operation.parameters:
