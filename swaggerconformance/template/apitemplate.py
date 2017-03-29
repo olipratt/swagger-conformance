@@ -22,41 +22,33 @@ class APITemplate:
         self._client = client
         self._app = client.app
 
-        self._paths = self._app.root.paths.keys()
-        log.debug("Found paths as: %s", self._paths)
-
-        self._expanded_paths = {}
-        for path in self._paths:
-            self._expanded_paths[path] = self._expand_path(path)
+        self._endpoints_map = {path: self._method_to_op_map(path)
+                               for path in self._app.root.paths}
 
     @property
     def endpoints(self):
         """Mapping of the endpoints of this API to their operations.
         :rtype: dict
         """
-        return self._expanded_paths
+        return self._endpoints_map
 
-    def iter_template_operations(self):
+    def template_operations(self):
         """All operations of the API across all endpoints.
 
-        :yields: OperationTemplate
+        :rtype: OperationTemplate
         """
-        for endpoint in self.endpoints:
-            log.debug("Testing endpoint: %r", endpoint)
-            for operation_type in self.endpoints[endpoint]:
-                log.debug("Testing operation type: %r", operation_type)
-                operation = self.endpoints[endpoint][operation_type]
-                log.info("Got operation: %r", operation)
+        return (self.endpoints[endpoint][operation_type]
+                for endpoint in self.endpoints
+                for operation_type in self.endpoints[endpoint])
 
-                yield operation
-
-    def _expand_path(self, path):
+    def _method_to_op_map(self, path):
         log.debug("Expanding path: %r", path)
+        operations_defs = self._app.root.paths[path]
 
         operations_map = {}
         for operation_name in self.operations:
             log.debug("Accessing operation: %s", operation_name)
-            operation = getattr(self._app.root.paths[path], operation_name)
+            operation = getattr(operations_defs, operation_name)
             if operation is not None:
                 log.debug("Have operation")
                 operations_map[operation_name] = OperationTemplate(self._app,

@@ -16,7 +16,7 @@ def validate_schema(schema_path):
     api_template = APITemplate(client)
     log.debug("Expanded endpoints as: %r", api_template)
 
-    for operation in api_template.iter_template_operations():
+    for operation in api_template.template_operations():
         validate_operation(client, operation)
 
 

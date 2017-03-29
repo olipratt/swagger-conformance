@@ -40,7 +40,7 @@ class APITemplateTestCase(unittest.TestCase):
 
         # Find the template GET operation on the /apps/{appid} endpoint.
         app_id_get_op = None
-        for operation_template in api_template.iter_template_operations():
+        for operation_template in api_template.template_operations():
             if (operation_template.operation.method == 'get' and
                     operation_template.operation.path == '/apps/{appid}'):
                 self.assertIsNone(app_id_get_op)
