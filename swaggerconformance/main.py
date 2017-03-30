@@ -32,7 +32,7 @@ def validate_operation(client, operation):
         :param client: The client to use to access the API.
         :type client: SwaggerClient
         :param operation: The operation to test.
-        :type operation: OperationTemplate
+        :type operation: template.operationtemplate.OperationTemplate
         :param params: The dictionary of parameters to use on the operation.
         :type params: dict
         """

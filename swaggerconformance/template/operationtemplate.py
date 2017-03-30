@@ -47,7 +47,7 @@ class OperationTemplate:
     @property
     def response_codes(self):
         """List of HTTP response codes this operation might return.
-        :rtype: list(int)
+        :rtype: set(int)
         """
         return self._response_codes
 
@@ -56,16 +56,16 @@ class OperationTemplate:
         # https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#fixed-fields-9
         # If only that value is specified, assume that any successful response
         # code is allowed.
-        self._response_codes = [int(code) for code in self._operation.responses
-                                if code != "default"]
+        self._response_codes = {int(code) for code in self._operation.responses
+                                if code != "default"}
         if len(self._response_codes) == 0:
             assert "default" in self._operation.responses, \
                 "No response codes at all"
             log.warning("Only 'default' response defined - allowing any 2XX")
-            self._response_codes = list(range(200, 300))
+            self._response_codes = set(range(200, 300))
         if all((x > 299 or x < 200) for x in self._response_codes):
             log.warning("No success responses defined - allowing 200")
-            self._response_codes.append(200)
+            self._response_codes.add(200)
 
     def _populate_parameters(self):
         for parameter in self._operation.parameters:
