@@ -37,8 +37,6 @@ def validate_operation(client, operation):
         :type params: dict
         """
         log.info("Testing with params: %r", params)
-        hypothesis.note("Endpoint: {}".format(operation.operation.path))
-        hypothesis.note("Operation: {}".format(operation.operation.method))
         result = client.request(operation, params)
         assert result.status in operation.response_codes, \
             "{} not in {}".format(result.status, operation.response_codes)
