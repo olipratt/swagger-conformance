@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 
 
 class ParameterTemplate:
-    """Common base class for Swagger API operation paramters."""
+    """Common class for Swagger API operation parameters."""
     VALUE_FACTORY = ValueFactory
 
     def __init__(self, swagger_definition):

@@ -10,26 +10,25 @@ import hypothesis.strategies as hy_st
 log = logging.getLogger(__name__)
 
 
-def hypothesize_base_parameter(base_parameter_template):
+def hypothesize_parameter(parameter_template):
     """Generate hypothesis strategy for a single Parameter.
-    :type parameter_template: templates.BaseParameterTemplate
+    :type parameter_template: template.parametertemplate.ParameterTemplate
     """
     log.debug("Hypothesizing a parameter")
 
-    if base_parameter_template.type == 'array':
-        elements = hypothesize_base_parameter(base_parameter_template.items)
+    if parameter_template.type == 'array':
+        elements = hypothesize_parameter(parameter_template.items)
         hypothesized_param = \
-            base_parameter_template.value_template.hypothesize(elements)
-    elif base_parameter_template.type == 'object':
+            parameter_template.value_template.hypothesize(elements)
+    elif parameter_template.type == 'object':
         properties = {}
-        for name, model in base_parameter_template.properties.items():
+        for name, model in parameter_template.properties.items():
             log.debug("Hypothesizing key: %r", name)
-            properties[name] = hypothesize_base_parameter(model)
+            properties[name] = hypothesize_parameter(model)
         hypothesized_param = \
-            base_parameter_template.value_template.hypothesize(properties)
+            parameter_template.value_template.hypothesize(properties)
     else:
-        hypothesized_param = \
-            base_parameter_template.value_template.hypothesize()
+        hypothesized_param = parameter_template.value_template.hypothesize()
 
     return hypothesized_param
 
@@ -43,7 +42,7 @@ def hypothesize_parameters(parameters):
     hypothesis_mapping = {}
 
     for parameter_name, parameter_template in parameters.items():
-        hypothesized_param = hypothesize_base_parameter(parameter_template)
+        hypothesized_param = hypothesize_parameter(parameter_template)
         hypothesis_mapping[parameter_name] = hypothesized_param
 
     return hy_st.fixed_dictionaries(hypothesis_mapping)
