@@ -23,9 +23,8 @@ class ParameterTemplate:
         self._populate_children()
 
     def __repr__(self):
-        return "{}(name={}, type={})".format(self.__class__.__name__,
-                                             self.name,
-                                             self.type)
+        return "{}(name={}, type={}, required={})".format(
+            self.__class__.__name__, self.name, self.type, self.required)
 
     def _populate_children(self):
         if self.type == 'array':
@@ -45,7 +44,7 @@ class ParameterTemplate:
         """The name of this parameter, if it has one.
         :rtype: str or None
         """
-        return getattr(self._swagger_definition, 'name', None)
+        return self._swagger_definition.name
 
     @property
     def type(self):
@@ -60,6 +59,13 @@ class ParameterTemplate:
         :rtype: str
         """
         return self._swagger_definition.format
+
+    @property
+    def required(self):
+        """Whether this parameter is required.
+        :rtype: bool
+        """
+        return self._swagger_definition.required
 
     @property
     def value_template(self):

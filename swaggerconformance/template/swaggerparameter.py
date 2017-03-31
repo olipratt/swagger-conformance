@@ -66,6 +66,18 @@ class SwaggerParameter:
         return self._swagger_definition.format
 
     @property
+    def required(self):
+        """Whether this parameter is required.
+        :rtype: bool
+        """
+        # If not specified in the underlying definition (or not applicable),
+        # then the default is that the value is required.
+        # This also clashes with the name of the list of required fields in a
+        # schema object, so only use the value if it's a Boolean.
+        required = getattr(self._swagger_definition, 'required', None)
+        return required if isinstance(required, bool) else True
+
+    @property
     def location(self):
         """The location of this parameter - e.g. 'header' or 'body', or `None`
         if not a top-level parameter.
@@ -93,6 +105,17 @@ class SwaggerParameter:
         return {prop_name: self.__class__(self._swagger_app, prop_value)
                 for prop_name, prop_value in
                 self._swagger_definition.properties.items()}
+
+    @property
+    def required_properties(self):
+        """List of required property names of this Parameter if it's an object.
+        :rtype: list(str) or None
+        """
+        # This clashes with the name of the bool indicating if this is a
+        # required parameter on a paramter object, so only use the value if
+        # it's a list.
+        required_props = getattr(self._swagger_definition, 'required', None)
+        return required_props if isinstance(required_props, list) else None
 
     @property
     def additionalProperties(self):

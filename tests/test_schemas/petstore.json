@@ -549,7 +549,7 @@
                         "description": "file to upload",
                         "in": "formData",
                         "name": "file",
-                        "required": false,
+                        "required": true,
                         "type": "file"
                     }
                 ],
