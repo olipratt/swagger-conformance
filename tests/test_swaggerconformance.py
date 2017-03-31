@@ -18,6 +18,24 @@ UBER_SCHEMA_PATH = osp.join(TEST_SCHEMA_DIR, 'uber.json')
 SCHEMA_URL_BASE = 'http://127.0.0.1:5000/api'
 CONTENT_TYPE_JSON = 'application/json'
 
+def respond_to_method(method, path, response_json=None, status=200):
+    url_re = re.compile(SCHEMA_URL_BASE + path + '$')
+    responses.add(method, url_re,
+                  json=response_json, status=status,
+                  content_type=CONTENT_TYPE_JSON)
+
+def respond_to_get(path, response_json=None, status=200):
+    respond_to_method(responses.GET, path, response_json, status)
+
+def respond_to_post(path, response_json=None, status=200):
+    respond_to_method(responses.POST, path, response_json, status)
+
+def respond_to_put(path, response_json=None, status=200):
+    respond_to_method(responses.PUT, path, response_json, status)
+
+def respond_to_delete(path, response_json=None, status=200):
+    respond_to_method(responses.DELETE, path, response_json, status)
+
 
 class APITemplateTestCase(unittest.TestCase):
 
@@ -29,9 +47,9 @@ class APITemplateTestCase(unittest.TestCase):
         pass
 
     def test_schema_parse(self):
-        endpoints_clctn = swaggerconformance.template.APITemplate(self.client)
+        api_template = swaggerconformance.template.APITemplate(self.client)
         expected_endpoints = {'/schema', '/apps', '/apps/{appid}'}
-        self.assertSetEqual(set(endpoints_clctn.endpoints.keys()),
+        self.assertSetEqual(set(api_template.endpoints.keys()),
                             expected_endpoints)
 
     @responses.activate
@@ -54,9 +72,7 @@ class APITemplateTestCase(unittest.TestCase):
         # Send an example parameter in to the endpoint manually, catch the
         # request, and respond.
         params = {'appid': 'test_string'}
-        responses.add(responses.GET, SCHEMA_URL_BASE + '/apps/test_string',
-                      json={}, status=404,
-                      content_type=CONTENT_TYPE_JSON)
+        respond_to_get('/apps/test_string', response_json={}, status=404)
         result = self.client.request(app_id_get_op, params)
         self.assertEqual(result.status, 404)
 
@@ -66,22 +82,10 @@ class ParameterTypesTestCase(unittest.TestCase):
     @responses.activate
     def test_full_put(self):
         # Handle all the basic endpoints.
-        responses.add(responses.GET, SCHEMA_URL_BASE + '/schema',
-                      json=None, status=200,
-                      content_type=CONTENT_TYPE_JSON)
-        responses.add(responses.GET, SCHEMA_URL_BASE + '/example',
-                      json=None, status=200,
-                      content_type=CONTENT_TYPE_JSON)
-        responses.add(responses.DELETE, SCHEMA_URL_BASE + '/example',
-                      json=None, status=204,
-                      content_type=CONTENT_TYPE_JSON)
-
-        # Handle the PUT requests on the endpoint which expects an integer path
-        # parameter. Don't validate the body as we expect pyswagger to do so.
-        url_re = re.compile(SCHEMA_URL_BASE + r'/example/-?\d+')
-        responses.add(responses.PUT, url_re,
-                      json=None, status=204,
-                      content_type=CONTENT_TYPE_JSON)
+        respond_to_get('/schema')
+        respond_to_get('/example')
+        respond_to_delete('/example', status=204)
+        respond_to_put(r'/example/-?\d+', status=204)
 
         # Now just kick off the validation process.
         swaggerconformance.validate_schema(FULL_PUT_SCHEMA_PATH)
@@ -92,24 +96,12 @@ class ExternalExamplesTestCase(unittest.TestCase):
     @responses.activate
     def test_swaggerio_petstore(self):
         # Example responses matching the required models.
-        pet = {
-            "id": 0,
-            "category": {
-                "id": 0,
-                "name": "string"
-            },
-            "name": "doggie",
-            "photoUrls": [
-                "string"
-            ],
-            "tags": [
-                {
-                    "id": 0,
-                    "name": "string"
-                }
-            ],
-            "status": "available"
-        }
+        pet = {"id": 0,
+               "category": {"id": 0, "name": "string"},
+               "name": "doggie",
+               "photoUrls": ["string"],
+               "tags": [{"id": 0, "name": "string"}],
+               "status": "available"}
         pets = [pet]
         inventory = {"additionalProp1": 0, "additionalProp2": 0}
         order = {"id": 0,
@@ -129,89 +121,34 @@ class ExternalExamplesTestCase(unittest.TestCase):
                 "userStatus": 0}
 
         # Handle all the basic endpoints.
-        responses.add(responses.GET, SCHEMA_URL_BASE + '/pet',
-                      json=None, status=200,
-                      content_type=CONTENT_TYPE_JSON)
-        responses.add(responses.POST, SCHEMA_URL_BASE + '/pet',
-                      json=None, status=200,
-                      content_type=CONTENT_TYPE_JSON)
-        responses.add(responses.PUT, SCHEMA_URL_BASE + '/pet',
-                      json=None, status=200,
-                      content_type=CONTENT_TYPE_JSON)
-        url_re = re.compile(SCHEMA_URL_BASE + r'/pet/-?\d+')
-        responses.add(responses.GET, url_re,
-                      json=pet, status=200,
-                      content_type=CONTENT_TYPE_JSON)
-        responses.add(responses.POST, url_re,
-                      json=api_response, status=200,
-                      content_type=CONTENT_TYPE_JSON)
-        responses.add(responses.DELETE, url_re,
-                      json=None, status=200,
-                      content_type=CONTENT_TYPE_JSON)
-        responses.add(responses.GET, SCHEMA_URL_BASE + '/pet/findByStatus',
-                      json=pets, status=200,
-                      content_type=CONTENT_TYPE_JSON)
-        responses.add(responses.GET, SCHEMA_URL_BASE + '/pet/findByTags',
-                      json=pets, status=200,
-                      content_type=CONTENT_TYPE_JSON)
-        responses.add(responses.GET, SCHEMA_URL_BASE + '/store',
-                      json=None, status=200,
-                      content_type=CONTENT_TYPE_JSON)
-        responses.add(responses.GET, SCHEMA_URL_BASE + '/store/inventory',
-                      json=inventory, status=200,
-                      content_type=CONTENT_TYPE_JSON)
-        responses.add(responses.POST, SCHEMA_URL_BASE + '/store/order',
-                      json=order, status=200,
-                      content_type=CONTENT_TYPE_JSON)
-        url_re = re.compile(SCHEMA_URL_BASE + r'/store/order/-?\d+')
-        responses.add(responses.GET, url_re,
-                      json=order, status=200,
-                      content_type=CONTENT_TYPE_JSON)
-        responses.add(responses.DELETE, url_re,
-                      json=None, status=200,
-                      content_type=CONTENT_TYPE_JSON)
-        responses.add(responses.GET, SCHEMA_URL_BASE + '/user',
-                      json=None, status=200,
-                      content_type=CONTENT_TYPE_JSON)
-        responses.add(responses.POST, SCHEMA_URL_BASE + '/user',
-                      json=None, status=200,
-                      content_type=CONTENT_TYPE_JSON)
-        responses.add(responses.DELETE, SCHEMA_URL_BASE + '/user',
-                      json=None, status=200,
-                      content_type=CONTENT_TYPE_JSON)
-        url_re = re.compile(SCHEMA_URL_BASE + r'/user/(?!login).+')
-        responses.add(responses.GET, url_re,
-                      json=user, status=200,
-                      content_type=CONTENT_TYPE_JSON)
-        responses.add(responses.PUT, url_re,
-                      json=None, status=200,
-                      content_type=CONTENT_TYPE_JSON)
-        responses.add(responses.DELETE, url_re,
-                      json=None, status=200,
-                      content_type=CONTENT_TYPE_JSON)
-        url_re = re.compile(SCHEMA_URL_BASE +
-                            r'/user/login\?username=.*&password=.*')
-        responses.add(responses.GET, url_re,
-                      json="example", status=200,
-                      content_type=CONTENT_TYPE_JSON)
-        responses.add(responses.GET, SCHEMA_URL_BASE + '/user/logout',
-                      json=None, status=200,
-                      content_type=CONTENT_TYPE_JSON)
-        responses.add(responses.POST,
-                      SCHEMA_URL_BASE + '/user/createWithArray',
-                      json=None, status=200,
-                      content_type=CONTENT_TYPE_JSON)
-        responses.add(responses.POST,
-                      SCHEMA_URL_BASE + '/user/createWithList',
-                      json=None, status=200,
-                      content_type=CONTENT_TYPE_JSON)
-
-        # Handle the PUT requests on the endpoint which expects an integer path
-        # parameter. Don't validate the body as we expect pyswagger to do so.
-        url_re = re.compile(SCHEMA_URL_BASE + r'/example/-?\d+')
-        responses.add(responses.PUT, url_re,
-                      json=None, status=204,
-                      content_type=CONTENT_TYPE_JSON)
+        respond_to_get('/pet')
+        respond_to_post('/pet')
+        respond_to_put('/pet')
+        respond_to_get(r'/pet/-?\d+', response_json=pet)
+        respond_to_delete(r'/pet/-?\d+')
+        respond_to_post(r'/pet/-?\d+', response_json=api_response)
+        respond_to_post(r'/pet/-?\d+/uploadImage', response_json=api_response)
+        respond_to_get('/pet/findByStatus', response_json=pets)
+        respond_to_get(r'/pet/findByStatus\?status=.*', response_json=pets)
+        respond_to_get('/pet/findByTags', response_json=pets)
+        respond_to_get(r'/pet/findByTags\?tags=.*', response_json=pets)
+        respond_to_get('/store')
+        respond_to_get('/store/inventory', response_json=inventory)
+        respond_to_post('/store/order', response_json=order)
+        respond_to_get(r'/store/order/-?\d+', response_json=order)
+        respond_to_delete(r'/store/order/-?\d+')
+        respond_to_get('/user')
+        respond_to_post('/user')
+        respond_to_delete('/user')
+        respond_to_get(r'/user/(?!login).+', response_json=user)
+        respond_to_put(r'/user/(?!login).+')
+        respond_to_delete(r'/user/(?!login).+')
+        respond_to_get(r'/user/login\?username=.*&password=.*',
+                       response_json="example")
+        respond_to_get('/user/logout')
+        respond_to_post('/user/createWithArray')
+        respond_to_post('/user/createWithList')
+        respond_to_put(r'/example/-?\d+')
 
         # Now just kick off the validation process.
         swaggerconformance.validate_schema(PETSTORE_SCHEMA_PATH)
@@ -241,21 +178,13 @@ class ExternalExamplesTestCase(unittest.TestCase):
                           "high_estimate": 124,
                           "surge_multiplier": 22.2}
         price_estimates = [price_estimate]
-        responses.add(responses.GET, SCHEMA_URL_BASE + '/estimates/price',
-                      json=price_estimates, status=200,
-                      content_type=CONTENT_TYPE_JSON)
-        responses.add(responses.GET, SCHEMA_URL_BASE + '/estimates/time',
-                      json=products, status=200,
-                      content_type=CONTENT_TYPE_JSON)
-        responses.add(responses.GET, SCHEMA_URL_BASE + '/history',
-                      json=activities, status=200,
-                      content_type=CONTENT_TYPE_JSON)
-        responses.add(responses.GET, SCHEMA_URL_BASE + '/me',
-                      json=profile, status=200,
-                      content_type=CONTENT_TYPE_JSON)
-        responses.add(responses.GET, SCHEMA_URL_BASE + '/products',
-                      json=products, status=200,
-                      content_type=CONTENT_TYPE_JSON)
+
+        # Handle all the basic endpoints.
+        respond_to_get(r'/estimates/price\?.*', response_json=price_estimates)
+        respond_to_get(r'/estimates/time\?.*', response_json=products)
+        respond_to_get(r'/history\?.*', response_json=activities)
+        respond_to_get('/me', response_json=profile)
+        respond_to_get(r'/products\?.*', response_json=products)
 
         # Now just kick off the validation process.
         swaggerconformance.validate_schema(UBER_SCHEMA_PATH)
