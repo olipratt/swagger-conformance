@@ -22,6 +22,7 @@ def validate_schema(schema_path):
 
 def validate_operation(client, operation):
     """Fully validate the API operation using the provided client."""
+    log.info("Testing operation: %r", operation)
     strategy = hypothesize_parameters(operation.parameters)
 
     @hypothesis.settings(max_examples=20)

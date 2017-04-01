@@ -87,3 +87,10 @@ class ParameterTemplate:
         :rtype: dict(str, ParameterTemplate) or None
         """
         return self._properties
+
+    @property
+    def required_properties(self):
+        """List of required property names of this parameter if it's an dict.
+        :rtype: list(str) or None
+        """
+        return self._swagger_definition.required_properties

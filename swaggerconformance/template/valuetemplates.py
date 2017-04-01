@@ -8,21 +8,14 @@ import math
 import hypothesis.strategies as hy_st
 
 from .strategies import (JSON_STRATEGY, DATE_STRATEGY, DATETIME_STRATEGY,
-                         FILE_STRATEGY)
+                         FILE_STRATEGY, merge_optional_dict_strategy,
+                         merge_dicts_max_size_strategy, merge_dicts_strategy)
 
 
 log = logging.getLogger(__name__)
 
 
-class CollectionTemplate:
-    """Abstract base class template for a collection any specified type."""
-
-    def hypothesize(self, elements):
-        """Return a hypothesis strategy defining this collection."""
-        raise NotImplementedError("Abstract method")
-
-
-class ArrayTemplate(CollectionTemplate):
+class ArrayTemplate:
     """Template for an array value."""
 
     def __init__(self, max_items=None, min_items=None, unique_items=None):
@@ -32,13 +25,14 @@ class ArrayTemplate(CollectionTemplate):
         self._unique_items = unique_items
 
     def hypothesize(self, elements):
+        """Return a hypothesis strategy defining this collection."""
         return hy_st.lists(elements=elements,
                            min_size=self._min_items,
                            max_size=self._max_items,
                            unique=self._unique_items)
 
 
-class ObjectTemplate(CollectionTemplate):
+class ObjectTemplate:
     """Template for a JSON object value."""
     # Limit on the number of additional properties to add to objects.
     # Setting this too high might cause data generation to time out.
@@ -51,9 +45,14 @@ class ObjectTemplate(CollectionTemplate):
         self._min_properties = min_properties
         self._additional_properties = additional_properties
 
-    def hypothesize(self, properties):
+    def hypothesize(self, required_properties, optional_properties):
+        """Return a hypothesis strategy defining this collection.
+        :type required_properties: dict
+        :type optional_properties: dict
+        """
         # The result must contain the specified propereties.
-        result = hy_st.fixed_dictionaries(properties)
+        result = merge_optional_dict_strategy(required_properties,
+                                              optional_properties)
 
         # If we allow arbitrary additional properties, create a dict with some
         # then update it with the fixed ones to ensure they are retained.
@@ -62,19 +61,27 @@ class ObjectTemplate(CollectionTemplate):
             # generate more than a fixed maximum.
             min_properties = (0 if self._min_properties is None else
                               self._min_properties)
-            min_properties = max(0, min_properties - len(properties))
+            min_properties = max(0, min_properties - len(required_properties))
             max_properties = (self.MAX_ADDITIONAL_PROPERTIES
                               if self._max_properties is None else
                               self._max_properties)
             max_properties = min(self.MAX_ADDITIONAL_PROPERTIES,
-                                 max_properties - len(properties))
+                                 max_properties - len(required_properties))
             max_properties = max(max_properties, min_properties)
-            extra = hy_st.dictionaries(hy_st.text(),
-                                       JSON_STRATEGY,
-                                       min_size=min_properties,
-                                       max_size=max_properties)
+            forbidden_extra_props = set(required_properties.keys() &
+                                        optional_properties.keys())
+            extra = hy_st.dictionaries(
+                hy_st.text().filter(lambda x: x not in forbidden_extra_props),
+                JSON_STRATEGY,
+                min_size=min_properties,
+                max_size=max_properties)
 
-            result = hy_st.builds(lambda x, y: x.update(y), extra, result)
+            if self._max_properties is not None:
+                result = merge_dicts_max_size_strategy(result,
+                                                       extra,
+                                                       self._max_properties)
+            else:
+                result = merge_dicts_strategy(result, extra)
 
         return result
 

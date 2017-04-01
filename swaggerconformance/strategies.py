@@ -4,7 +4,7 @@ properties.
 """
 import logging
 
-from .template.strategies import combined_dicts_strategy
+from .template.strategies import merge_optional_dict_strategy
 
 
 log = logging.getLogger(__name__)
@@ -21,12 +21,17 @@ def hypothesize_parameter(parameter_template):
         hypothesized_param = \
             parameter_template.value_template.hypothesize(elements)
     elif parameter_template.type == 'object':
-        properties = {}
+        required_properties = {}
+        optional_properties = {}
         for name, model in parameter_template.properties.items():
             log.debug("Hypothesizing key: %r", name)
-            properties[name] = hypothesize_parameter(model)
+            if name in parameter_template.required_properties:
+                required_properties[name] = hypothesize_parameter(model)
+            else:
+                optional_properties[name] = hypothesize_parameter(model)
         hypothesized_param = \
-            parameter_template.value_template.hypothesize(properties)
+            parameter_template.value_template.hypothesize(required_properties,
+                                                          optional_properties)
     else:
         hypothesized_param = parameter_template.value_template.hypothesize()
 
@@ -49,4 +54,4 @@ def hypothesize_parameters(parameters):
         else:
             optional_params[parameter_name] = hypothesized_param
 
-    return combined_dicts_strategy(required_params, optional_params)
+    return merge_optional_dict_strategy(required_params, optional_params)

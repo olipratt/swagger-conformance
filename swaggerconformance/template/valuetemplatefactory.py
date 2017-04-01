@@ -112,6 +112,7 @@ class ValueFactory:
         additional = (swagger_definition.additionalProperties not in
                       (None, False))
         additional = (additional or len(swagger_definition.properties) == 0)
+        log.debug("Allow additional properties? %r", additional)
         return vts.ObjectTemplate(
             max_properties=swagger_definition.maxProperties,
             min_properties=swagger_definition.minProperties,
