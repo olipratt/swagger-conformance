@@ -18,24 +18,20 @@ def hypothesize_parameter(parameter_template):
 
     if parameter_template.type == 'array':
         elements = hypothesize_parameter(parameter_template.items)
-        hypothesized_param = \
-            parameter_template.value_template.hypothesize(elements)
+        result = parameter_template.value_template.hypothesize(elements)
     elif parameter_template.type == 'object':
-        required_properties = {}
-        optional_properties = {}
-        for name, model in parameter_template.properties.items():
-            log.debug("Hypothesizing key: %r", name)
-            if name in parameter_template.required_properties:
-                required_properties[name] = hypothesize_parameter(model)
-            else:
-                optional_properties[name] = hypothesize_parameter(model)
-        hypothesized_param = \
-            parameter_template.value_template.hypothesize(required_properties,
-                                                          optional_properties)
+        reqd_props = {name: hypothesize_parameter(model)
+                      for name, model in parameter_template.properties.items()
+                      if name in parameter_template.required_properties}
+        opt_props = {name: hypothesize_parameter(model)
+                     for name, model in parameter_template.properties.items()
+                     if name not in parameter_template.required_properties}
+        result = parameter_template.value_template.hypothesize(reqd_props,
+                                                               opt_props)
     else:
-        hypothesized_param = parameter_template.value_template.hypothesize()
+        result = parameter_template.value_template.hypothesize()
 
-    return hypothesized_param
+    return result
 
 
 def hypothesize_parameters(parameters):
@@ -44,14 +40,11 @@ def hypothesize_parameters(parameters):
     :param parameters: The dictionary of parameter templates to generate from.
     :type parameters: dict
     """
-    required_params = {}
-    optional_params = {}
-
-    for parameter_name, parameter_template in parameters.items():
-        hypothesized_param = hypothesize_parameter(parameter_template)
-        if parameter_template.required:
-            required_params[parameter_name] = hypothesized_param
-        else:
-            optional_params[parameter_name] = hypothesized_param
+    required_params = {param_name: hypothesize_parameter(param_template)
+                       for param_name, param_template in parameters.items()
+                       if param_template.required}
+    optional_params = {param_name: hypothesize_parameter(param_template)
+                       for param_name, param_template in parameters.items()
+                       if not param_template.required}
 
     return merge_optional_dict_strategy(required_params, optional_params)
