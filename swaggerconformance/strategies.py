@@ -4,26 +4,10 @@ properties.
 """
 import logging
 
-import hypothesis.strategies as hy_st
+from .template.strategies import combined_dicts_strategy
 
 
 log = logging.getLogger(__name__)
-
-
-def combined_dicts_strategy(required_fields, optional_fields):
-    """Combine dicts of required and optional strategies into one.
-    :type required_fields: dict
-    :type optional_fields: dict
-    """
-    optional_keys = hy_st.sets(hy_st.sampled_from(optional_fields.keys()))
-    selected_optionals = hy_st.builds(
-        lambda dictionary, keys: {key: dictionary[key] for key in keys},
-        hy_st.fixed_dictionaries(optional_fields),
-        optional_keys)
-    result = hy_st.builds(lambda x, y: {**x, **y},
-                          hy_st.fixed_dictionaries(required_fields),
-                          selected_optionals)
-    return result
 
 
 def hypothesize_parameter(parameter_template):

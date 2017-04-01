@@ -2,44 +2,16 @@
 Templates for values of various data types.
 """
 import logging
-import datetime
-import io
 import urllib.parse
 import math
 
 import hypothesis.strategies as hy_st
 
+from .strategies import (JSON_STRATEGY, DATE_STRATEGY, DATETIME_STRATEGY,
+                         FILE_STRATEGY)
+
 
 log = logging.getLogger(__name__)
-
-
-JSON_STRATEGY = hy_st.recursive(
-    hy_st.floats() | hy_st.booleans() | hy_st.text() | hy_st.none(),
-    lambda children: hy_st.dictionaries(hy_st.text(), children),
-    max_leaves=5
-)
-
-JSON_OBJECT_STRATEGY = hy_st.dictionaries(hy_st.text(), JSON_STRATEGY)
-
-DATE_STRATEGY = hy_st.builds(
-    datetime.date.fromordinal,
-    hy_st.integers(min_value=1, max_value=datetime.date.max.toordinal())
-)
-
-TIME_STRATEGY = hy_st.builds(
-    datetime.time,
-    hour=hy_st.integers(min_value=0, max_value=23),
-    minute=hy_st.integers(min_value=0, max_value=59),
-    second=hy_st.integers(min_value=0, max_value=59),
-    microsecond=hy_st.integers(min_value=0, max_value=999999)
-)
-
-DATETIME_STRATEGY = hy_st.builds(datetime.datetime.combine,
-                                 DATE_STRATEGY,
-                                 TIME_STRATEGY)
-
-FILE_STRATEGY = hy_st.builds(io.BytesIO,
-                             hy_st.binary()).map(lambda x: {'data': x})
 
 
 class CollectionTemplate:
