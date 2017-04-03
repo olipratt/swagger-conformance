@@ -1,3 +1,13 @@
+"""
+Tests for the swaggerconformance package.
+
+General strategy is to run validation of a schema set to use a specific URL as
+the remote host, and then intercept the requests to that remot API using the
+responses package.
+Typically, there's no need to validate that the data caught actually matches
+the constraints of the schema in these tests - the `pyswagger` module used to
+drive the API does all the validation of input required for us.
+"""
 import logging
 import unittest
 import re
@@ -8,6 +18,7 @@ import responses
 import swaggerconformance
 import swaggerconformance.template
 import swaggerconformance.client
+
 
 TEST_SCHEMA_DIR = osp.relpath(osp.join(osp.dirname(osp.realpath(__file__)),
                                        'test_schemas/'))
@@ -20,23 +31,28 @@ UBER_SCHEMA_PATH = osp.join(TEST_SCHEMA_DIR, 'uber.json')
 SCHEMA_URL_BASE = 'http://127.0.0.1:5000/api'
 CONTENT_TYPE_JSON = 'application/json'
 
-def respond_to_method(method, path, response_json=None, status=200):
+
+def _respond_to_method(method, path, response_json=None, status=200):
     url_re = re.compile(SCHEMA_URL_BASE + path + '$')
     responses.add(method, url_re,
                   json=response_json, status=status,
                   content_type=CONTENT_TYPE_JSON)
 
 def respond_to_get(path, response_json=None, status=200):
-    respond_to_method(responses.GET, path, response_json, status)
+    """Respond to a GET request to the provided path."""
+    _respond_to_method(responses.GET, path, response_json, status)
 
 def respond_to_post(path, response_json=None, status=200):
-    respond_to_method(responses.POST, path, response_json, status)
+    """Respond to a POST request to the provided path."""
+    _respond_to_method(responses.POST, path, response_json, status)
 
 def respond_to_put(path, response_json=None, status=200):
-    respond_to_method(responses.PUT, path, response_json, status)
+    """Respond to a PUT request to the provided path."""
+    _respond_to_method(responses.PUT, path, response_json, status)
 
 def respond_to_delete(path, response_json=None, status=200):
-    respond_to_method(responses.DELETE, path, response_json, status)
+    """Respond to a DELETE request to the provided path."""
+    _respond_to_method(responses.DELETE, path, response_json, status)
 
 
 class APITemplateTestCase(unittest.TestCase):
