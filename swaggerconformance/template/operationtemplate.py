@@ -40,7 +40,7 @@ class OperationTemplate:
     @property
     def parameters(self):
         """Mapping of the names of the parameters to their templates.
-        :rtype: dict(str, BaseParameterTemplate)
+        :rtype: dict(str, ParameterTemplate)
         """
         return self._parameters
 

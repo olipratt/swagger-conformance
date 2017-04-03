@@ -35,7 +35,7 @@ class APITemplate:
     def template_operations(self):
         """All operations of the API across all endpoints.
 
-        :rtype: operationtemplate.OperationTemplate
+        :rtype: OperationTemplate
         """
         return (self.endpoints[endpoint][operation_type]
                 for endpoint in self.endpoints

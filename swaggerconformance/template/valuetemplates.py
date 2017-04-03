@@ -68,10 +68,10 @@ class ObjectTemplate:
             max_properties = min(self.MAX_ADDITIONAL_PROPERTIES,
                                  max_properties - len(required_properties))
             max_properties = max(max_properties, min_properties)
-            forbidden_extra_props = set(required_properties.keys() &
-                                        optional_properties.keys())
+            forbidden_prop_names = set(required_properties.keys() &
+                                       optional_properties.keys())
             extra = hy_st.dictionaries(
-                hy_st.text().filter(lambda x: x not in forbidden_extra_props),
+                hy_st.text().filter(lambda x: x not in forbidden_prop_names),
                 JSON_STRATEGY,
                 min_size=min_properties,
                 max_size=max_properties)
@@ -175,7 +175,7 @@ class FloatTemplate(NumericTemplate):
             minimum = self._minimum
             if minimum is not None:
                 minimum = math.ceil(minimum / self._multiple_of)
-            strategy = hy_st.floats(min_value=minimum, max_value=maximum)
+            strategy = hy_st.integers(min_value=minimum, max_value=maximum)
             strategy = strategy.map(lambda x: x * self._multiple_of)
         else:
             strategy = hy_st.floats(min_value=self._minimum,

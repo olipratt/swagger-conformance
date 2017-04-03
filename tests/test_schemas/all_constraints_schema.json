@@ -1,0 +1,236 @@
+{
+    "basePath": "/api",
+    "consumes": [
+        "application/json"
+    ],
+    "definitions": {
+        "Example": {
+            "properties": {
+                "fltexclimits": {
+                    "description": "float inc limits",
+                    "example": 1.0,
+                    "exclusiveMaximum": true,
+                    "exclusiveMinimum": true,
+                    "maximum": 3.0,
+                    "minimum": 0.0,
+                    "type": "number"
+                },
+                "fltinclimits": {
+                    "description": "float inc limits",
+                    "example": 1.0,
+                    "exclusiveMaximum": false,
+                    "exclusiveMinimum": false,
+                    "maximum": 3.0,
+                    "minimum": 0.0,
+                    "type": "number"
+                },
+                "fmulexclimits": {
+                    "description": "multiple float exc limits",
+                    "example": 1.5,
+                    "exclusiveMaximum": true,
+                    "exclusiveMinimum": true,
+                    "maximum": 3.0,
+                    "minimum": 0.0,
+                    "multipleOf": 1.5,
+                    "type": "number"
+                },
+                "fmulinclimits": {
+                    "description": "multiple float inc limits",
+                    "example": 1.5,
+                    "exclusiveMaximum": false,
+                    "exclusiveMinimum": false,
+                    "maximum": 3.0,
+                    "minimum": 0.0,
+                    "multipleOf": 1.5,
+                    "type": "number"
+                },
+                "fmulofflimits": {
+                    "description": "multiple float off limits",
+                    "example": 1.5,
+                    "exclusiveMaximum": false,
+                    "exclusiveMinimum": true,
+                    "maximum": 4.0,
+                    "minimum": 1.0,
+                    "multipleOf": 1.5,
+                    "type": "number"
+                },
+                "imulexclimits": {
+                    "description": "multiple integer exc limits",
+                    "example": 8,
+                    "exclusiveMaximum": true,
+                    "exclusiveMinimum": true,
+                    "maximum": 10,
+                    "minimum": 0,
+                    "multipleOf": 2,
+                    "type": "integer"
+                },
+                "imulinclimits": {
+                    "description": "multiple integer inc limits",
+                    "example": 8,
+                    "exclusiveMaximum": false,
+                    "exclusiveMinimum": false,
+                    "maximum": 10,
+                    "minimum": 0,
+                    "multipleOf": 2,
+                    "type": "integer"
+                },
+                "imulofflimits": {
+                    "description": "multiple integer off limits",
+                    "example": 8,
+                    "exclusiveMaximum": false,
+                    "exclusiveMinimum": false,
+                    "maximum": 9,
+                    "minimum": 1,
+                    "multipleOf": 2,
+                    "type": "integer"
+                },
+                "imulonlimits": {
+                    "description": "multiple integer on limits",
+                    "example": 8,
+                    "exclusiveMaximum": true,
+                    "exclusiveMinimum": true,
+                    "maximum": 9,
+                    "minimum": 1,
+                    "multipleOf": 2,
+                    "type": "integer"
+                },
+                "intexclimits": {
+                    "description": "integer inc limits",
+                    "example": 1,
+                    "exclusiveMaximum": true,
+                    "exclusiveMinimum": true,
+                    "maximum": 3,
+                    "minimum": 0,
+                    "type": "integer"
+                },
+                "intinclimits": {
+                    "description": "integer inc limits",
+                    "example": 1,
+                    "exclusiveMaximum": false,
+                    "exclusiveMinimum": false,
+                    "maximum": 3,
+                    "minimum": 0,
+                    "type": "integer"
+                },
+                "listlen": {
+                    "description": "length limited list",
+                    "example": [
+                        "some",
+                        "strings",
+                        "here"
+                    ],
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "strlen": {
+                    "description": "length limited str",
+                    "example": "exs",
+                    "maxLength": 4,
+                    "minLength": 2,
+                    "type": "string"
+                }
+            },
+            "required": [
+                "fltexclimits",
+                "fltinclimits",
+                "fmulexclimits",
+                "fmulinclimits",
+                "fmulofflimits",
+                "imulexclimits",
+                "imulinclimits",
+                "imulofflimits",
+                "imulonlimits",
+                "intexclimits",
+                "intinclimits",
+                "listlen",
+                "strlen"
+            ],
+            "type": "object"
+        }
+    },
+    "host": "127.0.0.1:5000",
+    "info": {
+        "description": "A test REST API",
+        "title": "Example API",
+        "version": "1.0"
+    },
+    "paths": {
+        "/example/{exint}": {
+            "parameters": [
+                {
+                    "in": "path",
+                    "name": "exint",
+                    "required": true,
+                    "type": "integer"
+                }
+            ],
+            "put": {
+                "operationId": "put_example_resource",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Example"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "App successfully updated."
+                    }
+                },
+                "summary": "Takes in data",
+                "tags": [
+                    "example"
+                ]
+            }
+        },
+        "/schema": {
+            "get": {
+                "operationId": "get_schema_resource",
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "summary": "Return the OpenAPI schema",
+                "tags": [
+                    "schema"
+                ]
+            }
+        }
+    },
+    "produces": [
+        "application/json"
+    ],
+    "responses": {
+        "MaskError": {
+            "description": "When any error occurs on mask"
+        },
+        "ParseError": {
+            "description": "When a mask can't be parsed"
+        }
+    },
+    "schemes": [
+        "http"
+    ],
+    "swagger": "2.0",
+    "tags": [
+        {
+            "description": "Default namespace",
+            "name": "default"
+        },
+        {
+            "description": "This API's schema operations",
+            "name": "schema"
+        },
+        {
+            "description": "Example operations",
+            "name": "example"
+        }
+    ]
+}

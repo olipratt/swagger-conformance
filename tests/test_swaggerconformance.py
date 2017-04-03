@@ -13,6 +13,8 @@ TEST_SCHEMA_DIR = osp.relpath(osp.join(osp.dirname(osp.realpath(__file__)),
                                        'test_schemas/'))
 TEST_SCHEMA_PATH = osp.join(TEST_SCHEMA_DIR, 'test_schema.json')
 FULL_PUT_SCHEMA_PATH = osp.join(TEST_SCHEMA_DIR, 'full_put_schema.json')
+ALL_CONSTRAINTS_SCHEMA_PATH = osp.join(TEST_SCHEMA_DIR,
+                                       'all_constraints_schema.json')
 PETSTORE_SCHEMA_PATH = osp.join(TEST_SCHEMA_DIR, 'petstore.json')
 UBER_SCHEMA_PATH = osp.join(TEST_SCHEMA_DIR, 'uber.json')
 SCHEMA_URL_BASE = 'http://127.0.0.1:5000/api'
@@ -89,6 +91,15 @@ class ParameterTypesTestCase(unittest.TestCase):
 
         # Now just kick off the validation process.
         swaggerconformance.validate_schema(FULL_PUT_SCHEMA_PATH)
+
+    @responses.activate
+    def test_all_constraints(self):
+        # Handle all the basic endpoints.
+        respond_to_get('/schema')
+        respond_to_put(r'/example/-?\d+', status=204)
+
+        # Now just kick off the validation process.
+        swaggerconformance.validate_schema(ALL_CONSTRAINTS_SCHEMA_PATH)
 
 
 class ExternalExamplesTestCase(unittest.TestCase):

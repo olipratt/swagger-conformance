@@ -6,6 +6,7 @@ import logging
 
 from .valuetemplatefactory import ValueFactory
 
+
 log = logging.getLogger(__name__)
 
 
