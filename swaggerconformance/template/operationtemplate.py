@@ -6,6 +6,7 @@ import logging
 
 from .parametertemplate import ParameterTemplate
 from .swaggerparameter import SwaggerParameter
+from.strategies import merge_optional_dict_strategy
 
 log = logging.getLogger(__name__)
 
@@ -29,6 +30,17 @@ class OperationTemplate:
         return "{}(method={}, path={}, params={})".format(
             self.__class__.__name__, self._operation.method,
             self._operation.path, self._parameters)
+
+    def hypothesize_parameters(self, value_factory):
+        """Generate hypothesis fixed dictionary mapping of parameters."""
+        req_params = {param_name: param_template.hypothesize(value_factory)
+                      for param_name, param_template in self.parameters.items()
+                      if param_template.required}
+        opt_params = {param_name: param_template.hypothesize(value_factory)
+                      for param_name, param_template in self.parameters.items()
+                      if not param_template.required}
+
+        return merge_optional_dict_strategy(req_params, opt_params)
 
     @property
     def operation(self):

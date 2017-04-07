@@ -39,7 +39,7 @@ api = Api(app,
 schema_ns = api.namespace('schema', description="This API's schema operations")
 
 
-@schema_ns.route('')
+@schema_ns.route('', doc=False)
 class SchemaResource(Resource):
     """Resource allowing access to the OpenAPI schema for the entire API."""
 

@@ -12,33 +12,32 @@ log = logging.getLogger(__name__)
 class ValueFactory:
     """Common factory for building ValueTemplates from swagger definitions."""
 
-    @classmethod
-    def create_value(cls, swagger_definition):
+    def create_value(self, swagger_definition):
         """Create a ValueTemplate for the value specified by the definition.
         :type swagger_definition: swaggerparameter.SwaggerParameter
         """
         value = None
         if swagger_definition.type == 'boolean':
-            value = cls._create_bool_value(swagger_definition)
+            value = self._create_bool_value(swagger_definition)
         elif swagger_definition.type == 'integer':
-            value = cls._create_integer_value(swagger_definition)
+            value = self._create_integer_value(swagger_definition)
         elif swagger_definition.type == 'number':
-            value = cls._create_float_value(swagger_definition)
+            value = self._create_float_value(swagger_definition)
         elif swagger_definition.type == 'string':
             if swagger_definition.format == 'date':
-                value = cls._create_date_value(swagger_definition)
+                value = self._create_date_value(swagger_definition)
             elif swagger_definition.format == 'date-time':
-                value = cls._create_datetime_value(swagger_definition)
+                value = self._create_datetime_value(swagger_definition)
             elif swagger_definition.format == 'uuid':
-                value = cls._create_uuid_value(swagger_definition)
+                value = self._create_uuid_value(swagger_definition)
             else:
-                value = cls._create_string_value(swagger_definition)
+                value = self._create_string_value(swagger_definition)
         elif swagger_definition.type == 'file':
-            value = cls._create_file_value(swagger_definition)
+            value = self._create_file_value(swagger_definition)
         elif swagger_definition.type == 'array':
-            value = cls._create_array_value(swagger_definition)
+            value = self._create_array_value(swagger_definition)
         elif swagger_definition.type == 'object':
-            return cls._create_object_value(swagger_definition)
+            return self._create_object_value(swagger_definition)
 
         if value is None:
             raise ValueError("Unsupported type, format: {}, {}".format(
@@ -46,12 +45,10 @@ class ValueFactory:
 
         return value
 
-    @staticmethod
-    def _create_bool_value(swagger_definition):
+    def _create_bool_value(self, swagger_definition):
         return vts.BooleanTemplate()
 
-    @staticmethod
-    def _create_integer_value(swagger_definition):
+    def _create_integer_value(self, swagger_definition):
         return vts.IntegerTemplate(
             maximum=swagger_definition.maximum,
             exclusive_maximum=swagger_definition.exclusiveMaximum,
@@ -59,8 +56,7 @@ class ValueFactory:
             exclusive_minimum=swagger_definition.exclusiveMinimum,
             multiple_of=swagger_definition.multipleOf)
 
-    @staticmethod
-    def _create_float_value(swagger_definition):
+    def _create_float_value(self, swagger_definition):
         return vts.FloatTemplate(
             maximum=swagger_definition.maximum,
             exclusive_maximum=swagger_definition.exclusiveMaximum,
@@ -68,24 +64,19 @@ class ValueFactory:
             exclusive_minimum=swagger_definition.exclusiveMinimum,
             multiple_of=swagger_definition.multipleOf)
 
-    @staticmethod
-    def _create_date_value(swagger_definition):
+    def _create_date_value(self, swagger_definition):
         return vts.DateTemplate()
 
-    @staticmethod
-    def _create_datetime_value(swagger_definition):
+    def _create_datetime_value(self, swagger_definition):
         return vts.DateTimeTemplate()
 
-    @staticmethod
-    def _create_uuid_value(swagger_definition):
+    def _create_uuid_value(self, swagger_definition):
         return vts.UUIDTemplate()
 
-    @staticmethod
-    def _create_file_value(swagger_definition):
+    def _create_file_value(self, swagger_definition):
         return vts.FileTemplate()
 
-    @staticmethod
-    def _create_string_value(swagger_definition):
+    def _create_string_value(self, swagger_definition):
         if swagger_definition.location == 'path':
             template_type = vts.URLPathStringTemplate
         elif swagger_definition.location == 'header':
@@ -97,21 +88,20 @@ class ValueFactory:
                              pattern=swagger_definition.pattern,
                              enum=swagger_definition.enum)
 
-    @staticmethod
-    def _create_array_value(swagger_definition):
+    def _create_array_value(self, swagger_definition):
         return vts.ArrayTemplate(
             max_items=swagger_definition.maxItems,
             min_items=swagger_definition.minItems,
             unique_items=swagger_definition.uniqueItems)
 
-    @staticmethod
-    def _create_object_value(swagger_definition):
+    def _create_object_value(self, swagger_definition):
         log.debug("Properties: %r", swagger_definition.properties)
         # If there are no fixed properties then allow arbitrary ones to be
         # added.
         additional = (swagger_definition.additionalProperties not in
                       (None, False))
-        additional = (additional or len(swagger_definition.properties) == 0)
+        additional = (additional or
+                      len(swagger_definition.properties) == 0)
         log.debug("Allow additional properties? %r", additional)
         return vts.ObjectTemplate(
             max_properties=swagger_definition.maxProperties,

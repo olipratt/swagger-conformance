@@ -12,8 +12,10 @@ import logging
 import unittest
 import re
 import os.path as osp
+import json
 
 import responses
+import hypothesis
 
 import swaggerconformance
 import swaggerconformance.template
@@ -28,14 +30,14 @@ ALL_CONSTRAINTS_SCHEMA_PATH = osp.join(TEST_SCHEMA_DIR,
                                        'all_constraints_schema.json')
 PETSTORE_SCHEMA_PATH = osp.join(TEST_SCHEMA_DIR, 'petstore.json')
 UBER_SCHEMA_PATH = osp.join(TEST_SCHEMA_DIR, 'uber.json')
+MIRROR_REQS_SCHEMA_PATH = osp.join(TEST_SCHEMA_DIR, 'mirror_requests.json')
 SCHEMA_URL_BASE = 'http://127.0.0.1:5000/api'
 CONTENT_TYPE_JSON = 'application/json'
 
 
 def _respond_to_method(method, path, response_json=None, status=200):
     url_re = re.compile(SCHEMA_URL_BASE + path + '$')
-    responses.add(method, url_re,
-                  json=response_json, status=status,
+    responses.add(method, url_re, json=response_json, status=status,
                   content_type=CONTENT_TYPE_JSON)
 
 def respond_to_get(path, response_json=None, status=200):
@@ -58,21 +60,21 @@ def respond_to_delete(path, response_json=None, status=200):
 class APITemplateTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.client = swaggerconformance.client.SwaggerClient(TEST_SCHEMA_PATH)
+        self.client = swaggerconformance.SwaggerClient(TEST_SCHEMA_PATH)
 
     def tearDown(self):
         # No teardown of test fixtures required.
         pass
 
     def test_schema_parse(self):
-        api_template = swaggerconformance.template.APITemplate(self.client)
+        api_template = swaggerconformance.APITemplate(self.client)
         expected_endpoints = {'/schema', '/apps', '/apps/{appid}'}
         self.assertSetEqual(set(api_template.endpoints.keys()),
                             expected_endpoints)
 
     @responses.activate
     def test_endpoint_manually(self):
-        api_template = swaggerconformance.template.APITemplate(self.client)
+        api_template = swaggerconformance.APITemplate(self.client)
 
         # Find the template GET operation on the /apps/{appid} endpoint.
         app_id_get_op = None
@@ -215,6 +217,41 @@ class ExternalExamplesTestCase(unittest.TestCase):
 
         # Now just kick off the validation process.
         swaggerconformance.validate_schema(UBER_SCHEMA_PATH)
+
+
+class CompareResponsesTestCase(unittest.TestCase):
+
+    @responses.activate
+    def test_get_resp(self):
+        url_base = SCHEMA_URL_BASE + '/example/'
+        def request_callback(request):
+            value = request.url[len(url_base):]
+            value = value.replace("~", "%7E") # Hack to fix URL quoting
+            # value = urllib.parse.unquote(value) # when pyswagger urlquotes
+            return (200, {}, json.dumps({'in_str': value}))
+
+        responses.add_callback(responses.GET, re.compile(url_base),
+                               callback=request_callback,
+                               content_type=CONTENT_TYPE_JSON)
+
+        my_val_factory = swaggerconformance.ValueFactory()
+        client = swaggerconformance.SwaggerClient(MIRROR_REQS_SCHEMA_PATH)
+        api_template = swaggerconformance.APITemplate(client)
+        operation = api_template.endpoints["/example/{in_str}"]["get"]
+        strategy = operation.hypothesize_parameters(my_val_factory)
+
+        @hypothesis.settings(max_examples=50)
+        @hypothesis.given(strategy)
+        def single_operation_test(client, operation, params):
+            result = client.request(operation, params)
+            assert result.status in operation.response_codes, \
+                "{} not in {}".format(result.status,
+                                      operation.response_codes)
+
+            assert result.data.in_str == params["in_str"], \
+                "{} != {}".format(result.data.in_str, params["in_str"])
+
+        single_operation_test(client, operation) # pylint: disable=I0011,E1120
 
 
 if __name__ == '__main__':

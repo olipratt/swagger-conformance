@@ -1,0 +1,92 @@
+{
+    "basePath": "/api",
+    "consumes": [
+        "application/json"
+    ],
+    "definitions": {
+        "Example": {
+            "properties": {
+                "in_str": {
+                    "description": "your str",
+                    "example": "exs",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "in_str"
+            ],
+            "type": "object"
+        }
+    },
+    "host": "127.0.0.1:5000",
+    "info": {
+        "description": "A test REST API",
+        "title": "Example API",
+        "version": "1.0"
+    },
+    "paths": {
+        "/example/{in_str}": {
+            "get": {
+                "operationId": "get_example_resource",
+                "parameters": [
+                    {
+                        "description": "An optional fields mask",
+                        "format": "mask",
+                        "in": "header",
+                        "name": "X-Fields",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/Example"
+                        }
+                    }
+                },
+                "summary": "Takes in data",
+                "tags": [
+                    "example"
+                ]
+            },
+            "parameters": [
+                {
+                    "in": "path",
+                    "name": "in_str",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        }
+    },
+    "produces": [
+        "application/json"
+    ],
+    "responses": {
+        "MaskError": {
+            "description": "When any error occurs on mask"
+        },
+        "ParseError": {
+            "description": "When a mask can't be parsed"
+        }
+    },
+    "schemes": [
+        "http"
+    ],
+    "swagger": "2.0",
+    "tags": [
+        {
+            "description": "Default namespace",
+            "name": "default"
+        },
+        {
+            "description": "This API's schema operations",
+            "name": "schema"
+        },
+        {
+            "description": "Example operations",
+            "name": "example"
+        }
+    ]
+}

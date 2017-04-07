@@ -4,23 +4,22 @@ passed to specific API operations adhering to the definition.
 """
 import logging
 
-from .valuetemplatefactory import ValueFactory
-
 
 log = logging.getLogger(__name__)
 
 
 class ParameterTemplate:
-    """Common class for Swagger API operation parameters."""
-    VALUE_FACTORY = ValueFactory
+    """Common class for Swagger API operation parameters.
+
+    :type swagger_definition: swaggerparameter.SwaggerParameter
+    """
 
     def __init__(self, swagger_definition):
         self._swagger_definition = swagger_definition
-        self._value_template = None
+
         self._items = None
         self._properties = None
 
-        self._populate_value()
         self._populate_children()
 
     def __repr__(self):
@@ -36,9 +35,25 @@ class ParameterTemplate:
                                 for prop_name, prop_value in
                                 self._swagger_definition.properties.items()}
 
-    def _populate_value(self):
-        self._value_template = self.VALUE_FACTORY.create_value(
-            self._swagger_definition)
+    def hypothesize(self, value_factory):
+        """Generate a hypothesis strategy representing this parameter."""
+        value_template = value_factory.create_value(self._swagger_definition)
+
+        if self.type == 'array':
+            elements = self.items.hypothesize(value_factory)
+            result = value_template.hypothesize(elements)
+        elif self.type == 'object':
+            reqd_props = {name: parameter.hypothesize(value_factory)
+                          for name, parameter in self.properties.items()
+                          if name in self.required_properties}
+            opt_props = {name: parameter.hypothesize(value_factory)
+                         for name, parameter in self.properties.items()
+                         if name not in self.required_properties}
+            result = value_template.hypothesize(reqd_props, opt_props)
+        else:
+            result = value_template.hypothesize()
+
+        return result
 
     @property
     def name(self):
@@ -67,13 +82,6 @@ class ParameterTemplate:
         :rtype: bool
         """
         return self._swagger_definition.required
-
-    @property
-    def value_template(self):
-        """The template for the value of this parameter.
-        :rtype: valuetemplates.ValueTemplate
-        """
-        return self._value_template
 
     @property
     def items(self):
