@@ -254,6 +254,59 @@ class CompareResponsesTestCase(unittest.TestCase):
         single_operation_test(client, operation) # pylint: disable=I0011,E1120
 
 
+class MultiRequestTestCase(unittest.TestCase):
+
+    @responses.activate
+    def test_put_get_combined(self):
+        """Test just to show how tests using multiple requests work."""
+        body = []
+        single_app_url_base = SCHEMA_URL_BASE + '/apps/'
+        def put_request_callback(request):
+            # Save off body to respond with.
+            body.append(json.loads(request.body))
+            return 204, {}, None
+        def get_request_callback(request):
+            # Respond with the last saved body.
+            data = body.pop()
+            data["name"] = "example"
+            return 200, {}, json.dumps(data)
+
+        responses.add_callback(responses.PUT, re.compile(single_app_url_base),
+                               callback=put_request_callback,
+                               content_type=CONTENT_TYPE_JSON)
+        responses.add_callback(responses.GET, re.compile(single_app_url_base),
+                               callback=get_request_callback,
+                               content_type=CONTENT_TYPE_JSON)
+
+        my_val_factory = swaggerconformance.ValueFactory()
+        client = swaggerconformance.SwaggerClient(TEST_SCHEMA_PATH)
+        api_template = swaggerconformance.APITemplate(client)
+        put_operation = api_template.endpoints["/apps/{appid}"]["put"]
+        put_strategy = put_operation.hypothesize_parameters(my_val_factory)
+        get_operation = api_template.endpoints["/apps/{appid}"]["get"]
+        get_strategy = get_operation.hypothesize_parameters(my_val_factory)
+
+        @hypothesis.settings(max_examples=50)
+        @hypothesis.given(put_strategy, get_strategy)
+        def single_operation_test(client, put_operation, get_operation,
+                                  put_params, get_params):
+            """PUT an app, then get it again."""
+            result = client.request(put_operation, put_params)
+            assert result.status in put_operation.response_codes, \
+                "{} not in {}".format(result.status,
+                                      put_operation.response_codes)
+
+            get_params["appid"] = put_params["appid"]
+            result = client.request(get_operation, get_params)
+
+            out_data = result.data.data
+            in_data = put_params["payload"]["data"]
+            assert out_data == in_data, \
+                "{!r} != {!r}".format(out_data, in_data)
+
+        single_operation_test(client, put_operation, get_operation) # pylint: disable=I0011,E1120
+
+
 if __name__ == '__main__':
     LOG_FORMAT = '%(asctime)s:%(levelname)-7s:%(funcName)s:%(message)s'
     logging.basicConfig(format=LOG_FORMAT, level=logging.DEBUG)
