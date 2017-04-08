@@ -39,8 +39,8 @@ class SwaggerClient:
         self._app.prepare()
 
     def __repr__(self):
-        return "{}(schema_path={})".format(self.__class__.__name__,
-                                           self._schema_path)
+        return "{}(schema_path={!r})".format(self.__class__.__name__,
+                                             self._schema_path)
 
     @property
     def app(self):

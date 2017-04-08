@@ -27,7 +27,7 @@ class OperationTemplate:
         self._populate_parameters()
 
     def __repr__(self):
-        return "{}(method={}, path={}, params={})".format(
+        return "{}(method={!r}, path={!r}, params={!r})".format(
             self.__class__.__name__, self._operation.method,
             self._operation.path, self._parameters)
 

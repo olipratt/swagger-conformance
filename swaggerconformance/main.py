@@ -56,7 +56,8 @@ def validate_operation(client, operation, num_tests=20):
         log.info("Testing with params: %r", params)
         result = client.request(operation, params)
         assert result.status in operation.response_codes, \
-            "{} not in {}".format(result.status, operation.response_codes)
+            "Response code {} not in {}".format(result.status,
+                                                operation.response_codes)
         assert 'application/json' in result.header['Content-Type'], \
             "application/json not in {}".format(result.header['Content-Type'])
 

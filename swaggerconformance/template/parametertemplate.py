@@ -23,7 +23,7 @@ class ParameterTemplate:
         self._populate_children()
 
     def __repr__(self):
-        return "{}(name={}, type={}, required={})".format(
+        return "{}(name={!r}, type={!r}, required={!r})".format(
             self.__class__.__name__, self.name, self.type, self.required)
 
     def _populate_children(self):
