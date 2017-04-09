@@ -68,6 +68,8 @@ class ObjectTemplate:
             max_properties = min(self.MAX_ADDITIONAL_PROPERTIES,
                                  max_properties - len(required_properties))
             max_properties = max(max_properties, min_properties)
+            log.debug("Determined max, min extra properties: %r, %r",
+                      max_properties, min_properties)
             forbidden_prop_names = set(required_properties.keys() &
                                        optional_properties.keys())
             extra = hy_st.dictionaries(

@@ -88,7 +88,7 @@ def merge_dicts_max_size_strategy(dict1, dict2, max_size):
     # max size.
     result = hy_st.builds(
         lambda x, y: {**x,
-                      **{k: y[k] for k in list(y.keys())[:len(x) - max_size]}},
+                      **{k: y[k] for k in list(y.keys())[:max_size - len(x)]}},
         dict1,
         dict2)
     return result
