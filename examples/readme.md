@@ -4,7 +4,7 @@ Examples showing how to use this package.
 
 ## Getting Started
 
-The simplest way to test your API is just to ask `swaggerconformance` to validated it as follows (assuming your swagger spec is hosted at `http://example.com/api/schema.json`):
+The simplest way to test your API is just to ask `swaggerconformance` to validated it as follows (assuming your swagger spec is hosted at `http://example.com/api/schema.json` - a local file path could be used instead):
 
 ```python
 from swaggerconformance import validate_schema
@@ -27,22 +27,24 @@ Falsifying example: single_operation_test(
         params={'exint': ParameterTemplate(name='exint', type='integer', required=True)}),
     params={'exint': -1})
 ...
+<Some stack trace here>
+...
 AssertionError: Response code 500 not in {200, 404}
 ```
 
 This shows that when testing the `GET` operation on the endpoint `/example/{exint}`, using the value `-1` for `exint` resulted in a `500` response code from the server, which is not one of the documented response codes (and any `5XX` response code is clearly an error!). From this it seems this server isn't handling negative numbers for this parameter well and needs to be made more robust.
 
-_As an aside, one great feature of hypothesis is once it finds a failing example, it will simplify it down as far as it can. So here it might have first found that `-2147483648` failed, but instead of just reporting that and let you figure out if that number is special it tries to find the simplest failing input value, e.g. here reducing down to simply `-1`._
+_As an aside, one great feature of hypothesis is once it finds a failing example, it will simplify it down as far as it can. So here it might have first found that `-2147483648` failed, but instead of just reporting that and let you figure out if that number is special, it tries to find the simplest failing input value, e.g. here reducing down to simply `-1`._
 
 ## Targeted and Stateful Testing
 
-The basic testing above just throws data at your API, but it's useful to be able to target specific endpoints, or build sequenced tests where the output of one operation is used as the input to another operation.
+The basic testing above just throws data at your API, but it's useful to be able to target specific endpoints, or build sequenced tests where the output of one operation is used as the input to another.
 
-Here's a small example of a test that creates a resource with `PUT` containing some generated data, and then verifies a `GET` returns the exact same data.
+Here's a small example of a test that creates a resource with a `PUT` containing some generated data, and then verifies that a `GET` returns the exact same data.
 
-You can run this test yourself by starting the `datastore_api.py` server and running the `ex_targeted_test.py` script in this directory, and read the same code there.
+You can run this test yourself by starting the `datastore_api.py` server and running the `ex_targeted_test.py` script in this directory to read the code there, and a run through of the same code follows.
 
-The first part of the setup involves creating a client that will make requests against the API, and creating templates for all operations and parameters the API exposes. The client can be given a URL or local file to read the schema from.
+The first part of the setup involves creating a client that will make requests against the API, and creating templates for all operations and parameters the API exposes. The client can be given a URL or local file path to read the schema from.
 
 ```python
 import hypothesis
@@ -53,7 +55,7 @@ client = swaggerconformance.SwaggerClient('http://example.com/api/schema.json')
 api_template = swaggerconformance.APITemplate(client)
 ```
 
-Now pull out the operations that will be tested, and `hypothesis` strategies for generating inputs to them. Here specific operations are accessed, but it's possible to just iterate through all operations in `api_template.template_operations()`. The value_factory generates strategies for individual data types being used - we'll just use the defaults, but the next section covers adding your own extra data types.
+The next step pulls out the operations that will be tested, and creates `hypothesis` strategies for generating inputs to them. Here specific operations are accessed, but it's possible to just iterate through all operations in `api_template.template_operations()`. The `value_factory` generates strategies for individual data types being used - we'll just use the defaults, but the next section covers adding your own extra data types.
 
 ```python
 # Get references to the operations we'll use for testing, and strategies for
@@ -65,7 +67,7 @@ get_operation = api_template.endpoints["/apps/{appid}"]["get"]
 get_strategy = get_operation.hypothesize_parameters(value_factory)
 ```
 
-That's all the setup - now write the `hypothesis` test. The [`hypothesis` docs](http://hypothesis.readthedocs.io/en/latest/quickstart.html#writing-tests) go through details of doing this and the [available settings](http://hypothesis.readthedocs.io/en/latest/settings.html#module-hypothesis). In short though, write a function which validates the property of your API you want to verify, and `hypothesis` runs this test multiple times. Each attempt uses different parameter values chosen to test all corners of the allowed values - the more attempts you allow it, the more thorough it can be and the greater the opportunity it has to flush out bugs.
+That's all the setup done - now to write the `hypothesis` test. The [`hypothesis` docs](http://hypothesis.readthedocs.io/en/latest/quickstart.html#writing-tests) go through details of doing this and the [available test settings](http://hypothesis.readthedocs.io/en/latest/settings.html#module-hypothesis). In short though, you write a function which validates the property of your API you want to verify, and `hypothesis` runs this function multiple times. Each attempt uses different parameter values chosen to test all corners of the allowed values - the more attempts you allow it, the more thorough it can be and the greater the chance it has to flush out bugs.
 
 ```python
 # Hypothesis will generate values fitting the strategies that define the
@@ -105,7 +107,7 @@ single_operation_test(client, put_operation, get_operation)
 
 ## Custom Data Types
 
-`swaggerconformance` supports generating values for [all the standard datatypes from the OpenAPI schema](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#data-types), however you might have defined your own more specific ones and want to generate instances of them to get more thorough testing of valid inputs to your API.
+`swaggerconformance` supports generating values for [all the standard datatypes from the OpenAPI schema](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#data-types). However you might have defined your own more specific ones and want to generate instances of them to get more thorough testing of valid inputs to your API.
 
 ### Example
 
@@ -115,7 +117,7 @@ For example, suppose you have an API operation that takes a colour as a paramete
 |-----------|------|--------|--------|
 |colour|`string`|`hexcolour`|`#` and six hex chars, e.g. `#3FE7D9`|
 
-By default, clearly `swaggerconformance` won't know what this is, will just generate string data as input for parameters of this format, and so your API will for most requests just be rejecting them with some `4XX` response because the parameter format isn't correct. You would much prefer that valid hex colours were being generated to test more successful API requests.
+By default, clearly `swaggerconformance` won't know what this is, and will just generate string data as input for parameters of this format. So for most requests your API will just be rejecting them with some `4XX` response because the parameter isn't of the correct format. You might prefer that valid hex colours were being generated to test a greater number of successful API requests. New type support can be added into `swaggerconformance` fairly easily.
 
 The first step here is to create a `ValueTemplate` which can build a hypothesis strategy to generate these `hexcolour` values:
 
@@ -134,7 +136,8 @@ class HexColourTemplate(valuetemplates.ValueTemplate):
         self._enum = enum
 
     def hypothesize(self):
-        # If there's a restricted set of allowed values, return one.
+        # If there's a specific set of allowed values, the strategy should
+        # return one of those.
         if self._enum is not None:
             return hy_st.sampled_from(self._enum)
 
@@ -143,15 +146,15 @@ class HexColourTemplate(valuetemplates.ValueTemplate):
         strategy = hy_st.text(alphabet=set(string.hexdigits),
                               min_size=6,
                               max_size=6)
-        # Don't forget the leading `#`.
+        # Don't forget to add the leading `#`.
         strategy = strategy.map(lambda x: "#" + x)
 
         return strategy
 ```
 
-This just needs to provide a `hypothesize(self)` method which returns a hypothesis strategy - `__init__` is optional if no parameters are needed.
+New `ValueTemplate`s just needs to provide a `hypothesize(self)` method which returns a `hypothesis` strategy - `__init__` is optional if no parameters are needed.
 
-You can see the [`hypothesis` docs](http://hypothesis.readthedocs.io/en/latest/data.html) for more information on creating strategies. One written, you can test values your template will produce - e.g.:
+You can see the [`hypothesis` docs](http://hypothesis.readthedocs.io/en/latest/data.html) for more information on building up strategies. One written, you can test values your template will produce - e.g.:
 
 ```python
 >>> template = HexColourTemplate()
@@ -166,7 +169,6 @@ Now that the template for values of this type is defined, we just need to create
 import swaggerconformance
 
 class HexColourValueFactory(swaggerconformance.ValueFactory):
-
     def create_value(self, swagger_definition):
         """Handle `hexcolour` string format, otherwise defer to parent class.
         :type swagger_definition: swaggerconformance.SwaggerParameter
@@ -190,4 +192,6 @@ put_strategy = put_operation.hypothesize_parameters(value_factory)
 ...
 ```
 
-If needed, you can use this to replace any of the built in templates - e.g. to restrict the alphabet of all strings - but remember making the generation more restrictive might mean bugs are missed.
+There's no reason that the factory couldn't check other properties of the parameter to decide what type of values to generate, e.g. the `name` - but remember that likely clients won't have whatever special logic you add here so it may be better to assign a special data type instead.
+
+If needed, you can replace any of the built in value templates - e.g. to restrict the alphabet of all generated basic strings - but again remember that making the generation more restrictive might mean bugs are missed if clients don't have the same restrictions.
