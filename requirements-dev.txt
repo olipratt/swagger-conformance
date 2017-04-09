@@ -1,3 +1,5 @@
 -r requirements.txt
 
+Flask==0.12
+flask-restplus==0.9.2
 responses==0.5.1
