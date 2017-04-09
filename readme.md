@@ -8,7 +8,7 @@ You have a Swagger (OpenAPI) schema defining the API you provide - but do you re
 
 A Swagger/OpenAPI Spec allows you to define what things are and aren't valid for your API to consume and produce. This tool takes that definition, and tries to explore all parts of it while strictly adhering to it. The aim is then to find any places where your application fails to adhere to its own spec, or even just falls over entirely.
 
-_This is **not** a pure fuzz tester of your HTTP API e.g. sending complete garbage, or to non-existent endpoints - it's not aiming to test your framework in that way, instead making sure that any valid endpoint, using your API exactly as you specify, can't break it._
+_This is **not** a complete fuzz tester of your HTTP interface e.g. sending complete garbage, or to non-existent endpoints. It's aiming to make sure that any valid endpoint, using your API exactly as you specify, can't break it._
 
 ## Setup
 
@@ -29,4 +29,4 @@ validate_schema('http://example.com/api/schema.json')
 
 where the URL should resolve to your swagger schema, or it can be a path to the file on disk.
 
-For more explanation of results and running more thorough tests, [see the examples](examples/readme.md).
+This basic test tries all your API operations looking for errors. For explanation of the results and running more thorough tests, including sequences of API calls and defining your custom data types, [see the examples](examples/readme.md).

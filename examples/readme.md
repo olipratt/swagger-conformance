@@ -105,6 +105,89 @@ single_operation_test(client, put_operation, get_operation)
 
 ## Custom Data Types
 
-`swaggerconformance` supports [all the standard datatypes from the OpenAPI schema](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#data-types), however you might have defined your own more specific ones and want to generate instances of them to get more thorough testing of valid inputs to your API.
+`swaggerconformance` supports generating values for [all the standard datatypes from the OpenAPI schema](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#data-types), however you might have defined your own more specific ones and want to generate instances of them to get more thorough testing of valid inputs to your API.
 
+### Example
+
+For example, suppose you have an API operation that takes a colour as a parameter, so you've defined a new datatype for your API as:
+
+|Common Name|`type`|`format`|Comments|
+|-----------|------|--------|--------|
+|colour|`string`|`hexcolour`|`#` and six hex chars, e.g. `#3FE7D9`|
+
+By default, clearly `swaggerconformance` won't know what this is, will just generate string data as input for parameters of this format, and so your API will for most requests just be rejecting them with some `4XX` response because the parameter format isn't correct. You would much prefer that valid hex colours were being generated to test more successful API requests.
+
+The first step here is to create a `ValueTemplate` which can build a hypothesis strategy to generate these `hexcolour` values:
+
+```python
+import string
+import hypothesis.strategies as hy_st
+from swaggerconformance import valuetemplates
+
+class HexColourTemplate(valuetemplates.ValueTemplate):
+    """Template for a hex colour value."""
+
+    def __init__(self, enum=None):
+        # Various parameters like length don't make sense for this field, but
+        # an enumeration of valid values may still be provided.
+        super().__init__()
+        self._enum = enum
+
+    def hypothesize(self):
+        # If there's a restricted set of allowed values, return one.
+        if self._enum is not None:
+            return hy_st.sampled_from(self._enum)
+
+        # We'll generate values as strings, but we could generate integers and
+        # convert those to hex instead.
+        strategy = hy_st.text(alphabet=set(string.hexdigits),
+                              min_size=6,
+                              max_size=6)
+        # Don't forget the leading `#`.
+        strategy = strategy.map(lambda x: "#" + x)
+
+        return strategy
+```
+
+This just needs to provide a `hypothesize(self)` method which returns a hypothesis strategy - `__init__` is optional if no parameters are needed.
+
+You can see the [`hypothesis` docs](http://hypothesis.readthedocs.io/en/latest/data.html) for more information on creating strategies. One written, you can test values your template will produce - e.g.:
+
+```python
+>>> template = HexColourTemplate()
+>>> strategy = template.hypothesize()
+>>> strategy.example()
+'#CafB0b'
+```
+
+Now that the template for values of this type is defined, we just need to create an updated factory that will generate them. To do this, inherit from the built in one, and add logic into an overridden `create_value` method:
+
+```python
+import swaggerconformance
+
+class HexColourValueFactory(swaggerconformance.ValueFactory):
+
+    def create_value(self, swagger_definition):
+        """Handle `hexcolour` string format, otherwise defer to parent class.
+        :type swagger_definition: swaggerconformance.SwaggerParameter
+        """
+        if (swagger_definition.type == 'string' and
+                swagger_definition.format == 'hexcolour'):
+            return HexColourTemplate(swagger_definition.enum)
+        else:
+            return super().create_value(swagger_definition)
+```
+
+Now whenever creating strategies for generating parameters for operations, use the new factory. Then anytime `string`, `hexcolour` is the datatype of a parameter, the new template will be used to generate a strategy for it. So in the example code in the previous section, the change would just be:
+
+```python
+client = swaggerconformance.SwaggerClient('http://example.com/api/schema.json')
+api_template = swaggerconformance.APITemplate(client)
+
+value_factory = HexColourValueFactory()  # Use enhanced factory for values.
+put_operation = api_template.endpoints["/apps/{appid}"]["put"]
+put_strategy = put_operation.hypothesize_parameters(value_factory)
 ...
+```
+
+If needed, you can use this to replace any of the built in templates - e.g. to restrict the alphabet of all strings - but remember making the generation more restrictive might mean bugs are missed.
