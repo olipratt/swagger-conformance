@@ -4,7 +4,7 @@ setup(
   packages = ['swaggerconformance'],
   install_requires=['hypothesis', 'pyswagger', 'requests'],
   version = '0.1',
-  description = 'Tool for testing whether your API conforms to it's swagger specification',
+  description = "Tool for testing whether your API conforms to it's swagger specification",
   author = 'Oli Pratt',
   author_email = 'olipratt@users.noreply.github.com',
   url = 'https://github.com/olipratt/swagger-conformance',
