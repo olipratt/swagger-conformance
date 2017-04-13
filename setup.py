@@ -1,7 +1,7 @@
-from distutils.core import setup
+from setuptools import find_packages, setup
 setup(
   name = 'swagger-conformance',
-  packages = ['swaggerconformance'],
+  packages = find_packages(exclude=['examples', 'docs', 'tests']),
   install_requires=['hypothesis', 'pyswagger', 'requests'],
   version = '0.1',
   description = "Tool for testing whether your API conforms to it's swagger specification",
