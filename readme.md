@@ -23,8 +23,8 @@ $ pip install -r requirements.txt
 After setup the simplest test you can run against your API is just:
 
 ```python
-from swaggerconformance import validate_schema
-validate_schema('http://example.com/api/schema.json')
+from swaggerconformance import api_conformance_test
+api_conformance_test('http://example.com/api/schema.json')
 ```
 
 where the URL should resolve to your swagger schema, or it can be a path to the file on disk.

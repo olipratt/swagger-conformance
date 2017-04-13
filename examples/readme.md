@@ -7,9 +7,9 @@ Examples showing how to use this package.
 The simplest way to test your API is just to ask `swaggerconformance` to validated it as follows (assuming your swagger spec is hosted at `http://example.com/api/schema.json` - a local file path could be used instead):
 
 ```python
-from swaggerconformance import validate_schema
+from swaggerconformance import api_conformance_test
 
-validate_schema('http://example.com/api/schema.json')
+api_conformance_test('http://example.com/api/schema.json')
 ```
 
 This will simply make requests against your API using data generated to match your API schema, and ensure that the response codes and data returned also match your schema.

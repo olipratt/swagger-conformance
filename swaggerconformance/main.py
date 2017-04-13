@@ -12,8 +12,8 @@ from .template import APITemplate, ValueFactory
 log = logging.getLogger(__name__)
 
 
-def validate_schema(schema_path, num_tests_per_op=20):
-    """Fully validate the API defined by the given schema.
+def api_conformance_test(schema_path, num_tests_per_op=20):
+    """Test the conformance of the API defined by the given schema.
 
     :param schema_path: The path to / URL of the schema to validate.
     :type schema_path: str
@@ -25,11 +25,11 @@ def validate_schema(schema_path, num_tests_per_op=20):
     log.debug("Expanded endpoints as: %r", api_template)
 
     for operation in api_template.template_operations():
-        validate_operation(client, operation, num_tests_per_op)
+        operation_conformance_test(client, operation, num_tests_per_op)
 
 
-def validate_operation(client, operation, num_tests=20):
-    """Fully validate the API operation using the provided client.
+def operation_conformance_test(client, operation, num_tests=20):
+    """Test the conformance of the given operation using the provided client.
 
     :param client: The client to use to access the API.
     :type client: SwaggerClient

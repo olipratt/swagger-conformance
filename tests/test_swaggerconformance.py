@@ -18,8 +18,6 @@ import responses
 import hypothesis
 
 import swaggerconformance
-import swaggerconformance.template
-import swaggerconformance.client
 
 
 TEST_SCHEMA_DIR = osp.relpath(osp.join(osp.dirname(osp.realpath(__file__)),
@@ -108,7 +106,7 @@ class ParameterTypesTestCase(unittest.TestCase):
         respond_to_put(r'/example/-?\d+', status=204)
 
         # Now just kick off the validation process.
-        swaggerconformance.validate_schema(FULL_PUT_SCHEMA_PATH)
+        swaggerconformance.api_conformance_test(FULL_PUT_SCHEMA_PATH)
 
     @responses.activate
     def test_all_constraints(self):
@@ -117,7 +115,7 @@ class ParameterTypesTestCase(unittest.TestCase):
         respond_to_put(r'/example/-?\d+', status=204)
 
         # Now just kick off the validation process.
-        swaggerconformance.validate_schema(ALL_CONSTRAINTS_SCHEMA_PATH)
+        swaggerconformance.api_conformance_test(ALL_CONSTRAINTS_SCHEMA_PATH)
 
 
 class ExternalExamplesTestCase(unittest.TestCase):
@@ -180,7 +178,7 @@ class ExternalExamplesTestCase(unittest.TestCase):
         respond_to_put(r'/example/-?\d+')
 
         # Now just kick off the validation process.
-        swaggerconformance.validate_schema(PETSTORE_SCHEMA_PATH)
+        swaggerconformance.api_conformance_test(PETSTORE_SCHEMA_PATH)
 
     @responses.activate
     def test_openapi_uber(self):
@@ -216,7 +214,7 @@ class ExternalExamplesTestCase(unittest.TestCase):
         respond_to_get(r'/products\?.*', response_json=products)
 
         # Now just kick off the validation process.
-        swaggerconformance.validate_schema(UBER_SCHEMA_PATH)
+        swaggerconformance.api_conformance_test(UBER_SCHEMA_PATH)
 
 
 class CompareResponsesTestCase(unittest.TestCase):
@@ -299,8 +297,10 @@ class MultiRequestTestCase(unittest.TestCase):
             get_params["appid"] = put_params["appid"]
             result = client.request(get_operation, get_params)
 
-            out_data = result.data.data
-            in_data = put_params["payload"]["data"]
+            # Compare JSON representations of the data - as Python objects they
+            # may contain NAN, instances of which are not equal to one another.
+            out_data = json.dumps(result.data.data, sort_keys=True)
+            in_data = json.dumps(put_params["payload"]["data"], sort_keys=True)
             assert out_data == in_data, \
                 "{!r} != {!r}".format(out_data, in_data)
 

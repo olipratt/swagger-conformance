@@ -1,10 +1,10 @@
-from .main import validate_schema, validate_operation
+from .main import api_conformance_test, operation_conformance_test
 from .client import SwaggerClient
 from .template import (APITemplate, ValueFactory, valuetemplates,
                        SwaggerParameter)
 
-__all__ = ["validate_schema",
-           "validate_operation",
+__all__ = ["api_conformance_test",
+           "operation_conformance_test",
            "SwaggerClient",
            "APITemplate",
            "ValueFactory",
