@@ -25,7 +25,7 @@ api_conformance_test('http://example.com/api/schema.json')
 
 where the URL should resolve to your swagger schema, or it can be a path to the file on disk.
 
-This basic test tries all your API operations looking for errors. For explanation of the results and running more thorough tests, including sequences of API calls and defining your custom data types, [see the examples](examples/readme.md).
+This basic test tries all your API operations looking for errors. For explanation of the results and running more thorough tests, including sequences of API calls and defining your custom data types, [see the examples](https://github.com/olipratt/swagger-conformance/tree/master/examples).
 
 ## Wait, I don't get it, what does this thing do?
 
@@ -68,4 +68,4 @@ With just a little code, we can load in the swagger schema for that API, access 
 >>>
 ```
 
-See [the examples](examples/readme.md) for more details, and how to go on to make requests against an API.
+See [the examples](https://github.com/olipratt/swagger-conformance/tree/master/examples) for more details, and how to go on to make requests against an API.
