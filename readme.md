@@ -12,11 +12,7 @@ _This is not a complete fuzz tester of your HTTP interface e.g. sending complete
 
 ## Setup
 
-Just clone this repository, and from inside it run:
-
-```shell
-$ pip install -r requirements.txt
-```
+Either install with `pip install swagger-conformance`, or manually clone this repository and from inside it install dependencies with `pip install -r requirements.txt`.
 
 ## Usage
 
