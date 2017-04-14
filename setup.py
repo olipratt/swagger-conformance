@@ -1,26 +1,27 @@
 from setuptools import find_packages, setup
 import pypandoc
 
-
-def readme():
-    return pypandoc.convert('readme.md', 'rst')
+URL = 'https://github.com/olipratt/swagger-conformance'
+VERSION = '0.1.1'
+LONG_DESC = pypandoc.convert('readme.md', 'rst')
 
 
 setup(
     name='swagger-conformance',
     packages=find_packages(exclude=['examples', 'docs', 'tests']),
     install_requires=['hypothesis', 'pyswagger', 'requests'],
-    version='0.1',
-    description="Tool for testing whether your API conforms to it's swagger specification",
-    long_description=readme(),
+    version=VERSION,
+    description="Tool for testing whether your API conforms to its swagger "
+                "specification",
+    long_description=LONG_DESC,
     author='Oli Pratt',
     author_email='olipratt@users.noreply.github.com',
-    url='https://github.com/olipratt/swagger-conformance',
-    download_url='https://github.com/olipratt/swagger-conformance/archive/0.1.tar.gz',
+    url=URL,
+    download_url='{}/archive/{}.tar.gz'.format(URL, VERSION),
     keywords=['swagger', 'testing', 'OpenAPI', 'hypothesis'],
     license='MIT',
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'Topic :: Software Development :: Testing',
         'License :: OSI Approved :: MIT License',
