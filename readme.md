@@ -68,4 +68,4 @@ With just a little code, we can load in the swagger schema for that API, access 
 >>>
 ```
 
-See [the examples](https://github.com/olipratt/swagger-conformance/tree/master/examples) for more details, and how to go on to make requests against an API.
+See [the examples](https://github.com/olipratt/swagger-conformance/tree/master/examples) for more details, and how to make requests against an API using these parameter values.
