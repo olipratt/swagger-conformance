@@ -3,7 +3,7 @@ import pypandoc
 
 URL = 'https://github.com/olipratt/swagger-conformance'
 VERSION = '0.1.1'
-LONG_DESC = pypandoc.convert('readme.md', 'rst')
+LONG_DESC = pypandoc.convert('readme.md', 'rst').replace('\r\n', '\n')
 
 
 setup(

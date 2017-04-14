@@ -3,5 +3,6 @@ __pycache__
 *.sublime-*
 .hypothesis
 .vscode
+build/
 dist/
 MANIFEST

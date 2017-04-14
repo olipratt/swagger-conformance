@@ -60,7 +60,7 @@ With just a little code, we can load in the swagger schema for that API, access 
     'tags':[
       {
         'id':-172930,
-        'name':'\U000286dfÄ\u04dc\U00033563\u696d\U00055ba8\x89H'
+        'name':'\U000286df\u04dc\U00033563\u696d\U00055ba8\x89H'
       }
     ]
   }
