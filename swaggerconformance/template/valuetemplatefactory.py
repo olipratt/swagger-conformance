@@ -98,9 +98,7 @@ class ValueFactory:
         log.debug("Properties: %r", swagger_definition.properties)
         # If there are no fixed properties then allow arbitrary ones to be
         # added.
-        additional = (swagger_definition.additionalProperties not in
-                      (None, False))
-        additional = (additional or
+        additional = (swagger_definition.additionalProperties or
                       len(swagger_definition.properties) == 0)
         log.debug("Allow additional properties? %r", additional)
         return vts.ObjectTemplate(
