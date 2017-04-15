@@ -12,6 +12,7 @@ log = logging.getLogger(__name__)
 
 class APITemplate:
     """Template for an entire Swagger API.
+
     :type client: client.SwaggerClient
     """
 
@@ -28,6 +29,7 @@ class APITemplate:
     @property
     def endpoints(self):
         """Mapping of the endpoints of this API to their operations.
+
         :rtype: dict
         """
         return self._endpoints_map

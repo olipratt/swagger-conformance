@@ -47,6 +47,7 @@ class SwaggerParameter:
     @property
     def name(self):
         """The name of this parameter, if it has one.
+
         :rtype: str or None
         """
         return getattr(self._swagger_definition, 'name', None)
@@ -54,6 +55,7 @@ class SwaggerParameter:
     @property
     def type(self):
         """The type of this parameter.
+
         :rtype: str
         """
         return self._swagger_definition.type
@@ -61,6 +63,7 @@ class SwaggerParameter:
     @property
     def format(self):
         """The format of this parameter.
+
         :rtype: str
         """
         return self._swagger_definition.format
@@ -68,6 +71,7 @@ class SwaggerParameter:
     @property
     def required(self):
         """Whether this parameter is required.
+
         :rtype: bool
         """
         # If not specified in the underlying definition (or not applicable),
@@ -81,6 +85,7 @@ class SwaggerParameter:
     def location(self):
         """The location of this parameter - e.g. 'header' or 'body', or `None`
         if not a top-level parameter.
+
         :rtype: str or None
         """
         return getattr(self._swagger_definition, 'in', None)
@@ -88,6 +93,7 @@ class SwaggerParameter:
     @property
     def items(self):
         """The Parameter elements of this Parameter if it's an array.
+
         :rtype: SwaggerParameter or None
         """
         items = self._swagger_definition.items
@@ -97,6 +103,7 @@ class SwaggerParameter:
     @property
     def properties(self):
         """The dict of Parameter elements of this Parameter if it's an object.
+
         :rtype: dict(str, SwaggerParameter) or None
         """
         # This attribute is only present on `Schema` objects.
@@ -109,6 +116,7 @@ class SwaggerParameter:
     @property
     def required_properties(self):
         """List of required property names of this Parameter if it's an object.
+
         :rtype: list(str) or None
         """
         # This clashes with the name of the bool indicating if this is a
@@ -120,6 +128,7 @@ class SwaggerParameter:
     @property
     def additionalProperties(self):
         """Whether this paramater is a dict that accepts arbitrary entries.
+
         :rtype: bool
         """
         # This attribute is only present on `Schema` objects.
@@ -131,6 +140,7 @@ class SwaggerParameter:
     @property
     def maxProperties(self):
         """The maximum number of properties in this parameter if it's a dict.
+
         :rtype: int
         """
         if not hasattr(self._swagger_definition, 'maxProperties'):
@@ -140,6 +150,7 @@ class SwaggerParameter:
     @property
     def minProperties(self):
         """The minimum number of properties in this parameter if it's a dict.
+
         :rtype: int
         """
         if not hasattr(self._swagger_definition, 'minProperties'):
@@ -149,6 +160,7 @@ class SwaggerParameter:
     @property
     def maximum(self):
         """The maximum value of this parameter.
+
         :rtype: float
         """
         return self._swagger_definition.maximum
@@ -156,6 +168,7 @@ class SwaggerParameter:
     @property
     def exclusiveMaximum(self):
         """Whether the maximum value of this parameter is allowed.
+
         :rtype: bool
         """
         return self._swagger_definition.exclusiveMaximum
@@ -163,6 +176,7 @@ class SwaggerParameter:
     @property
     def minimum(self):
         """The minimum value of this parameter.
+
         :rtype: float
         """
         return self._swagger_definition.minimum
@@ -170,6 +184,7 @@ class SwaggerParameter:
     @property
     def exclusiveMinimum(self):
         """Whether the minimum value of this parameter is allowed.
+
         :rtype: bool
         """
         return self._swagger_definition.exclusiveMinimum
@@ -177,6 +192,7 @@ class SwaggerParameter:
     @property
     def multipleOf(self):
         """The value of this parameter must be a multiple of this value.
+
         :rtype: float or None
         """
         return self._swagger_definition.multipleOf
@@ -184,6 +200,7 @@ class SwaggerParameter:
     @property
     def maxLength(self):
         """The maximum length of this parameter.
+
         :rtype: int
         """
         return self._swagger_definition.maxLength
@@ -191,6 +208,7 @@ class SwaggerParameter:
     @property
     def minLength(self):
         """The minimum length of this parameter.
+
         :rtype: int
         """
         return self._swagger_definition.minLength
@@ -198,6 +216,7 @@ class SwaggerParameter:
     @property
     def pattern(self):
         """The regex pattern for this parameter.
+
         :rtype: string
         """
         return self._swagger_definition.pattern
@@ -205,6 +224,7 @@ class SwaggerParameter:
     @property
     def maxItems(self):
         """The maximum number of items in this parameter if it's an array.
+
         :rtype: int
         """
         return self._swagger_definition.maxItems
@@ -212,6 +232,7 @@ class SwaggerParameter:
     @property
     def minItems(self):
         """The minimum number of items in this parameter if it's an array.
+
         :rtype: int
         """
         return self._swagger_definition.minItems
@@ -219,6 +240,7 @@ class SwaggerParameter:
     @property
     def uniqueItems(self):
         """Whether the items in this parameter are unique if it's an array.
+
         :rtype: bool
         """
         return self._swagger_definition.uniqueItems
@@ -226,6 +248,7 @@ class SwaggerParameter:
     @property
     def enum(self):
         """List of valid values for this paramater.
+
         :rtype: list
         """
         return self._swagger_definition.enum

@@ -14,6 +14,7 @@ class ValueFactory:
 
     def create_value(self, swagger_definition):
         """Create a ValueTemplate for the value specified by the definition.
+
         :type swagger_definition: swaggerparameter.SwaggerParameter
         """
         value = None

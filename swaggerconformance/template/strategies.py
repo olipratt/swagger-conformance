@@ -49,6 +49,7 @@ FILE_STRATEGY = hy_st.builds(io.BytesIO,
 
 def merge_dicts_strategy(dict_strat_1, dict_strat_2):
     """Strategy merging two strategies producting dicts into one.
+
     :type dict_strat_1: dict
     :type dict_strat_2: dict
     """
@@ -57,6 +58,7 @@ def merge_dicts_strategy(dict_strat_1, dict_strat_2):
 
 def merge_optional_dict_strategy(required_fields, optional_fields):
     """Combine dicts of required and optional strategies into one.
+
     :type required_fields: dict
     :type optional_fields: dict
     """

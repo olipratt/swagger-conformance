@@ -13,6 +13,7 @@ log = logging.getLogger(__name__)
 
 class OperationTemplate:
     """Template for an operation on an endpoint.
+
     :type app: pyswagger.App
     :type operation: pyswagger.spec.v2_0.objects.Operation
     """
@@ -45,6 +46,7 @@ class OperationTemplate:
     @property
     def operation(self):
         """The actual API operation this template represents.
+
         :rtype: pyswagger.spec.v2_0.objects.Operation
         """
         return self._operation
@@ -52,6 +54,7 @@ class OperationTemplate:
     @property
     def parameters(self):
         """Mapping of the names of the parameters to their templates.
+
         :rtype: dict(str, ParameterTemplate)
         """
         return self._parameters
@@ -59,6 +62,7 @@ class OperationTemplate:
     @property
     def response_codes(self):
         """List of HTTP response codes this operation might return.
+
         :rtype: set(int)
         """
         return self._response_codes

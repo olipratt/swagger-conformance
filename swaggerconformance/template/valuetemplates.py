@@ -47,6 +47,7 @@ class ObjectTemplate:
 
     def hypothesize(self, required_properties, optional_properties):
         """Return a hypothesis strategy defining this collection.
+
         :type required_properties: dict
         :type optional_properties: dict
         """

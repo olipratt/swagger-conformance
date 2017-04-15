@@ -58,6 +58,7 @@ class ParameterTemplate:
     @property
     def name(self):
         """The name of this parameter, if it has one.
+
         :rtype: str or None
         """
         return self._swagger_definition.name
@@ -65,6 +66,7 @@ class ParameterTemplate:
     @property
     def type(self):
         """The type of this parameter.
+
         :rtype: str
         """
         return self._swagger_definition.type
@@ -72,6 +74,7 @@ class ParameterTemplate:
     @property
     def format(self):
         """The format of this parameter.
+
         :rtype: str
         """
         return self._swagger_definition.format
@@ -79,6 +82,7 @@ class ParameterTemplate:
     @property
     def required(self):
         """Whether this parameter is required.
+
         :rtype: bool
         """
         return self._swagger_definition.required
@@ -86,6 +90,7 @@ class ParameterTemplate:
     @property
     def items(self):
         """The children of this parameter if it's an array - `None` otherwise.
+
         :rtype: ParameterTemplate or None
         """
         return self._items
@@ -93,6 +98,7 @@ class ParameterTemplate:
     @property
     def properties(self):
         """The children of this parameter if it's a dict - `None` otherwise.
+
         :rtype: dict(str, ParameterTemplate) or None
         """
         return self._properties
@@ -100,6 +106,7 @@ class ParameterTemplate:
     @property
     def required_properties(self):
         """List of required property names of this parameter if it's an dict.
+
         :rtype: list(str) or None
         """
         return self._swagger_definition.required_properties
