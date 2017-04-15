@@ -9,7 +9,7 @@ LONG_DESC = pypandoc.convert('readme.md', 'rst').replace('\r\n', '\n')
 setup(
     name='swagger-conformance',
     packages=find_packages(exclude=['examples', 'docs', 'tests']),
-    install_requires=['hypothesis', 'pyswagger', 'requests'],
+    install_requires=['hypothesis', 'pyswagger>=0.8.28', 'requests'],
     version=VERSION,
     description="Tool for testing whether your API conforms to its swagger "
                 "specification",

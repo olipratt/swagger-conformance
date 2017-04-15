@@ -13,6 +13,7 @@ import unittest
 import re
 import os.path as osp
 import json
+import urllib
 
 import responses
 import hypothesis
@@ -56,6 +57,7 @@ def respond_to_delete(path, response_json=None, status=200):
 
 
 class APITemplateTestCase(unittest.TestCase):
+    """Simple tests working with the `APITemplate` class directly."""
 
     def setUp(self):
         self.client = swaggerconformance.SwaggerClient(TEST_SCHEMA_PATH)
@@ -65,6 +67,7 @@ class APITemplateTestCase(unittest.TestCase):
         pass
 
     def test_schema_parse(self):
+        """Test we can parse an API schema, and find all the endpoints."""
         api_template = swaggerconformance.APITemplate(self.client)
         expected_endpoints = {'/schema', '/apps', '/apps/{appid}'}
         self.assertSetEqual(set(api_template.endpoints.keys()),
@@ -72,6 +75,7 @@ class APITemplateTestCase(unittest.TestCase):
 
     @responses.activate
     def test_endpoint_manually(self):
+        """Test we can make a request against an endpoint manually."""
         api_template = swaggerconformance.APITemplate(self.client)
 
         # Find the template GET operation on the /apps/{appid} endpoint.
@@ -96,9 +100,11 @@ class APITemplateTestCase(unittest.TestCase):
 
 
 class ParameterTypesTestCase(unittest.TestCase):
+    """Tests to cover all the options/constraints on parameters."""
 
     @responses.activate
     def test_full_put(self):
+        """A PUT request containing all different parameter types."""
         # Handle all the basic endpoints.
         respond_to_get('/schema')
         respond_to_get('/example')
@@ -110,6 +116,7 @@ class ParameterTypesTestCase(unittest.TestCase):
 
     @responses.activate
     def test_all_constraints(self):
+        """A PUT request containing all parameter constraint combinations."""
         # Handle all the basic endpoints.
         respond_to_get('/schema')
         respond_to_put(r'/example/-?\d+', status=204)
@@ -119,9 +126,11 @@ class ParameterTypesTestCase(unittest.TestCase):
 
 
 class ExternalExamplesTestCase(unittest.TestCase):
+    """Tests of API specs from external sources to get coverage."""
 
     @responses.activate
     def test_swaggerio_petstore(self):
+        """The petstore API spec from the swagger.io site is handled."""
         # Example responses matching the required models.
         pet = {"id": 0,
                "category": {"id": 0, "name": "string"},
@@ -182,6 +191,7 @@ class ExternalExamplesTestCase(unittest.TestCase):
 
     @responses.activate
     def test_openapi_uber(self):
+        """An example Uber API spec from the OpenAPI examples is handled."""
         profile = {"first_name": "steve",
                    "last_name": "stevenson",
                    "email": "example@stevemail.com",
@@ -218,18 +228,21 @@ class ExternalExamplesTestCase(unittest.TestCase):
 
 
 class CompareResponsesTestCase(unittest.TestCase):
+    """Tests that values sent on requests can be returned unchanged."""
 
     @responses.activate
     def test_get_resp(self):
+        """Test that a GET URL parameter is the same when passed back in the
+        GET response body - i.e. there's no mismatched encode/decode."""
         url_base = SCHEMA_URL_BASE + '/example/'
-        def request_callback(request):
+        def _request_callback(request):
             value = request.url[len(url_base):]
-            value = value.replace("~", "%7E") # Hack to fix URL quoting
-            # value = urllib.parse.unquote(value) # when pyswagger urlquotes
+            # Special characters will be quoted in the URL - unquote them here.
+            value = urllib.parse.unquote_plus(value)
             return (200, {}, json.dumps({'in_str': value}))
 
         responses.add_callback(responses.GET, re.compile(url_base),
-                               callback=request_callback,
+                               callback=_request_callback,
                                content_type=CONTENT_TYPE_JSON)
 
         my_val_factory = swaggerconformance.ValueFactory()
@@ -238,9 +251,9 @@ class CompareResponsesTestCase(unittest.TestCase):
         operation = api_template.endpoints["/example/{in_str}"]["get"]
         strategy = operation.hypothesize_parameters(my_val_factory)
 
-        @hypothesis.settings(max_examples=50)
+        @hypothesis.settings(max_examples=200)
         @hypothesis.given(strategy)
-        def single_operation_test(client, operation, params):
+        def _single_operation_test(client, operation, params):
             result = client.request(operation, params)
             assert result.status in operation.response_codes, \
                 "{} not in {}".format(result.status,
@@ -249,31 +262,32 @@ class CompareResponsesTestCase(unittest.TestCase):
             assert result.data.in_str == params["in_str"], \
                 "{} != {}".format(result.data.in_str, params["in_str"])
 
-        single_operation_test(client, operation) # pylint: disable=I0011,E1120
+        _single_operation_test(client, operation) # pylint: disable=I0011,E1120
 
 
 class MultiRequestTestCase(unittest.TestCase):
+    """Test that multiple requests can be handled as part of single test."""
 
     @responses.activate
     def test_put_get_combined(self):
         """Test just to show how tests using multiple requests work."""
         body = []
         single_app_url_base = SCHEMA_URL_BASE + '/apps/'
-        def put_request_callback(request):
+        def _put_request_callback(request):
             # Save off body to respond with.
             body.append(json.loads(request.body))
             return 204, {}, None
-        def get_request_callback(request):
+        def _get_request_callback(_):
             # Respond with the last saved body.
             data = body.pop()
             data["name"] = "example"
             return 200, {}, json.dumps(data)
 
         responses.add_callback(responses.PUT, re.compile(single_app_url_base),
-                               callback=put_request_callback,
+                               callback=_put_request_callback,
                                content_type=CONTENT_TYPE_JSON)
         responses.add_callback(responses.GET, re.compile(single_app_url_base),
-                               callback=get_request_callback,
+                               callback=_get_request_callback,
                                content_type=CONTENT_TYPE_JSON)
 
         my_val_factory = swaggerconformance.ValueFactory()

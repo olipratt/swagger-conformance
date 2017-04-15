@@ -225,12 +225,10 @@ class URLPathStringTemplate(StringTemplate):
                  pattern=None, enum=None):
         if min_length is None:
             min_length = 1
+        if min_length < 1:
+            raise ValueError("Path parameters must be at least 1 char long")
         super().__init__(max_length=max_length, min_length=min_length,
                          pattern=pattern, enum=enum)
-
-    def hypothesize(self):
-        return super().hypothesize().map(lambda x: urllib.parse.quote(x,
-                                                                      safe=''))
 
 
 class HTTPHeaderStringTemplate(StringTemplate):
@@ -238,11 +236,13 @@ class HTTPHeaderStringTemplate(StringTemplate):
 
     def __init__(self, max_length=None, min_length=None,
                  pattern=None, enum=None):
+        # Heaved values are strings but cannot contain newlines.
         super().__init__(max_length=max_length, min_length=min_length,
                          pattern=pattern, enum=enum,
                          blacklist_chars=['\r', '\n'])
 
     def hypothesize(self):
+        # Header values shouldn't have surrounding whitespace.
         return super().hypothesize().map(str.strip)
 
 class DateTemplate(ValueTemplate):
