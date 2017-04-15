@@ -1,8 +1,23 @@
+r"""
+File required to relese on PyPI. More info here:
+https://packaging.python.org/distributing/#packaging-your-project
+
+To push a new release, assuming running on Windows:
+1. Increment the `VERSION` below appropriately.
+2. Delete old distributions:
+    del dist
+3. Build the `source` and `wheel` distributions with:
+    python setup.py sdist bdist_wheel
+4. Update the registered package on PyPI with `twine`:
+    twine register dist\swagger_conformance-<VERSION>-py3-none-any.whl
+5. Upload the new packages:
+    twine upload dist\*
+"""
 from setuptools import find_packages, setup
 import pypandoc
 
+VERSION = '0.1.2'
 URL = 'https://github.com/olipratt/swagger-conformance'
-VERSION = '0.1.1'
 LONG_DESC = pypandoc.convert('readme.md', 'rst').replace('\r\n', '\n')
 
 
