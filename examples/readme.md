@@ -4,7 +4,7 @@ Examples showing how to use this package.
 
 ## Getting Started
 
-The simplest way to test your API is just to ask `swaggerconformance` to validated it as follows (assuming your swagger spec is hosted at `http://example.com/api/schema.json` - a local file path could be used instead):
+The simplest way to test your API is just to ask `swaggerconformance` to validate it as follows (assuming your swagger spec is hosted at `http://example.com/api/schema.json` - a local file path could be used instead):
 
 ```python
 from swaggerconformance import api_conformance_test
@@ -16,7 +16,7 @@ This will simply make requests against your API using data generated to match yo
 
 ### Handling Failures
 
-If this testing fails, you'll be shown a an example input to an API operation which resulted in a response that didn't match your schema. Something like:
+If this testing fails, you'll be shown an example input to an API operation which resulted in a response that didn't match your schema. Something like:
 
 ```
 Falsifying example: single_operation_test(
@@ -32,7 +32,7 @@ Falsifying example: single_operation_test(
 AssertionError: Response code 500 not in {200, 404}
 ```
 
-This shows that when testing the `GET` operation on the endpoint `/example/{exint}`, using the value `-1` for `exint` resulted in a `500` response code from the server, which is not one of the documented response codes (and any `5XX` response code is clearly an error!). From this it seems this server isn't handling negative numbers for this parameter well and needs to be made more robust.
+This shows that when testing the `GET` operation on the endpoint `/example/{exint}`, using the value `-1` for `exint` resulted in a `500` response code from the server, which is not one of the documented response codes (and any `5XX` response code is clearly an error!). From this we can tell that this server isn't handling negative numbers for this parameter properly and needs to be made more robust.
 
 _As an aside, one great feature of hypothesis is once it finds a failing example, it will simplify it down as far as it can. So here it might have first found that `-2147483648` failed, but instead of just reporting that and let you figure out if that number is special, it tries to find the simplest failing input value, e.g. here reducing down to simply `-1`._
 
@@ -40,9 +40,13 @@ _As an aside, one great feature of hypothesis is once it finds a failing example
 
 The basic testing above just throws data at your API, but it's useful to be able to target specific endpoints, or build sequenced tests where the output of one operation is used as the input to another.
 
+### Example
+
 Here's a small example of a test that creates a resource with a `PUT` containing some generated data, and then verifies that a `GET` returns the exact same data.
 
-You can run this test yourself by starting the `datastore_api.py` server and running the `ex_targeted_test.py` script in this directory to read the code there, and a run through of the same code follows.
+You can run this test yourself by starting the `datastore_api.py` server and running the `ex_targeted_test.py` script in this directory. A walkthrough of the code there follows.
+
+### Walkthrough
 
 The first part of the setup involves creating a client that will make requests against the API, and creating templates for all operations and parameters the API exposes. The client can be given a URL or local file path to read the schema from.
 
@@ -67,7 +71,7 @@ get_operation = api_template.endpoints["/apps/{appid}"]["get"]
 get_strategy = get_operation.hypothesize_parameters(value_factory)
 ```
 
-That's all the setup done - now to write the `hypothesis` test. The [`hypothesis` docs](http://hypothesis.readthedocs.io/en/latest/quickstart.html#writing-tests) go through details of doing this and the [available test settings](http://hypothesis.readthedocs.io/en/latest/settings.html#module-hypothesis). In short though, you write a function which validates the property of your API you want to verify, and `hypothesis` runs this function multiple times. Each attempt uses different parameter values chosen to test all corners of the allowed values - the more attempts you allow it, the more thorough it can be and the greater the chance it has to flush out bugs.
+That's all the setup done - now to write the `hypothesis` test. The [`hypothesis` docs](http://hypothesis.readthedocs.io/en/latest/quickstart.html#writing-tests) go through details of doing this and the [available test settings](http://hypothesis.readthedocs.io/en/latest/settings.html#module-hypothesis). In short though, you write a function which validates the property of your API you want to verify, and through a decorator `hypothesis` runs this function multiple times. Each attempt uses different parameter values chosen to test all corners of the allowed values - the more attempts you allow `hypothesis`, the more thorough it can be and the greater the chance it has to flush out bugs.
 
 ```python
 # Hypothesis will generate values fitting the strategies that define the
@@ -117,7 +121,7 @@ For example, suppose you have an API operation that takes a colour as a paramete
 |-----------|------|--------|--------|
 |colour|`string`|`hexcolour`|`#` and six hex chars, e.g. `#3FE7D9`|
 
-By default, clearly `swaggerconformance` won't know what this is, and will just generate string data as input for parameters of this format. So for most requests your API will just be rejecting them with some `4XX` response because the parameter isn't of the correct format. You might prefer that valid hex colours were being generated to test a greater number of successful API requests. New type support can be added into `swaggerconformance` fairly easily.
+By default, clearly `swaggerconformance` won't know what this `format` is, and will just generate `string` type data as input for parameters of this format. So for most requests, your API will just rejecting them with some `4XX` response because the parameter isn't of the correct format. You might prefer that valid hex colours were being generated to test a greater number of successful API requests. New `type` and `format` support can be added into `swaggerconformance` fairly easily.
 
 The first step here is to create a `ValueTemplate` which can build a hypothesis strategy to generate these `hexcolour` values:
 
