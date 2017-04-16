@@ -34,7 +34,7 @@ AssertionError: Response code 500 not in {200, 404}
 
 This shows that when testing the `GET` operation on the endpoint `/example/{exint}`, using the value `-1` for `exint` resulted in a `500` response code from the server, which is not one of the documented response codes (and any `5XX` response code is clearly an error!). From this we can tell that this server isn't handling negative numbers for this parameter properly and needs to be made more robust.
 
-_As an aside, one great feature of hypothesis is once it finds a failing example, it will simplify it down as far as it can. So here it might have first found that `-2147483648` failed, but instead of just reporting that and let you figure out if that number is special, it tries to find the simplest failing input value, e.g. here reducing down to simply `-1`._
+_As an aside, one great feature of hypothesis is once it finds a failing example, it will simplify it down as far as it can. So here it might have first found that_ `-2147483648` _failed, but instead of just reporting that and let you figure out if that number is special, it tries to find the simplest failing input value, e.g. here reducing down to simply_ `-1`_._
 
 ## Targeted and Stateful Testing
 
@@ -71,7 +71,7 @@ get_operation = api_template.endpoints["/apps/{appid}"]["get"]
 get_strategy = get_operation.hypothesize_parameters(value_factory)
 ```
 
-That's all the setup done - now to write the `hypothesis` test. The [`hypothesis` docs](http://hypothesis.readthedocs.io/en/latest/quickstart.html#writing-tests) go through details of doing this and the [available test settings](http://hypothesis.readthedocs.io/en/latest/settings.html#module-hypothesis). In short though, you write a function which validates the property of your API you want to verify, and through a decorator `hypothesis` runs this function multiple times. Each attempt uses different parameter values chosen to test all corners of the allowed values - the more attempts you allow `hypothesis`, the more thorough it can be and the greater the chance it has to flush out bugs.
+That's all the setup done - now to write the `hypothesis` test. The [hypothesis docs](http://hypothesis.readthedocs.io/en/latest/quickstart.html#writing-tests) go through details of doing this and the [available test settings](http://hypothesis.readthedocs.io/en/latest/settings.html#module-hypothesis). In short though, you write a function which validates the property of your API you want to verify, and through a decorator `hypothesis` runs this function multiple times. Each attempt uses different parameter values chosen to test all corners of the allowed values - the more attempts you allow `hypothesis`, the more thorough it can be and the greater the chance it has to flush out bugs.
 
 ```python
 # Hypothesis will generate values fitting the strategies that define the
@@ -158,7 +158,7 @@ class HexColourTemplate(valuetemplates.ValueTemplate):
 
 New `ValueTemplate`s just needs to provide a `hypothesize(self)` method which returns a `hypothesis` strategy - `__init__` is optional if no parameters are needed.
 
-You can see the [`hypothesis` docs](http://hypothesis.readthedocs.io/en/latest/data.html) for more information on building up strategies. One written, you can test values your template will produce - e.g.:
+You can see the [hypothesis docs](http://hypothesis.readthedocs.io/en/latest/data.html) for more information on building up strategies. One written, you can test values your template will produce - e.g.:
 
 ```python
 >>> template = HexColourTemplate()
