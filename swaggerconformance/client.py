@@ -13,19 +13,21 @@ from pyswagger.contrib.client.requests import Client
 logging.getLogger("pyswagger").setLevel(logging.WARNING)
 logging.getLogger("requests").setLevel(logging.WARNING)
 
+__all__ = ["SwaggerClient"]
+
 
 log = logging.getLogger(__name__)
 
 
 class SwaggerClient:
-    """Client to use to access the Swagger application."""
+    """Client to use to access the Swagger application according to its schema.
+
+    :param schema_path: The URL of or file path to the API definition.
+    :type schema_path: str
+    """
 
     def __init__(self, schema_path):
-        """Create a new Swagger API client.
-
-        :param schema_path: The URL of or file path to the API definition.
-        :type schema_path: str
-        """
+        """Create a new Swagger API client."""
         self._schema_path = schema_path
 
         # Pyswagger doesn't support integers or floats without a 'format', even
@@ -54,7 +56,7 @@ class SwaggerClient:
         """Make a request against a certain operation on the API.
 
         :param operation: The operation to perform.
-        :type operation: OperationTemplate
+        :type operation: apitemplates.OperationTemplate
         :param parameters: The parameters to use on the operation.
         :type parameters: dict
 

@@ -9,12 +9,14 @@ from .client import SwaggerClient
 from .apitemplates import APITemplate
 from .valuetemplates import ValueFactory
 
+__all__ = ["api_conformance_test", "operation_conformance_test"]
+
 
 log = logging.getLogger(__name__)
 
 
 def api_conformance_test(schema_path, num_tests_per_op=20):
-    """Test the conformance of the API defined by the given schema.
+    """Basic test of the conformance of the API defined by the given schema.
 
     :param schema_path: The path to / URL of the schema to validate.
     :type schema_path: str
@@ -33,9 +35,9 @@ def operation_conformance_test(client, operation, num_tests=20):
     """Test the conformance of the given operation using the provided client.
 
     :param client: The client to use to access the API.
-    :type client: SwaggerClient
+    :type client: client.SwaggerClient
     :param operation: The operation to test.
-    :type operation: template.operationtemplate.OperationTemplate
+    :type operation: apitemplates.OperationTemplate
     :param num_tests: How many tests to run of each API operation.
     :type num_tests: int
     """
@@ -48,9 +50,9 @@ def operation_conformance_test(client, operation, num_tests=20):
         """Test an operation fully.
 
         :param client: The client to use to access the API.
-        :type client: SwaggerClient
+        :type client: client.SwaggerClient
         :param operation: The operation to test.
-        :type operation: template.operationtemplate.OperationTemplate
+        :type operation: apitemplates.OperationTemplate
         :param params: The dictionary of parameters to use on the operation.
         :type params: dict
         """
