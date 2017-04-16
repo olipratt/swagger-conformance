@@ -43,6 +43,9 @@ help:
 test:
 	$(PYTHONCMD) -m unittest discover $(PYTHONUTOPTS)
 
+docs_clean:
+	rm -rf "$(DOCSBUILDDIR)"
+
 docs_api:
 	rm -rf "$(SPHINXAPIOUT)"
 	$(SPHINXAPIDOC) $(SPHINXAPIDOCOPTS) -o "$(SPHINXAPIOUT)" "$(PKGSOURCEDIR)"
@@ -51,7 +54,7 @@ docs_md_convert:
 	$(PANDOC) readme.md -o $(DOCSSOURCEDIR)/readme.rst
 	$(PANDOC) examples/readme.md -o $(DOCSSOURCEDIR)/examples.rst
 
-docs_sphinx: docs_api docs_md_convert
+docs_sphinx: docs_clean docs_api docs_md_convert
 	@$(SPHINXBUILD) -M "$(SPHINXBUILDTARGET)" "$(DOCSSOURCEDIR)" \
 		"$(DOCSBUILDDIR)" $(SPHINXBUILDOPTS)
 
@@ -67,5 +70,5 @@ package_upload: package
 
 all: docs package
 
-.PHONY: help test docs_api docs_md_convert docs_sphinx docs package \
-	package_upload all
+.PHONY: help test docs_clean docs_api docs_md_convert docs_sphinx docs \
+	package package_upload all
