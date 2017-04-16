@@ -7,6 +7,7 @@ PKGSOURCEDIR = swaggerconformance
 DOCSSOURCEDIR = docs/source
 SPHINXAPIOUT = $(DOCSSOURCEDIR)/_modules
 DOCSBUILDDIR = docs/build
+DOCSHTMLDIR = $(DOCSBUILDDIR)/html
 # Sphinx documentation commands.
 SPHINXBUILDOPTS = -E -W
 SPHINXBUILD = sphinx-build
@@ -33,6 +34,8 @@ help:
 	@echo "        Run all tests."
 	@echo "    docs"
 	@echo "        Generate all documentation."
+	@echo "    docs_bundle"
+	@echo "        Bundle up documentation ready for manual upload to PyPI."
 	@echo "    package"
 	@echo "        Package up ready for upload to PyPI."
 	@echo "    all"
@@ -60,6 +63,10 @@ docs_sphinx: docs_clean docs_api docs_md_convert
 
 docs: docs_sphinx
 
+docs_bundle: docs
+	cd $(DOCSHTMLDIR) ; zip -r docs.zip .
+	@echo "Docs are bundled up in $(DOCSHTMLDIR)/docs.zip"
+
 package: test
 	rm -rf "$(DISTSDIR)"
 	$(PYTHONCMD) setup.py sdist bdist_wheel
@@ -71,4 +78,4 @@ package_upload: package
 all: docs package
 
 .PHONY: help test docs_clean docs_api docs_md_convert docs_sphinx docs \
-	package package_upload all
+	docs_bundle package package_upload all

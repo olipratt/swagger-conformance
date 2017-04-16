@@ -27,6 +27,10 @@ where the URL should resolve to your swagger schema, or it can be a path to the 
 
 This basic test tries all your API operations looking for errors. For explanation of the results and running more thorough tests, including sequences of API calls and defining your custom data types, [see the examples](https://github.com/olipratt/swagger-conformance/tree/master/examples).
 
+## Documentation
+
+Full documentation, including the example walkthroughs mentioned above and API documentation, is [available here](https://pythonhosted.org/swagger-conformance/index.html).
+
 ## Wait, I don't get it, what does this thing do?
 
 In short, it lets you generate example values for parameters to your Swagger API operations, make API requests using these values, and verify the responses.
