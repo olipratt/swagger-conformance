@@ -12,12 +12,13 @@ log = logging.getLogger(__name__)
 
 
 class ValueFactory:
-    """Common factory for building ValueTemplates from swagger definitions."""
+    """Factory for building :class:`ValueTemplate` from swagger definitions."""
 
     def create_value(self, swagger_definition):
-        """Create a ValueTemplate for the value specified by the definition.
+        """Create a template for the value specified by the definition.
 
-        :type swagger_definition: swaggerparameter.SwaggerParameter
+        :type swagger_definition: apitemplates.SwaggerParameter
+        :rtype: ValueTemplate
         """
         value = None
         if swagger_definition.type == 'boolean':

@@ -18,7 +18,7 @@ log = logging.getLogger(__name__)
 
 
 class ArrayTemplate:
-    """Template for an array value."""
+    """Template for an array collection."""
 
     def __init__(self, max_items=None, min_items=None, unique_items=None):
         super().__init__()
@@ -27,7 +27,10 @@ class ArrayTemplate:
         self._unique_items = unique_items
 
     def hypothesize(self, elements):
-        """Return a hypothesis strategy defining this collection."""
+        """Return a hypothesis strategy defining this collection.
+
+        :param elements: The hypothesis strategy for a single element.
+        """
         return hy_st.lists(elements=elements,
                            min_size=self._min_items,
                            max_size=self._max_items,
@@ -35,9 +38,12 @@ class ArrayTemplate:
 
 
 class ObjectTemplate:
-    """Template for a JSON object value."""
-    # Limit on the number of additional properties to add to objects.
-    # Setting this too high might cause data generation to time out.
+    """Template for a JSON object collection.
+
+    :const:`MAX_ADDITIONAL_PROPERTIES` is a limit on the number of additional
+    properties to add to objects. Setting this too high might cause data
+    generation to time out.
+    """
     MAX_ADDITIONAL_PROPERTIES = 5
 
     def __init__(self, max_properties=None, min_properties=None,
@@ -48,9 +54,15 @@ class ObjectTemplate:
         self._additional_properties = additional_properties
 
     def hypothesize(self, required_properties, optional_properties):
-        """Return a hypothesis strategy defining this collection.
+        """Return a hypothesis strategy defining this collection, including
+        random additional properties if the object supports them.
 
+        Will add only up to :const:`MAX_ADDITIONAL_PROPERTIES` extra values to
+        prevent data generation taking too long and timing out.
+
+        :param required_properties: The required fields in the generated dict.
         :type required_properties: dict
+        :param optional_properties: The optional fields in the generated dict.
         :type optional_properties: dict
         """
         # The result must contain the specified propereties.
