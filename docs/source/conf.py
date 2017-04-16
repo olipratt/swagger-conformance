@@ -103,6 +103,7 @@ html_static_path = []
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'swaggerconformancedoc'
+html_show_sourcelink = False
 
 
 # -- Options for LaTeX output ---------------------------------------------
