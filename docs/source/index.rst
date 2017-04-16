@@ -14,5 +14,5 @@ This is the documentation for ``swaggerconformance`` package available on `PyPI 
    Documentation Overview<self>
    Introduction<readme>
    Example Usage<examples>
-   swaggerconformance API<_modules/modules>
+   swaggerconformance API<_modules/swaggerconformance>
 

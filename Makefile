@@ -12,7 +12,7 @@ SPHINXBUILDOPTS = -E
 SPHINXBUILD = sphinx-build
 SPHINXBUILDTARGET = html
 SPHINXAPIDOC = sphinx-apidoc
-SPHINXAPIDOCOPTS = -e -f -M
+SPHINXAPIDOCOPTS = -e -f -T
 # Pandoc documentation commands.
 PANDOC = pandoc
 

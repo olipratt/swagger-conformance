@@ -4,8 +4,8 @@ specific API requests adhering to the definition.
 """
 import logging
 
-from .parametertemplate import ParameterTemplate
-from .swaggerparameter import SwaggerParameter
+from ._parametertemplate import ParameterTemplate
+from ._swaggerparameter import SwaggerParameter
 from ..strategies import merge_optional_dict_strategy
 
 log = logging.getLogger(__name__)

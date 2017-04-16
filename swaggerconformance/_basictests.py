@@ -6,7 +6,7 @@ import logging
 import hypothesis
 
 from .client import SwaggerClient
-from .template import APITemplate
+from .apitemplates import APITemplate
 from .valuetemplates import ValueFactory
 
 

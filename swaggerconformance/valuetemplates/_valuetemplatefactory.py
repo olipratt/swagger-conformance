@@ -3,7 +3,7 @@ Factories for creating ValueTemplates from swagger definitions.
 """
 import logging
 
-from . import valuetemplates as vts
+from . import _valuetemplates as vts
 
 __all__ = ["ValueFactory"]
 

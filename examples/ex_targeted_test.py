@@ -21,15 +21,15 @@ import swaggerconformance
 # (Add a try/except to try and catch when a user hasn't started the server).
 try:
     schema_url = 'http://127.0.0.1:5000/api/schema'
-    client = swaggerconformance.SwaggerClient(schema_url)
+    client = swaggerconformance.client.SwaggerClient(schema_url)
 except:
     raise Exception("Failed to load API schema - have you started the server?")
 
-api_template = swaggerconformance.APITemplate(client)
+api_template = swaggerconformance.apitemplates.APITemplate(client)
 
 # Get references to the operations we'll use for testing, and strategies for
 # generating inputs to those operations.
-value_factory = swaggerconformance.ValueFactory()
+value_factory = swaggerconformance.valuetemplates.ValueFactory()
 put_operation = api_template.endpoints["/apps/{appid}"]["put"]
 put_strategy = put_operation.hypothesize_parameters(value_factory)
 get_operation = api_template.endpoints["/apps/{appid}"]["get"]

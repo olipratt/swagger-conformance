@@ -60,7 +60,7 @@ class APITemplateTestCase(unittest.TestCase):
     """Simple tests working with the `APITemplate` class directly."""
 
     def setUp(self):
-        self.client = swaggerconformance.SwaggerClient(TEST_SCHEMA_PATH)
+        self.client = swaggerconformance.client.SwaggerClient(TEST_SCHEMA_PATH)
 
     def tearDown(self):
         # No teardown of test fixtures required.
@@ -68,7 +68,7 @@ class APITemplateTestCase(unittest.TestCase):
 
     def test_schema_parse(self):
         """Test we can parse an API schema, and find all the endpoints."""
-        api_template = swaggerconformance.APITemplate(self.client)
+        api_template = swaggerconformance.apitemplates.APITemplate(self.client)
         expected_endpoints = {'/schema', '/apps', '/apps/{appid}'}
         self.assertSetEqual(set(api_template.endpoints.keys()),
                             expected_endpoints)
@@ -76,7 +76,7 @@ class APITemplateTestCase(unittest.TestCase):
     @responses.activate
     def test_endpoint_manually(self):
         """Test we can make a request against an endpoint manually."""
-        api_template = swaggerconformance.APITemplate(self.client)
+        api_template = swaggerconformance.apitemplates.APITemplate(self.client)
 
         # Find the template GET operation on the /apps/{appid} endpoint.
         app_id_get_op = None
@@ -245,9 +245,10 @@ class CompareResponsesTestCase(unittest.TestCase):
                                callback=_request_callback,
                                content_type=CONTENT_TYPE_JSON)
 
-        my_val_factory = swaggerconformance.ValueFactory()
-        client = swaggerconformance.SwaggerClient(MIRROR_REQS_SCHEMA_PATH)
-        api_template = swaggerconformance.APITemplate(client)
+        my_val_factory = swaggerconformance.valuetemplates.ValueFactory()
+        client = \
+            swaggerconformance.client.SwaggerClient(MIRROR_REQS_SCHEMA_PATH)
+        api_template = swaggerconformance.apitemplates.APITemplate(client)
         operation = api_template.endpoints["/example/{in_str}"]["get"]
         strategy = operation.hypothesize_parameters(my_val_factory)
 
@@ -290,9 +291,9 @@ class MultiRequestTestCase(unittest.TestCase):
                                callback=_get_request_callback,
                                content_type=CONTENT_TYPE_JSON)
 
-        my_val_factory = swaggerconformance.ValueFactory()
-        client = swaggerconformance.SwaggerClient(TEST_SCHEMA_PATH)
-        api_template = swaggerconformance.APITemplate(client)
+        my_val_factory = swaggerconformance.valuetemplates.ValueFactory()
+        client = swaggerconformance.client.SwaggerClient(TEST_SCHEMA_PATH)
+        api_template = swaggerconformance.apitemplates.APITemplate(client)
         put_operation = api_template.endpoints["/apps/{appid}"]["put"]
         put_strategy = put_operation.hypothesize_parameters(my_val_factory)
         get_operation = api_template.endpoints["/apps/{appid}"]["get"]

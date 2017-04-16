@@ -1,5 +1,5 @@
-from .valuetemplatefactory import ValueFactory
-from .valuetemplates import *
-from . import valuetemplates
+from ._valuetemplatefactory import ValueFactory
+from ._valuetemplates import *
+from . import _valuetemplates
 
-__all__ = ["ValueFactory"] + valuetemplates.__all__
+__all__ = ["ValueFactory"] + _valuetemplates.__all__

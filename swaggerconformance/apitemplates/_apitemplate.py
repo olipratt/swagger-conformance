@@ -4,7 +4,7 @@ specific API requests adhering to the definition.
 """
 import logging
 
-from .operationtemplate import OperationTemplate
+from ._operationtemplate import OperationTemplate
 
 
 log = logging.getLogger(__name__)
