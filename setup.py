@@ -13,10 +13,13 @@ To push a new release, assuming running on Windows:
 5. Upload the new packages:
     twine upload dist\*
 """
+import os.path as osp
 from setuptools import find_packages, setup
 import pypandoc
 
-VERSION = '0.1.2'
+VERSION_FILE = osp.relpath(osp.join(osp.dirname(osp.realpath(__file__)),
+                                    'VERSION.txt'))
+VERSION = open(VERSION_FILE).read().strip()
 URL = 'https://github.com/olipratt/swagger-conformance'
 LONG_DESC = pypandoc.convert('readme.md', 'rst').replace('\r\n', '\n')
 
