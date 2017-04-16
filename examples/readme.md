@@ -44,7 +44,7 @@ The basic testing above just throws data at your API, but it's useful to be able
 
 Here's a small example of a test that creates a resource with a `PUT` containing some generated data, and then verifies that a `GET` returns the exact same data.
 
-You can run this test yourself by starting the `datastore_api.py` server and running the `ex_targeted_test.py` script in this directory. A walkthrough of the code there follows.
+You can run this test yourself by starting the `datastore_api.py` server and running the `ex_targeted_test.py` script in the [examples directory](https://github.com/olipratt/swagger-conformance/tree/master/examples). A walkthrough of the code there follows.
 
 ### Walkthrough
 
