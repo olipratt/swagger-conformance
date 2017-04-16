@@ -46,7 +46,7 @@ class SwaggerClient:
     def app(self):
         """The App representing the API of the server.
 
-        :rtype: pyswagger.App
+        :rtype: pyswagger.core.App
         """
         return self._app
 
