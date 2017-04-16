@@ -6,7 +6,8 @@ import logging
 import hypothesis
 
 from .client import SwaggerClient
-from .template import APITemplate, ValueFactory
+from .template import APITemplate
+from .valuetemplates import ValueFactory
 
 
 log = logging.getLogger(__name__)

@@ -6,7 +6,7 @@ import logging
 
 from .parametertemplate import ParameterTemplate
 from .swaggerparameter import SwaggerParameter
-from.strategies import merge_optional_dict_strategy
+from ..strategies import merge_optional_dict_strategy
 
 log = logging.getLogger(__name__)
 

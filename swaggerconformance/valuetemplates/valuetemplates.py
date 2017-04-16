@@ -7,9 +7,15 @@ import math
 
 import hypothesis.strategies as hy_st
 
-from .strategies import (JSON_STRATEGY, DATE_STRATEGY, DATETIME_STRATEGY,
-                         FILE_STRATEGY, merge_optional_dict_strategy,
-                         merge_dicts_max_size_strategy, merge_dicts_strategy)
+from ..strategies import (JSON_STRATEGY, DATE_STRATEGY, DATETIME_STRATEGY,
+                          FILE_STRATEGY, merge_optional_dict_strategy,
+                          merge_dicts_max_size_strategy, merge_dicts_strategy)
+
+__all__ = ["ArrayTemplate", "ObjectTemplate", "ValueTemplate",
+           "BooleanTemplate", "NumericTemplate", "IntegerTemplate",
+           "FloatTemplate", "StringTemplate", "URLPathStringTemplate",
+           "HTTPHeaderStringTemplate", "DateTemplate", "DateTimeTemplate",
+           "UUIDTemplate", "FileTemplate"]
 
 
 log = logging.getLogger(__name__)

@@ -5,6 +5,8 @@ import logging
 
 from . import valuetemplates as vts
 
+__all__ = ["ValueFactory"]
+
 
 log = logging.getLogger(__name__)
 
