@@ -15,20 +15,33 @@ __all__ = ["api_conformance_test", "operation_conformance_test"]
 log = logging.getLogger(__name__)
 
 
-def api_conformance_test(schema_path, num_tests_per_op=20):
+def api_conformance_test(schema_path, num_tests_per_op=20, cont_on_err=True):
     """Basic test of the conformance of the API defined by the given schema.
 
     :param schema_path: The path to / URL of the schema to validate.
     :type schema_path: str
     :param num_tests_per_op: How many tests to run of each API operation.
     :type num_tests_per_op: int
+    :param cont_on_err: Validate all operations, or drop out on first error.
+    :type cont_on_err: bool
     """
     client = SwaggerClient(schema_path)
     api_template = APITemplate(client)
     log.debug("Expanded endpoints as: %r", api_template)
 
+    num_errors = 0
     for operation in api_template.template_operations():
-        operation_conformance_test(client, operation, num_tests_per_op)
+        try:
+            operation_conformance_test(client, operation, num_tests_per_op)
+        except:
+            log.exception("Validation falied of operation: %r", operation)
+            num_errors += 1
+            if not cont_on_err:
+                raise
+
+    if num_errors > 0:
+        raise Exception("{} operation(s) failed conformance tests - check "
+                        "output for details".format(num_errors))
 
 
 def operation_conformance_test(client, operation, num_tests=20):

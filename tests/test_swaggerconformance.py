@@ -112,7 +112,8 @@ class ParameterTypesTestCase(unittest.TestCase):
         respond_to_put(r'/example/-?\d+', status=204)
 
         # Now just kick off the validation process.
-        swaggerconformance.api_conformance_test(FULL_PUT_SCHEMA_PATH)
+        swaggerconformance.api_conformance_test(FULL_PUT_SCHEMA_PATH,
+                                                cont_on_err=False)
 
     @responses.activate
     def test_all_constraints(self):
@@ -122,7 +123,8 @@ class ParameterTypesTestCase(unittest.TestCase):
         respond_to_put(r'/example/-?\d+', status=204)
 
         # Now just kick off the validation process.
-        swaggerconformance.api_conformance_test(ALL_CONSTRAINTS_SCHEMA_PATH)
+        swaggerconformance.api_conformance_test(ALL_CONSTRAINTS_SCHEMA_PATH,
+                                                cont_on_err=False)
 
 
 class ExternalExamplesTestCase(unittest.TestCase):
@@ -187,7 +189,8 @@ class ExternalExamplesTestCase(unittest.TestCase):
         respond_to_put(r'/example/-?\d+')
 
         # Now just kick off the validation process.
-        swaggerconformance.api_conformance_test(PETSTORE_SCHEMA_PATH)
+        swaggerconformance.api_conformance_test(PETSTORE_SCHEMA_PATH,
+                                                cont_on_err=False)
 
     @responses.activate
     def test_openapi_uber(self):
@@ -224,7 +227,8 @@ class ExternalExamplesTestCase(unittest.TestCase):
         respond_to_get(r'/products\?.*', response_json=products)
 
         # Now just kick off the validation process.
-        swaggerconformance.api_conformance_test(UBER_SCHEMA_PATH)
+        swaggerconformance.api_conformance_test(UBER_SCHEMA_PATH,
+                                                cont_on_err=False)
 
 
 class CompareResponsesTestCase(unittest.TestCase):
