@@ -2,14 +2,10 @@
 Templates for values of various data types.
 """
 import logging
-import urllib.parse
 import math
 
 import hypothesis.strategies as hy_st
-
-from ..strategies import (JSON_STRATEGY, DATE_STRATEGY, DATETIME_STRATEGY,
-                          FILE_STRATEGY, merge_optional_dict_strategy,
-                          merge_dicts_max_size_strategy, merge_dicts_strategy)
+from .. import strategies as sw_st
 
 __all__ = ["ArrayTemplate", "ObjectTemplate", "ValueTemplate",
            "BooleanTemplate", "NumericTemplate", "IntegerTemplate",
@@ -58,8 +54,8 @@ class ObjectTemplate:
         :type optional_properties: dict
         """
         # The result must contain the specified propereties.
-        result = merge_optional_dict_strategy(required_properties,
-                                              optional_properties)
+        result = sw_st.merge_optional_dict_strategy(required_properties,
+                                                    optional_properties)
 
         # If we allow arbitrary additional properties, create a dict with some
         # then update it with the fixed ones to ensure they are retained.
@@ -81,16 +77,15 @@ class ObjectTemplate:
                                        optional_properties.keys())
             extra = hy_st.dictionaries(
                 hy_st.text().filter(lambda x: x not in forbidden_prop_names),
-                JSON_STRATEGY,
+                sw_st.json(),
                 min_size=min_properties,
                 max_size=max_properties)
 
             if self._max_properties is not None:
-                result = merge_dicts_max_size_strategy(result,
-                                                       extra,
-                                                       self._max_properties)
+                result = sw_st.merge_dicts_max_size_strategy(
+                    result, extra, self._max_properties)
             else:
-                result = merge_dicts_strategy(result, extra)
+                result = sw_st.merge_dicts_strategy(result, extra)
 
         return result
 
@@ -256,14 +251,14 @@ class DateTemplate(ValueTemplate):
     """Template for a Date value."""
 
     def hypothesize(self):
-        return DATE_STRATEGY
+        return sw_st.dates()
 
 
 class DateTimeTemplate(ValueTemplate):
     """Template for a Date-Time value."""
 
     def hypothesize(self):
-        return DATETIME_STRATEGY
+        return sw_st.datetimes()
 
 
 class UUIDTemplate(ValueTemplate):
@@ -277,4 +272,4 @@ class FileTemplate(ValueTemplate):
     """Template for a File value."""
 
     def hypothesize(self):
-        return FILE_STRATEGY
+        return sw_st.files()
