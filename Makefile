@@ -8,7 +8,7 @@ DOCSSOURCEDIR = docs/source
 SPHINXAPIOUT = $(DOCSSOURCEDIR)/_modules
 DOCSBUILDDIR = docs/build
 # Sphinx documentation commands.
-SPHINXBUILDOPTS = -E
+SPHINXBUILDOPTS = -E -W
 SPHINXBUILD = sphinx-build
 SPHINXBUILDTARGET = html
 SPHINXAPIDOC = sphinx-apidoc
