@@ -7,10 +7,10 @@ REM Command file for Sphinx documentation
 if "%SPHINXBUILD%" == "" (
 	set SPHINXBUILD=sphinx-build
 )
-set SOURCEDIR=.
-set BUILDDIR=_build
+set SOURCEDIR=source
+set BUILDDIR=build
 set SPHINXPROJ=swaggerconformance
-set APIOUTDIR=_modules
+set APIOUTDIR=source\_modules
 set PACKAGEDIR=../swaggerconformance
 
 if "%1" == "" goto help
@@ -28,10 +28,10 @@ if errorlevel 9009 (
 	exit /b 1
 )
 
-pandoc ../readme.md -o readme.rst
-pandoc ../examples/readme.md -o examples.rst
+pandoc ../readme.md -o source/readme.rst
+pandoc ../examples/readme.md -o source/examples.rst
 del /Q %APIOUTDIR%
-sphinx-apidoc -e -f -T -M -o %APIOUTDIR% %PACKAGEDIR%
+sphinx-apidoc -e -f -M -o %APIOUTDIR% %PACKAGEDIR%
 %SPHINXBUILD% -M %1 %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% -E
 goto end
 

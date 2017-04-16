@@ -6,8 +6,7 @@ __pycache__
 build/
 dist/
 MANIFEST
-docs/_build/
-docs/_modules/
-docs/_templates/
-docs/examples.rst
-docs/readme.rst
+docs/build/
+docs/source/_modules/
+docs/source/examples.rst
+docs/source/readme.rst
