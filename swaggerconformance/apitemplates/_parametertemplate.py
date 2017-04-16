@@ -4,6 +4,8 @@ passed to specific API operations adhering to the definition.
 """
 import logging
 
+__all__ = ["ParameterTemplate"]
+
 
 log = logging.getLogger(__name__)
 
@@ -11,7 +13,8 @@ log = logging.getLogger(__name__)
 class ParameterTemplate:
     """Common class for Swagger API operation parameters.
 
-    :type swagger_definition: swaggerparameter.SwaggerParameter
+    :param swagger_definition: The swagger spec portion defining the parameter.
+    :type swagger_definition: SwaggerParameter
     """
 
     def __init__(self, swagger_definition):
@@ -36,7 +39,11 @@ class ParameterTemplate:
                                 self._swagger_definition.properties.items()}
 
     def hypothesize(self, value_factory):
-        """Generate a hypothesis strategy representing this parameter."""
+        """Generate a hypothesis strategy representing this parameter.
+
+        :param value_factory: Factory to generate strategies for values.
+        :type value_factory: swaggerconformance.valuetemplates.ValueFactory
+        """
         value_template = value_factory.create_value(self._swagger_definition)
 
         if self.type == 'array':

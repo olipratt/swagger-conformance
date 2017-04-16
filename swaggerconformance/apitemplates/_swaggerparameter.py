@@ -3,6 +3,8 @@ Wrapper around a Swagger definition of a paramater for an operation.
 """
 import logging
 
+__all__ = ["SwaggerParameter"]
+
 
 log = logging.getLogger(__name__)
 
@@ -17,7 +19,9 @@ class SwaggerParameter:
     as a parameter as well since it's sufficiently similar we don't care about
     the distinction. `Items` don't have names though, so be careful of that.
 
-    :type swagger_app: pyswagger.App
+    :param swagger_app: The API the parameter is part of.
+    :type swagger_app: pyswagger.core.App
+    :param swagger_definition: The swagger spec definition of this parameter.
     :type swagger_definition: pyswagger.spec.v2_0.objects.Parameter or
                               pyswagger.spec.v2_0.objects.Items or
                               pyswagger.spec.v2_0.objects.Schema

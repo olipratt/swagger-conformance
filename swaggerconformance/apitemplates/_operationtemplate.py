@@ -8,13 +8,18 @@ from ._parametertemplate import ParameterTemplate
 from ._swaggerparameter import SwaggerParameter
 from ..strategies import merge_optional_dict_strategy
 
+__all__ = ["OperationTemplate"]
+
+
 log = logging.getLogger(__name__)
 
 
 class OperationTemplate:
     """Template for an operation on an endpoint.
 
-    :type app: pyswagger.App
+    :param app: The app representing the API.
+    :type app: pyswagger.core.App
+    :param operation: The definition of the operation in the API schema.
     :type operation: pyswagger.spec.v2_0.objects.Operation
     """
 
@@ -33,7 +38,11 @@ class OperationTemplate:
             self._operation.path, self._parameters)
 
     def hypothesize_parameters(self, value_factory):
-        """Generate hypothesis fixed dictionary mapping of parameters."""
+        """Generate hypothesis fixed dictionary mapping of parameters.
+
+        :param value_factory: Factory to generate strategies for values.
+        :type value_factory: swaggerconformance.valuetemplates.ValueFactory
+        """
         req_params = {param_name: param_template.hypothesize(value_factory)
                       for param_name, param_template in self.parameters.items()
                       if param_template.required}

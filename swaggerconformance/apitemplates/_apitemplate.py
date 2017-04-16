@@ -6,6 +6,8 @@ import logging
 
 from ._operationtemplate import OperationTemplate
 
+__all__ = ["APITemplate"]
+
 
 log = logging.getLogger(__name__)
 
@@ -16,7 +18,7 @@ class APITemplate:
     :type client: client.SwaggerClient
     """
 
-    operations = ["get", "put", "post", "delete"]
+    _OPERATIONS = ["get", "put", "post", "delete"]
 
     def __init__(self, client):
         log.debug("Creating new endpoint collection for: %r", client)
@@ -30,14 +32,14 @@ class APITemplate:
     def endpoints(self):
         """Mapping of the endpoints of this API to their operations.
 
-        :rtype: dict
+        :rtype: dict(str, dict(str, OperationTemplate))
         """
         return self._endpoints_map
 
     def template_operations(self):
         """All operations of the API across all endpoints.
 
-        :rtype: OperationTemplate
+        :rtype: iter(OperationTemplate)
         """
         return (self.endpoints[endpoint][operation_type]
                 for endpoint in self.endpoints
@@ -48,7 +50,7 @@ class APITemplate:
         operations_defs = self._app.root.paths[path]
 
         operations_map = {}
-        for operation_name in self.operations:
+        for operation_name in self._OPERATIONS:
             log.debug("Accessing operation: %s", operation_name)
             operation = getattr(operations_defs, operation_name)
             if operation is not None:
