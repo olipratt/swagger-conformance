@@ -124,10 +124,10 @@ class NumericTemplate(ValueTemplate):
                  minimum=None, exclusive_minimum=None,
                  multiple_of=None):
         super().__init__()
-        if exclusive_maximum and (maximum is None):
-            raise ValueError("Can't have exclusive max set and no max")
-        if exclusive_minimum and (minimum is None):
-            raise ValueError("Can't have exclusive min set and no min")
+        assert not (exclusive_maximum and (maximum is None)), \
+            "Can't have exclusive max set and no max"
+        assert not (exclusive_minimum and (minimum is None)), \
+            "Can't have exclusive min set and no min"
         self._maximum = maximum
         self._exclusive_maximum = exclusive_maximum
         self._minimum = minimum
@@ -239,8 +239,7 @@ class URLPathStringTemplate(StringTemplate):
                  pattern=None, enum=None):
         if min_length is None:
             min_length = 1
-        if min_length < 1:
-            raise ValueError("Path parameters must be at least 1 char long")
+        assert min_length >= 1, "Path parameters must be at least 1 char long"
         super().__init__(max_length=max_length, min_length=min_length,
                          pattern=pattern, enum=enum)
 

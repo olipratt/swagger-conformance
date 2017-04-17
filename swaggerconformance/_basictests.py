@@ -57,7 +57,9 @@ def operation_conformance_test(client, operation, num_tests=20):
     log.info("Testing operation: %r", operation)
     strategy = operation.hypothesize_parameters(ValueFactory())
 
-    @hypothesis.settings(max_examples=num_tests)
+    @hypothesis.settings(
+        max_examples=num_tests,
+        suppress_health_check=[hypothesis.HealthCheck.too_slow])
     @hypothesis.given(strategy)
     def single_operation_test(client, operation, params):
         """Test an operation fully.
@@ -79,4 +81,4 @@ def operation_conformance_test(client, operation, num_tests=20):
 
     # Run the test, which takes one less parameter than expected due to the
     # hypothesis decorator providing the last one.
-    single_operation_test(client, operation) # pylint: disable=I0011,E1120
+    single_operation_test(client, operation) # pylint: disable=E1120

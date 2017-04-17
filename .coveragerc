@@ -1,0 +1,11 @@
+[run]
+source = swaggerconformance
+
+[report]
+exclude_lines =
+    # Have to re-enable the standard pragma.
+    pragma: no cover
+    # Don't error on virtual methods not being called.
+    raise NotImplementedError
+fail_under = 100
+show_missing = True

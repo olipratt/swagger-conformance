@@ -44,9 +44,8 @@ class ValueFactory:
         elif swagger_definition.type == 'object':
             return self._create_object_value(swagger_definition)
 
-        if value is None:
-            raise ValueError("Unsupported type, format: {}, {}".format(
-                swagger_definition.type, swagger_definition.format))
+        assert value is not None, "Unsupported type, format: {}, {}".format(
+            swagger_definition.type, swagger_definition.format)
 
         return value
 

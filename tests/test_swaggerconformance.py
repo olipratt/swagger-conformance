@@ -21,6 +21,11 @@ import hypothesis
 import swaggerconformance
 
 
+LOG_FORMAT = '%(asctime)s:%(levelname)-7s:%(funcName)s:%(message)s'
+logging.basicConfig(format=LOG_FORMAT, level=logging.DEBUG,
+                    filename='python_ut_debug.log', filemode='w')
+
+
 TEST_SCHEMA_DIR = osp.relpath(osp.join(osp.dirname(osp.realpath(__file__)),
                                        'test_schemas/'))
 TEST_SCHEMA_PATH = osp.join(TEST_SCHEMA_DIR, 'test_schema.json')
@@ -291,7 +296,9 @@ class CompareResponsesTestCase(unittest.TestCase):
         operation = api_template.endpoints["/example/{in_str}"]["get"]
         strategy = operation.hypothesize_parameters(my_val_factory)
 
-        @hypothesis.settings(max_examples=200)
+        @hypothesis.settings(
+            max_examples=200,
+            suppress_health_check=[hypothesis.HealthCheck.too_slow])
         @hypothesis.given(strategy)
         def _single_operation_test(client, operation, params):
             result = client.request(operation, params)
@@ -338,7 +345,9 @@ class MultiRequestTestCase(unittest.TestCase):
         get_operation = api_template.endpoints["/apps/{appid}"]["get"]
         get_strategy = get_operation.hypothesize_parameters(my_val_factory)
 
-        @hypothesis.settings(max_examples=50)
+        @hypothesis.settings(
+            max_examples=50,
+            suppress_health_check=[hypothesis.HealthCheck.too_slow])
         @hypothesis.given(put_strategy, get_strategy)
         def single_operation_test(client, put_operation, get_operation,
                                   put_params, get_params):
@@ -358,10 +367,8 @@ class MultiRequestTestCase(unittest.TestCase):
             assert out_data == in_data, \
                 "{!r} != {!r}".format(out_data, in_data)
 
-        single_operation_test(client, put_operation, get_operation) # pylint: disable=I0011,E1120
+        single_operation_test(client, put_operation, get_operation) # pylint: disable=E1120
 
 
 if __name__ == '__main__':
-    LOG_FORMAT = '%(asctime)s:%(levelname)-7s:%(funcName)s:%(message)s'
-    logging.basicConfig(format=LOG_FORMAT, level=logging.DEBUG)
     unittest.main()

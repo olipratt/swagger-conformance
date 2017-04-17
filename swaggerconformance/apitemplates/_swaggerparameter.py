@@ -112,7 +112,7 @@ class SwaggerParameter:
         """
         # This attribute is only present on `Schema` objects.
         if not hasattr(self._swagger_definition, 'properties'):
-            return None
+            return None  # pragma: no cover - means called on wrong obect type
         return {prop_name: self.__class__(self._swagger_app, prop_value)
                 for prop_name, prop_value in
                 self._swagger_definition.properties.items()}
@@ -137,7 +137,7 @@ class SwaggerParameter:
         """
         # This attribute is only present on `Schema` objects.
         if not hasattr(self._swagger_definition, 'additionalProperties'):
-            return None
+            return None  # pragma: no cover - means called on wrong obect type
         return self._swagger_definition.additionalProperties not in (None,
                                                                      False)
 
@@ -148,7 +148,7 @@ class SwaggerParameter:
         :rtype: int
         """
         if not hasattr(self._swagger_definition, 'maxProperties'):
-            return None
+            return None  # pragma: no cover - means called on wrong obect type
         return self._swagger_definition.maxProperties
 
     @property
@@ -158,7 +158,7 @@ class SwaggerParameter:
         :rtype: int
         """
         if not hasattr(self._swagger_definition, 'minProperties'):
-            return None
+            return None  # pragma: no cover - means called on wrong obect type
         return self._swagger_definition.minProperties
 
     @property

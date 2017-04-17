@@ -21,6 +21,7 @@ PANDOC = pandoc
 PYTHONCMD = python3
 PYTHONUTDIR = tests
 PYTHONUTOPTS = -v -s $(PYTHONUTDIR) -t . -p "test_*.py"
+PYCOVERAGECMD = coverage
 
 # Package building values.
 DISTSDIR = dist
@@ -32,6 +33,8 @@ help:
 	@echo "        Print this message."
 	@echo "    test"
 	@echo "        Run all tests."
+	@echo "    test_coverage"
+	@echo "        Run all tests with code coverage enabled."
 	@echo "    docs"
 	@echo "        Generate all documentation."
 	@echo "    package"
@@ -45,6 +48,10 @@ help:
 
 test:
 	$(PYTHONCMD) -m unittest discover $(PYTHONUTOPTS)
+
+test_coverage: test
+	$(PYCOVERAGECMD) run -m unittest discover $(PYTHONUTOPTS)
+	$(PYCOVERAGECMD) report
 
 docs_clean:
 	rm -rf "$(DOCSBUILDDIR)"
@@ -75,7 +82,7 @@ package_upload: package
 	twine register dist/swagger_conformance-*-py3-none-any.whl
 	twine upload dist/*
 
-all: docs package
+all: docs test_coverage package
 
 .PHONY: help test docs_clean docs_api docs_md_convert docs_sphinx docs \
 	docs_bundle package package_upload all
