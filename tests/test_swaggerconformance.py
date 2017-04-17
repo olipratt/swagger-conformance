@@ -21,9 +21,14 @@ import hypothesis
 import swaggerconformance
 
 
+# Set up debug logging to file - basicConfig won't work due to UTF-8 encoding.
+# This also needs to be done inline so it's triggered by `unittest discover`.
 LOG_FORMAT = '%(asctime)s:%(levelname)-7s:%(funcName)s:%(message)s'
-logging.basicConfig(format=LOG_FORMAT, level=logging.DEBUG,
-                    filename='python_ut_debug.log', filemode='w')
+root_logger = logging.getLogger()
+root_logger.setLevel(logging.DEBUG)
+handler = logging.FileHandler('python_ut_debug.log', 'w', 'utf-8')
+handler.setFormatter(logging.Formatter(LOG_FORMAT))
+root_logger.addHandler(handler)
 
 
 TEST_SCHEMA_DIR = osp.relpath(osp.join(osp.dirname(osp.realpath(__file__)),
