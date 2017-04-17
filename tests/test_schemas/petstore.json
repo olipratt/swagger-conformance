@@ -130,6 +130,8 @@
                     "type": "string"
                 }
             },
+            "maxProperties": 4,
+            "minProperties": 1,
             "type": "object",
             "xml": {
                 "name": "Tag"
