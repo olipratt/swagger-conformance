@@ -1,5 +1,6 @@
 # swagger-conformance
 
+[![PyPI version](https://badge.fury.io/py/swagger-conformance.svg)](https://badge.fury.io/py/swagger-conformance)
 [![Build Status](https://travis-ci.org/olipratt/swagger-conformance.svg?branch=master)](https://travis-ci.org/olipratt/swagger-conformance)
 [![codecov](https://codecov.io/gh/olipratt/swagger-conformance/branch/master/graph/badge.svg)](https://codecov.io/gh/olipratt/swagger-conformance)
 
