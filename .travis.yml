@@ -2,8 +2,10 @@ language: python
 python:
   - "3.5"
   - "3.6"
-# command to install dependencies
 install:
   - pip install -r requirements-dev.txt
-# command to run tests
-script: make test
+  - pip install codecov
+script:
+  make test_coverage
+after_success:
+  codecov
