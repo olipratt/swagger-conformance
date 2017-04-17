@@ -26,8 +26,9 @@ class ParameterTemplate:
         self._populate_children()
 
     def __repr__(self):
-        return "{}(name={!r}, type={!r}, required={!r})".format(
-            self.__class__.__name__, self.name, self.type, self.required)
+        return "{}(name={!r}, type={!r}, format={!r}, required={!r})".format(
+            self.__class__.__name__, self.name, self.type, self.format,
+            self.required)
 
     def _populate_children(self):
         if self.type == 'array':

@@ -20,6 +20,7 @@ class ValueFactory:
         :type swagger_definition: apitemplates.SwaggerParameter
         :rtype: ValueTemplate
         """
+        log.debug("Creating value for: %r", swagger_definition)
         value = None
         if swagger_definition.type == 'boolean':
             value = self._create_bool_value(swagger_definition)
