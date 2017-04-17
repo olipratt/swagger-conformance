@@ -5,7 +5,7 @@ PKGSOURCEDIR = swaggerconformance
 
 # General documentation directories.
 DOCSSOURCEDIR = docs/source
-SPHINXAPIOUT = $(DOCSSOURCEDIR)/_modules
+SPHINXAPIOUT = $(DOCSSOURCEDIR)/modules
 DOCSBUILDDIR = docs/build
 DOCSHTMLDIR = $(DOCSBUILDDIR)/html
 # Sphinx documentation commands.

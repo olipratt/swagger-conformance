@@ -5,7 +5,7 @@ This is the documentation for ``swaggerconformance`` package available on `PyPI 
 
 * The :doc:`Introduction<readme>` gives a high-level purpose and usage of the package.
 * The :doc:`Example Usage<examples>` walks thorough some standard use cases with example code.
-* The :doc:`swaggerconformance API<_modules/swaggerconformance>` documents the specifics of exposed API operations and their inputs and outputs.
+* The :doc:`swaggerconformance API<modules/swaggerconformance>` documents the specifics of exposed API operations and their inputs and outputs.
 
 .. toctree::
    :maxdepth: 2
@@ -14,5 +14,4 @@ This is the documentation for ``swaggerconformance`` package available on `PyPI 
    Documentation Overview<self>
    Introduction<readme>
    Example Usage<examples>
-   swaggerconformance API<_modules/swaggerconformance>
-
+   swaggerconformance API<modules/swaggerconformance>

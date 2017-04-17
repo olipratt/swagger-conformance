@@ -7,6 +7,6 @@ build/
 dist/
 MANIFEST
 docs/build/
-docs/source/_modules/
+docs/source/modules/
 docs/source/examples.rst
 docs/source/readme.rst
