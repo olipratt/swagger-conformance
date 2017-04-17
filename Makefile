@@ -41,10 +41,12 @@ help:
 	@echo "        Package up ready for upload to PyPI."
 	@echo "    all"
 	@echo "        Run all tests and builds, but don't upload the results."
-	@echo "    docs_bundle"
-	@echo "        Bundle up documentation ready for manual upload to PyPI."
+	@echo "    docs_upload"
+	@echo "        Generate and upload documentation to PyPI."
 	@echo "    package_upload"
 	@echo "        Build and upload the current code to PyPI."
+	@echo "    publish"
+	@echo "        Build and publish docs and packages to PyPI."
 
 test:
 	$(PYTHONCMD) -m unittest discover $(PYTHONUTOPTS)
@@ -70,9 +72,13 @@ docs_sphinx: docs_clean docs_api docs_md_convert
 
 docs: docs_sphinx
 
-docs_bundle: docs
-	cd $(DOCSHTMLDIR) ; zip -r docs.zip .
-	@echo "Docs are bundled up in $(DOCSHTMLDIR)/docs.zip"
+# zip up docs for manual upload to PyPI - deprecated in favour of docs_upload.
+# docs_bundle: docs
+# 	cd $(DOCSHTMLDIR) ; zip -r docs.zip .
+# 	@echo "Docs are bundled up in $(DOCSHTMLDIR)/docs.zip"
+
+docs_upload: docs
+	$(PYTHONCMD) setup.py upload_docs --upload-dir=$(DOCSHTMLDIR)
 
 package: test
 	rm -rf "$(DISTSDIR)"
@@ -81,6 +87,8 @@ package: test
 package_upload: package
 	twine register dist/swagger_conformance-*-py3-none-any.whl
 	twine upload dist/*
+
+publish: package_upload docs_upload
 
 all: docs test_coverage package
 

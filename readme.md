@@ -5,8 +5,8 @@
 [![codecov](https://codecov.io/gh/olipratt/swagger-conformance/branch/master/graph/badge.svg)](https://codecov.io/gh/olipratt/swagger-conformance)
 [![docs](https://img.shields.io/badge/docs-latest-brightgreen.svg)](https://pythonhosted.org/swagger-conformance/index.html)
 
-[![PyPI](https://img.shields.io/pypi/pyversions/swagger-conformance.svg)](https://pypi.python.org/pypi/swagger-conformance)
-[![PyPI](https://img.shields.io/pypi/l/swagger-conformance.svg)](https://pypi.python.org/pypi/swagger-conformance)
+[![PyPI Versions](https://img.shields.io/pypi/pyversions/swagger-conformance.svg)](https://pypi.python.org/pypi/swagger-conformance)
+[![PyPI License](https://img.shields.io/pypi/l/swagger-conformance.svg)](https://pypi.python.org/pypi/swagger-conformance)
 
 You have a Swagger (aka OpenAPI) schema defining an API you provide - but does your API really conform to that schema, and does it correctly handle all valid inputs?
 
