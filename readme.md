@@ -1,6 +1,7 @@
 # swagger-conformance
 
 [![Build Status](https://travis-ci.org/olipratt/swagger-conformance.svg?branch=master)](https://travis-ci.org/olipratt/swagger-conformance)
+[![codecov](https://codecov.io/gh/olipratt/swagger-conformance/branch/master/graph/badge.svg)](https://codecov.io/gh/olipratt/swagger-conformance)
 
 You have a Swagger (aka OpenAPI) schema defining an API you provide - but does your API really conform to that schema, and does it correctly handle all valid inputs?
 
