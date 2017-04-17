@@ -99,6 +99,41 @@ class APITemplateTestCase(unittest.TestCase):
         self.assertEqual(result.status, 404)
 
 
+class BasicConformanceAPITestCase(unittest.TestCase):
+    """Tests of the basic conformance testing API itself."""
+
+    @responses.activate
+    def test_immediate_failure(self):
+        """An error response code should trigger an immediate assertion."""
+        # Return an error response to all endpoints
+        respond_to_get('/schema')
+        respond_to_get('/apps', status=500)
+        respond_to_get(r'/apps/.+', status=404)
+        respond_to_put(r'/apps/.+', status=204)
+        respond_to_delete(r'/apps/.+', status=204)
+
+        self.assertRaises(AssertionError,
+                          swaggerconformance.api_conformance_test,
+                          TEST_SCHEMA_PATH,
+                          cont_on_err=False)
+
+    @responses.activate
+    def test_deferred_failure(self):
+        """Errors should be counted and reported in a single exception."""
+        # Return an error response to all endpoints
+        respond_to_get('/schema')
+        respond_to_get('/apps', status=500)
+        respond_to_get(r'/apps/.+', status=500)
+        respond_to_put(r'/apps/.+', status=500)
+        respond_to_delete(r'/apps/.+', status=204)
+
+        self.assertRaisesRegex(Exception,
+                               r"3 operation\(s\) failed",
+                               swaggerconformance.api_conformance_test,
+                               TEST_SCHEMA_PATH,
+                               cont_on_err=True)
+
+
 class ParameterTypesTestCase(unittest.TestCase):
     """Tests to cover all the options/constraints on parameters."""
 
