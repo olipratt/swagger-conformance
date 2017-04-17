@@ -12,7 +12,7 @@ log = logging.getLogger(__name__)
 
 
 class ValueFactory:
-    """Factory for building :class:`ValueTemplate` from swagger definitions."""
+    """Factory for building `ValueTemplate` from swagger definitions."""
 
     def create_value(self, swagger_definition):
         """Create a template for the value specified by the definition.

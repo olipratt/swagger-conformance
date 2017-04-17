@@ -1,5 +1,5 @@
 """
-Extra hypothesis strategies built from those in ``hypothesis.strategies``, and
+Extra hypothesis strategies built from those in `hypothesis.strategies`, and
 helper functions for merging dictionary type strategies and dictionaries of
 strategies.
 """
@@ -19,7 +19,7 @@ log = logging.getLogger(__name__)
 
 def json(value_limit=5):
     """Hypothesis strategy for generating values that can be passed to
-    ``json.dumps()`` to produce valid JSON data.
+    `json.dumps` to produce valid JSON data.
 
     :param value_limit: A limit on the number of values in the JSON data -
                         setting this too high can cause value generation to
@@ -33,14 +33,14 @@ def json(value_limit=5):
 
 
 def dates():
-    """Hypothesis strategy for generating :class:`datetime.date` values."""
+    """Hypothesis strategy for generating `datetime.date` values."""
     return hy_st.builds(
         datetime.date.fromordinal,
         hy_st.integers(min_value=1, max_value=datetime.date.max.toordinal()))
 
 
 def times():
-    """Hypothesis strategy for generating :class:`datetime.time` values."""
+    """Hypothesis strategy for generating `datetime.time` values."""
     return hy_st.builds(
         datetime.time,
         hour=hy_st.integers(min_value=0, max_value=23),
@@ -50,20 +50,20 @@ def times():
 
 
 def datetimes():
-    """Hypothesis strategy for generating :class:`datetime.datetime` values."""
+    """Hypothesis strategy for generating `datetime.datetime` values."""
     return hy_st.builds(datetime.datetime.combine, dates(), times())
 
 
 def file_objects():
-    """Hypothesis strategy for generating pre-populated ``file objects``."""
+    """Hypothesis strategy for generating pre-populated `file objects`."""
     return hy_st.builds(io.BytesIO, hy_st.binary())
 
 
 def files():
     """Hypothesis strategy for generating objects pyswagger can use as file
-    handles to populate ``file`` format parameters.
+    handles to populate `file` format parameters.
 
-    Generated values take the format: ``dict('data': <file object>)``"""
+    Generated values take the format: `dict('data': <file object>)`"""
     return file_objects().map(lambda x: {'data': x})
 
 

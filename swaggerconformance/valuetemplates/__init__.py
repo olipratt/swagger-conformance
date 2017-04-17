@@ -1,13 +1,13 @@
 """
 This package provides access to two main classes of objects:
 
-* :class:`ValueFactory` for generating :class:`ValueTemplate` instances
+* `ValueFactory` for generating `ValueTemplate` instances
   matching the parameter values defines by a parameter entry in a swagger
-  schema. This can be inherited from to generate new :class:`ValueTemplate`
+  schema. This can be inherited from to generate new `ValueTemplate`
   instances matching custom parameters in a user's schema.
-* The :class:`ValueTemplate` itself and child classes used to generate
+* The `ValueTemplate` itself and child classes used to generate
   hypothesis strategies for generating parameter values with certain
-  constraints. Again, users may create new :class:`ValueTemplate` subclasses
+  constraints. Again, users may create new `ValueTemplate` subclasses
   to define their own new value types.
 """
 from ._valuetemplatefactory import ValueFactory

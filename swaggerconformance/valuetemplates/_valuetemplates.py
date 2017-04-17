@@ -40,7 +40,7 @@ class ArrayTemplate:
 class ObjectTemplate:
     """Template for a JSON object collection.
 
-    :const:`MAX_ADDITIONAL_PROPERTIES` is a limit on the number of additional
+    `MAX_ADDITIONAL_PROPERTIES` is a limit on the number of additional
     properties to add to objects. Setting this too high might cause data
     generation to time out.
     """
@@ -57,7 +57,7 @@ class ObjectTemplate:
         """Return a hypothesis strategy defining this collection, including
         random additional properties if the object supports them.
 
-        Will add only up to :const:`MAX_ADDITIONAL_PROPERTIES` extra values to
+        Will add only up to `MAX_ADDITIONAL_PROPERTIES` extra values to
         prevent data generation taking too long and timing out.
 
         :param required_properties: The required fields in the generated dict.
