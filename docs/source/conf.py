@@ -92,7 +92,7 @@ html_theme = 'sphinx_rtd_theme'
 html_show_sourcelink = False
 # Don't generate a module index as there aren't enough modules to need one.
 html_domain_indices = False
-# Whether to generate an index - we don't link to it but it does seem useful.
+# Whether to generate an index - which needs manually referencing.
 html_use_index = True
 
 # Add any paths that contain custom static files (such as style sheets) here,
