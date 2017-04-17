@@ -1,5 +1,7 @@
 # swagger-conformance
 
+[![Build Status](https://travis-ci.org/olipratt/swagger-conformance.svg?branch=master)](https://travis-ci.org/olipratt/swagger-conformance)
+
 You have a Swagger (aka OpenAPI) schema defining an API you provide - but does your API really conform to that schema, and does it correctly handle all valid inputs?
 
 `swaggerconformance` combines the power of `hypothesis` for property based / fuzz testing with `pyswagger` to explore all corners of your API - testing its conformance to its specification.
