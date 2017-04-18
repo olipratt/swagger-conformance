@@ -10,8 +10,8 @@ from .. import strategies as sw_st
 __all__ = ["ArrayTemplate", "ObjectTemplate", "ValueTemplate",
            "BooleanTemplate", "NumericTemplate", "IntegerTemplate",
            "FloatTemplate", "StringTemplate", "URLPathStringTemplate",
-           "HTTPHeaderStringTemplate", "DateTemplate", "DateTimeTemplate",
-           "UUIDTemplate", "FileTemplate"]
+           "HTTPHeaderStringTemplate", "XFieldsHeaderStringTemplate",
+           "DateTemplate", "DateTimeTemplate", "UUIDTemplate", "FileTemplate"]
 
 
 log = logging.getLogger(__name__)
@@ -257,6 +257,34 @@ class HTTPHeaderStringTemplate(StringTemplate):
     def hypothesize(self):
         # Header values shouldn't have surrounding whitespace.
         return super().hypothesize().map(str.strip)
+
+
+class XFieldsHeaderStringTemplate(ValueTemplate):
+    """Template for a string value which must be valid in the X-Fields header.
+
+    The ``X-Fields`` parameter lets you specify a mask of fields to be returned
+    by the application. The format is a comma-separated list of fields to
+    return, enclosed by curly-brackets, which can be nested. So for example:
+    ``{name, age, pets{name}}``. There is also a special value of ``*`` meaning
+    'all remaining fields', and it can be provided alone as ``*`` or inserted
+    into a mask of the above format instead of a field name.
+
+    We could generate random values for this header that match the allowed
+    syntax, but:
+
+    - as far as I can see, this field is a `Flast-RESTPlus` special,
+    - this is implemented by the Swagger API framework, so not exciting to
+      exercise,
+    - there's a risk of just generating values which are rejected continually
+      and so reducing the effectiveness of the testing of other fields.
+
+    Therefore, we just return either ``''`` or ``*`` for this parameter as they
+    are safe values that shouldn't interfere with other testing.
+    """
+
+    def hypothesize(self):
+        return hy_st.sampled_from(("*", ''))
+
 
 class DateTemplate(ValueTemplate):
     """Template for a Date value."""

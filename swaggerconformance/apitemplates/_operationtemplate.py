@@ -99,9 +99,7 @@ class OperationTemplate:
             # Every parameter has a name. It's either a well defined parameter,
             # or it's the lone body parameter, in which case it's a Model
             # defined by a schema.
-            if parameter.name == 'X-Fields':
-                log.warning("SKIPPING X-Fields PARAM - NOT IMPLEMENTED")
-            elif parameter.schema is None:
+            if parameter.schema is None:
                 log.debug("Fully defined parameter")
                 param_template = ParameterTemplate(
                     SwaggerParameter(self._app, parameter))

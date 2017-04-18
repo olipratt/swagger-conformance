@@ -22,7 +22,13 @@ class ValueFactory:
         """
         log.debug("Creating value for: %r", swagger_definition)
         value = None
-        if swagger_definition.type == 'boolean':
+
+        # Handle special cases by name.
+        if (swagger_definition.location == "header" and
+                swagger_definition.name == "X-Fields"):
+            value = self._create_xfields_header_value(swagger_definition)
+        # Handle generating a value based on type and format.
+        elif swagger_definition.type == 'boolean':
             value = self._create_bool_value(swagger_definition)
         elif swagger_definition.type == 'integer':
             value = self._create_integer_value(swagger_definition)
@@ -42,7 +48,7 @@ class ValueFactory:
         elif swagger_definition.type == 'array':
             value = self._create_array_value(swagger_definition)
         elif swagger_definition.type == 'object':
-            return self._create_object_value(swagger_definition)
+            value = self._create_object_value(swagger_definition)
 
         assert value is not None, "Unsupported type, format: {}, {}".format(
             swagger_definition.type, swagger_definition.format)
@@ -79,6 +85,9 @@ class ValueFactory:
 
     def _create_file_value(self, swagger_definition):
         return vts.FileTemplate()
+
+    def _create_xfields_header_value(self, swagger_definition):
+        return vts.XFieldsHeaderStringTemplate()
 
     def _create_string_value(self, swagger_definition):
         if swagger_definition.location == 'path':

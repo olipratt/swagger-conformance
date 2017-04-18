@@ -97,8 +97,10 @@ class APITemplateTestCase(unittest.TestCase):
                 app_id_get_op = operation_template
         self.assertIsNotNone(app_id_get_op)
 
-        # The operation takes one parameter, 'appid', which is a string.
-        self.assertEqual(list(app_id_get_op.parameters.keys()), ['appid'])
+        # The operation takes two parameters, 'appid', which is a string and
+        # the special 'X-Fields' header parameter.
+        self.assertSetEqual(set(app_id_get_op.parameters.keys()),
+                            {'appid', 'X-Fields'})
         self.assertEqual(app_id_get_op.parameters['appid'].type, 'string')
 
         # Send an example parameter in to the endpoint manually, catch the
