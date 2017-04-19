@@ -2,6 +2,7 @@
 Factories for creating ValueTemplates from swagger definitions.
 """
 import logging
+from collections import defaultdict
 
 from . import _valuetemplates as vts
 
@@ -14,46 +15,71 @@ log = logging.getLogger(__name__)
 class ValueFactory:
     """Factory for building `ValueTemplate` from swagger definitions."""
 
+    def __init__(self):
+        self._map = {
+            'boolean': defaultdict(lambda: self._create_bool_value,
+                                   [(None, self._create_bool_value)]),
+            'integer': defaultdict(lambda: self._create_integer_value,
+                                   [(None, self._create_integer_value)]),
+            'number': defaultdict(lambda: self._create_float_value,
+                                  [(None, self._create_float_value)]),
+            'file': defaultdict(lambda: self._create_file_value,
+                                [(None, self._create_file_value)]),
+            'array': defaultdict(lambda: self._create_array_value,
+                                 [(None, self._create_array_value)]),
+            'object': defaultdict(lambda: self._create_object_value,
+                                  [(None, self._create_object_value)]),
+            'string': defaultdict(lambda: self._create_default_string_value,
+                                  [(None, self._create_string_value),
+                                   ('date', self._create_date_value),
+                                   ('date-time', self._create_datetime_value),
+                                   ('uuid', self._create_uuid_value)])
+        }
+
+    def _get(self, type_str, format_str):
+        return self._map[type_str][format_str]
+
+    def _set(self, type_str, format_str, creator):
+        self._map[type_str][format_str] = creator
+
+    def _set_default(self, type_str, creator):
+        self._map[type_str].default_factory = lambda: creator
+
     def create_value(self, swagger_definition):
         """Create a template for the value specified by the definition.
 
+        :param swagger_definition: The schema of the parameter to
         :type swagger_definition: apitemplates.SwaggerParameter
         :rtype: ValueTemplate
         """
         log.debug("Creating value for: %r", swagger_definition)
-        value = None
-
-        # Handle special cases by name.
-        if (swagger_definition.location == "header" and
-                swagger_definition.name == "X-Fields"):
-            value = self._create_xfields_header_value(swagger_definition)
-        # Handle generating a value based on type and format.
-        elif swagger_definition.type == 'boolean':
-            value = self._create_bool_value(swagger_definition)
-        elif swagger_definition.type == 'integer':
-            value = self._create_integer_value(swagger_definition)
-        elif swagger_definition.type == 'number':
-            value = self._create_float_value(swagger_definition)
-        elif swagger_definition.type == 'string':
-            if swagger_definition.format == 'date':
-                value = self._create_date_value(swagger_definition)
-            elif swagger_definition.format == 'date-time':
-                value = self._create_datetime_value(swagger_definition)
-            elif swagger_definition.format == 'uuid':
-                value = self._create_uuid_value(swagger_definition)
-            else:
-                value = self._create_string_value(swagger_definition)
-        elif swagger_definition.type == 'file':
-            value = self._create_file_value(swagger_definition)
-        elif swagger_definition.type == 'array':
-            value = self._create_array_value(swagger_definition)
-        elif swagger_definition.type == 'object':
-            value = self._create_object_value(swagger_definition)
+        creator = self._get(swagger_definition.type, swagger_definition.format)
+        value = creator(swagger_definition)
 
         assert value is not None, "Unsupported type, format: {}, {}".format(
             swagger_definition.type, swagger_definition.format)
 
         return value
+
+    def register(self, type_str, format_str, creator):
+        """Register a function to generate `ValueTemplate` instances for this
+        type and format pair.
+
+        The function signature of the ``creator`` parameter must be:
+
+        ``def fn(`` `SwaggerParameter` ``) -> `` `ValueTemplate`
+        """
+        self._set(type_str, format_str, creator)
+
+    def register_type_default(self, type_str, creator):
+        """Register a function to generate `ValueTemplate` instances for this
+        type paired with any format with no other registered creator.
+
+        The function signature of the ``creator`` parameter must be:
+
+        ``def fn(`` `SwaggerParameter` ``) -> `` `ValueTemplate`
+        """
+        self._set_default(type_str, creator)
 
     def _create_bool_value(self, swagger_definition):
         return vts.BooleanTemplate()
@@ -100,6 +126,14 @@ class ValueFactory:
                              min_length=swagger_definition.minLength,
                              pattern=swagger_definition.pattern,
                              enum=swagger_definition.enum)
+
+    def _create_default_string_value(self, swagger_definition):
+        if (swagger_definition.location == "header" and
+                swagger_definition.name == "X-Fields"):
+            return self._create_xfields_header_value(swagger_definition)
+        else:
+            creator = self._get(swagger_definition.type, None)
+            return creator(swagger_definition)
 
     def _create_array_value(self, swagger_definition):
         return vts.ArrayTemplate(
