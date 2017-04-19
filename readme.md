@@ -24,11 +24,10 @@ Either install with `pip install swagger-conformance`, or manually clone this re
 
 ## Usage
 
-After setup the simplest test you can run against your API is just:
+After setup, the simplest test you can run against your API is just the following from the command line:
 
-```python
-from swaggerconformance import api_conformance_test
-api_conformance_test('http://example.com/api/schema.json')
+```bash
+python -m swaggerconformance 'http://example.com/api/schema.json'
 ```
 
 where the URL should resolve to your swagger schema, or it can be a path to the file on disk.
