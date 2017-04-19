@@ -1,6 +1,5 @@
 [run]
 source = swaggerconformance
-omit = swaggerconformance/__main__.py
 
 [report]
 exclude_lines =

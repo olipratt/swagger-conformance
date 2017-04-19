@@ -145,6 +145,22 @@ class BasicConformanceAPITestCase(unittest.TestCase):
                                TEST_SCHEMA_PATH,
                                cont_on_err=True)
 
+    @responses.activate
+    def test_running_as_module(self):
+        """Running __main__ means errors are reported in a single exception."""
+        from swaggerconformance.__main__ import main as dunder_main
+        # Return an error response to all endpoints
+        respond_to_get('/schema')
+        respond_to_get('/apps', status=500)
+        respond_to_get(r'/apps/.+', status=500)
+        respond_to_put(r'/apps/.+', status=500)
+        respond_to_delete(r'/apps/.+', status=204)
+
+        self.assertRaisesRegex(Exception,
+                               r"3 operation\(s\) failed",
+                               dunder_main,
+                               [TEST_SCHEMA_PATH])
+
 
 class ParameterTypesTestCase(unittest.TestCase):
     """Tests to cover all the options/constraints on parameters."""
