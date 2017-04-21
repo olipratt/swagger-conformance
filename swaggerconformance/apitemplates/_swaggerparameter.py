@@ -119,15 +119,15 @@ class SwaggerParameter:
 
     @property
     def required_properties(self):
-        """List of required property names of this Parameter if it's an object.
+        """Set of required property names of this Parameter if it's an object.
 
-        :rtype: list(str) or None
+        :rtype: set(str) or None
         """
         # This clashes with the name of the bool indicating if this is a
         # required parameter on a paramter object, so only use the value if
         # it's a list.
-        required_props = getattr(self._swagger_definition, 'required', None)
-        return required_props if isinstance(required_props, list) else None
+        reqd_props = getattr(self._swagger_definition, 'required', None)
+        return set(reqd_props) if isinstance(reqd_props, list) else None
 
     @property
     def additionalProperties(self):

@@ -12,7 +12,7 @@ __all__ = ["ValueFactory", "create_string_value"]
 log = logging.getLogger(__name__)
 
 
-def create_string_value(swagger_definition):
+def create_string_value(swagger_definition, factory):
     """Function for creating an appropriately formatted string value depending
     on the location of the string parameter.
 
@@ -21,11 +21,11 @@ def create_string_value(swagger_definition):
     :rtype: ValueTemplate
     """
     if swagger_definition.location == 'path':
-        template = vts.URLPathStringTemplate(swagger_definition)
+        template = vts.URLPathStringTemplate(swagger_definition, factory)
     elif swagger_definition.location == 'header':
-        template = vts.HTTPHeaderStringTemplate(swagger_definition)
+        template = vts.HTTPHeaderStringTemplate(swagger_definition, factory)
     else:
-        template = vts.StringTemplate(swagger_definition)
+        template = vts.StringTemplate(swagger_definition, factory)
     return template
 
 
@@ -71,7 +71,7 @@ class ValueFactory:
         """
         log.debug("Creating value for: %r", swagger_definition)
         creator = self._get(swagger_definition.type, swagger_definition.format)
-        value = creator(swagger_definition)
+        value = creator(swagger_definition, self)
 
         assert value is not None, "Unsupported type, format: {}, {}".format(
             swagger_definition.type, swagger_definition.format)
@@ -84,7 +84,8 @@ class ValueFactory:
 
         The function signature of the ``creator`` parameter must be:
 
-        ``def fn(`` `apitemplates.SwaggerParameter` ``) ->`` `ValueTemplate`
+        ``def fn(`` `apitemplates.SwaggerParameter` , `ValueFactory` ``) ->``
+        `ValueTemplate`
 
         :param type_str: The Swagger schema type to register for.
         :type type_str: str
@@ -101,7 +102,8 @@ class ValueFactory:
 
         The function signature of the ``creator`` parameter must be:
 
-        ``def fn(`` `apitemplates.SwaggerParameter` ``) ->`` `ValueTemplate`
+        ``def fn(`` `apitemplates.SwaggerParameter` , `ValueFactory` ``) ->``
+        `ValueTemplate`
 
         :param type_str: The Swagger schema type to register for.
         :type type_str: str
@@ -110,10 +112,11 @@ class ValueFactory:
         """
         self._set_default(type_str, creator)
 
-    def _create_default_string_value(self, swagger_definition):
+    def _create_default_string_value(self, swagger_definition, _):
         if (swagger_definition.location == "header" and
                 swagger_definition.name == "X-Fields"):
-            return vts.XFieldsHeaderStringTemplate(swagger_definition)
+            creator = vts.XFieldsHeaderStringTemplate
         else:
             creator = self._get(swagger_definition.type, None)
-            return creator(swagger_definition)
+
+        return creator(swagger_definition, self)

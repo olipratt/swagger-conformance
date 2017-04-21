@@ -403,8 +403,8 @@ class CustomTypeTestCase(unittest.TestCase):
             swaggerconformance.valuetemplates.ValueTemplate):
         """Template for a hex colour value."""
 
-        def __init__(self, swagger_definition):
-            super().__init__(swagger_definition)
+        def __init__(self, swagger_definition, factory):
+            super().__init__(swagger_definition, factory)
             self._enum = swagger_definition.enum
 
         def hypothesize(self):
