@@ -67,7 +67,14 @@ class ValueFactory:
 
         The function signature of the ``creator`` parameter must be:
 
-        ``def fn(`` `SwaggerParameter` ``) -> `` `ValueTemplate`
+        ``def fn(`` `apitemplates.SwaggerParameter` ``) ->`` `ValueTemplate`
+
+        :param type_str: The Swagger schema type to register for.
+        :type type_str: str
+        :param format_str: The Swagger schema format to register for.
+        :type format_str: str
+        :param creator: The function to create a `ValueTemplate`.
+        :type creator: callable
         """
         self._set(type_str, format_str, creator)
 
@@ -77,7 +84,12 @@ class ValueFactory:
 
         The function signature of the ``creator`` parameter must be:
 
-        ``def fn(`` `SwaggerParameter` ``) -> `` `ValueTemplate`
+        ``def fn(`` `apitemplates.SwaggerParameter` ``) ->`` `ValueTemplate`
+
+        :param type_str: The Swagger schema type to register for.
+        :type type_str: str
+        :param creator: The function to create a `ValueTemplate`.
+        :type creator: callable
         """
         self._set_default(type_str, creator)
 

@@ -1,0 +1,228 @@
+{
+    "basePath": "/api",
+    "consumes": [
+        "application/json"
+    ],
+    "definitions": {
+        "HexColourModel": {
+            "properties": {
+                "hexcolour": {
+                    "description": "Hex colour",
+                    "example": "#123456",
+                    "format": "hexcolour",
+                    "maxLength": 7,
+                    "minLength": 7,
+                    "type": "string"
+                }
+            },
+            "required": [
+                "hexcolour"
+            ],
+            "type": "object"
+        },
+        "IdModel": {
+            "properties": {
+                "id": {
+                    "description": "Id number",
+                    "example": 123456,
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "type": "object"
+        },
+        "IntColourModel": {
+            "properties": {
+                "intcolour": {
+                    "description": "Int colour",
+                    "example": 16777215,
+                    "format": "intcolour",
+                    "maximum": 16777215,
+                    "minimum": 0,
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "intcolour"
+            ],
+            "type": "object"
+        }
+    },
+    "host": "127.0.0.1:5000",
+    "info": {
+        "description": "A test REST API",
+        "title": "Example API",
+        "version": "1.0"
+    },
+    "paths": {
+        "/example": {
+            "post": {
+                "operationId": "post_example_collection",
+                "parameters": [
+                    {
+                        "description": "An optional fields mask",
+                        "format": "mask",
+                        "in": "header",
+                        "name": "X-Fields",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/IdModel"
+                        }
+                    }
+                },
+                "summary": "Return a new ID",
+                "tags": [
+                    "example"
+                ]
+            }
+        },
+        "/example/{int_id}/hexcolour": {
+            "get": {
+                "operationId": "get_hex_colour_resource",
+                "parameters": [
+                    {
+                        "description": "An optional fields mask",
+                        "format": "mask",
+                        "in": "header",
+                        "name": "X-Fields",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/HexColourModel"
+                        }
+                    }
+                },
+                "summary": "Return the colour for the ID",
+                "tags": [
+                    "example"
+                ]
+            },
+            "parameters": [
+                {
+                    "in": "path",
+                    "name": "int_id",
+                    "required": true,
+                    "type": "integer"
+                }
+            ],
+            "put": {
+                "operationId": "put_hex_colour_resource",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/HexColourModel"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Colour successfully updated."
+                    }
+                },
+                "summary": "Set the colour for the ID",
+                "tags": [
+                    "example"
+                ]
+            }
+        },
+        "/example/{int_id}/intcolour": {
+            "get": {
+                "operationId": "get_int_colour_resource",
+                "parameters": [
+                    {
+                        "description": "An optional fields mask",
+                        "format": "mask",
+                        "in": "header",
+                        "name": "X-Fields",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/IntColourModel"
+                        }
+                    }
+                },
+                "summary": "Return the colour for the ID",
+                "tags": [
+                    "example"
+                ]
+            },
+            "parameters": [
+                {
+                    "in": "path",
+                    "name": "int_id",
+                    "required": true,
+                    "type": "integer"
+                }
+            ],
+            "put": {
+                "operationId": "put_int_colour_resource",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/IntColourModel"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Colour successfully updated."
+                    }
+                },
+                "summary": "Set the colour for the ID",
+                "tags": [
+                    "example"
+                ]
+            }
+        }
+    },
+    "produces": [
+        "application/json"
+    ],
+    "responses": {
+        "MaskError": {
+            "description": "When any error occurs on mask"
+        },
+        "ParseError": {
+            "description": "When a mask can't be parsed"
+        }
+    },
+    "schemes": [
+        "http"
+    ],
+    "swagger": "2.0",
+    "tags": [
+        {
+            "description": "Default namespace",
+            "name": "default"
+        },
+        {
+            "description": "This API's schema operations",
+            "name": "schema"
+        },
+        {
+            "description": "Example operations",
+            "name": "example"
+        }
+    ]
+}

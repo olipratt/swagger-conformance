@@ -64,6 +64,7 @@
       "parameters": [
         {
           "type": "string",
+          "format": "arbitrary non-existent format",
           "required": true,
           "name": "appid",
           "in": "path"
