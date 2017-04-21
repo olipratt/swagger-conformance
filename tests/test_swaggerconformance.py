@@ -403,9 +403,9 @@ class CustomTypeTestCase(unittest.TestCase):
             swaggerconformance.valuetemplates.ValueTemplate):
         """Template for a hex colour value."""
 
-        def __init__(self, enum=None):
-            super().__init__()
-            self._enum = enum
+        def __init__(self, swagger_definition):
+            super().__init__(swagger_definition)
+            self._enum = swagger_definition.enum
 
         def hypothesize(self):
             if self._enum is not None:
@@ -420,15 +420,12 @@ class CustomTypeTestCase(unittest.TestCase):
 
     def test_colour_type_reg_for_fmt(self):
         value_factory = swaggerconformance.valuetemplates.ValueFactory()
-        value_factory.register("string",
-                               "hexcolour",
-                               lambda _: self.HexColourTemplate())
+        value_factory.register("string", "hexcolour", self.HexColourTemplate)
         self._run_test_colour_type(value_factory)
 
     def test_colour_type_default_fmt(self):
         value_factory = swaggerconformance.valuetemplates.ValueFactory()
-        value_factory.register_type_default("string",
-                                            lambda _: self.HexColourTemplate())
+        value_factory.register_type_default("string", self.HexColourTemplate)
         self._run_test_colour_type(value_factory)
 
     @responses.activate

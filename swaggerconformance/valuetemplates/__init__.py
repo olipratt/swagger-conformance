@@ -10,8 +10,9 @@ This package provides access to two main classes of objects:
   constraints. Again, users may create new `ValueTemplate` subclasses
   to define their own new value types.
 """
-from ._valuetemplatefactory import ValueFactory
-from ._valuetemplates import *
+from . import _valuetemplatefactory
 from . import _valuetemplates
+from ._valuetemplatefactory import *
+from ._valuetemplates import *
 
-__all__ = ["ValueFactory"] + _valuetemplates.__all__
+__all__ = _valuetemplatefactory.__all__ + _valuetemplates.__all__
