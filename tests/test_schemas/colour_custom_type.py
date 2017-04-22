@@ -6,7 +6,7 @@ import os.path
 import random
 
 from flask import request
-from flask_restplus import Resource, fields
+from flask_restplus import Resource, fields, Model
 
 from common import main, api
 
@@ -15,6 +15,7 @@ log = logging.getLogger(__name__)
 
 
 example_ns = api.namespace('example', description="Example operations")
+scene_ns = api.namespace('scenes', description="Scene operations")
 
 
 class Colour:
@@ -65,7 +66,30 @@ IntColourModel = api.model('IntColourModel', {
                                 max=16777215),
 })
 
-DATA_DICT = {}
+class SceneModelClass(Model):
+    @property
+    def __schema__(self):
+        schema = super().__schema__
+        schema.update({"format": "scene"})
+        return schema
+
+SceneModel = SceneModelClass('Scene', {
+    'foreground colour': IntColourField(required=True,
+                                        description='Int colour',
+                                        example=16777215,
+                                        min=0,
+                                        max=16777215),
+    'background colour': IntColourField(required=True,
+                                        description='Int colour',
+                                        example=16777215,
+                                        min=0,
+                                        max=16777215)
+})
+api.add_model(SceneModel.name, SceneModel)
+
+COLOUR_DATA_DICT = {}
+SCENE_DATA_DICT = {}
+
 
 @example_ns.route('')
 class ExampleCollection(Resource):
@@ -75,7 +99,7 @@ class ExampleCollection(Resource):
     def post(self):
         """Return a new ID."""
         new_id = random.randint(0, 0xffffffff)
-        DATA_DICT[new_id] = None
+        COLOUR_DATA_DICT[new_id] = None
         return {'id': new_id}
 
 
@@ -86,7 +110,7 @@ class HexColourResource(Resource):
     def get(self, int_id):
         """Return the colour for the ID"""
         log.debug("Got parameter: %r", int_id)
-        return {'hexcolour': DATA_DICT[int_id].hex}
+        return {'hexcolour': COLOUR_DATA_DICT[int_id].hex}
 
     @api.expect(HexColourModel)
     @api.response(204, 'Colour successfully updated.')
@@ -94,7 +118,7 @@ class HexColourResource(Resource):
         """Set the colour for the ID"""
         log.debug("Got parameter: %r", int_id)
         log.debug("Got body: %r", request.data)
-        DATA_DICT[int_id] = Colour(request.json['hexcolour'])
+        COLOUR_DATA_DICT[int_id] = Colour(request.json['hexcolour'])
         return None, 204
 
 
@@ -105,7 +129,7 @@ class IntColourResource(Resource):
     def get(self, int_id):
         """Return the colour for the ID"""
         log.debug("Got parameter: %r", int_id)
-        return {'intcolour': DATA_DICT[int_id].int}
+        return {'intcolour': COLOUR_DATA_DICT[int_id].int}
 
     @api.expect(IntColourModel)
     @api.response(204, 'Colour successfully updated.')
@@ -113,7 +137,31 @@ class IntColourResource(Resource):
         """Set the colour for the ID"""
         log.debug("Got parameter: %r", int_id)
         log.debug("Got body: %r", request.data)
-        DATA_DICT[int_id] = Colour(request.json['intcolour'])
+        COLOUR_DATA_DICT[int_id] = Colour(request.json['intcolour'])
+        return None, 204
+
+
+@scene_ns.route('/<int:int_id>')
+class SceneResource(Resource):
+
+    @api.marshal_with(SceneModel)
+    @api.response(404, "Scene doesn't exist.")
+    def get(self, int_id):
+        """Return the scene for the ID"""
+        log.debug("Got parameter: %r", int_id)
+        if int_id not in SCENE_DATA_DICT:
+            api.abort(404, "Scene '{}' doesn't exist".format(int_id))
+        return {'foreground colour': SCENE_DATA_DICT[int_id][0],
+                'background colour': SCENE_DATA_DICT[int_id][1]}
+
+    @api.expect(SceneModel)
+    @api.response(204, 'Scene successfully updated.')
+    def put(self, int_id):
+        """Set the scene for the ID"""
+        log.debug("Got parameter: %r", int_id)
+        log.debug("Got body: %r", request.data)
+        SCENE_DATA_DICT[int_id] = (request.json['foreground colour'],
+                                   request.json['background colour'])
         return None, 204
 
 

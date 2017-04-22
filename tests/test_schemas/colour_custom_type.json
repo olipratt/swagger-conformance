@@ -48,6 +48,32 @@
                 "intcolour"
             ],
             "type": "object"
+        },
+        "Scene": {
+            "format": "scene",
+            "properties": {
+                "background colour": {
+                    "description": "Int colour",
+                    "example": 16777215,
+                    "format": "intcolour",
+                    "maximum": 16777215,
+                    "minimum": 0,
+                    "type": "integer"
+                },
+                "foreground colour": {
+                    "description": "Int colour",
+                    "example": 16777215,
+                    "format": "intcolour",
+                    "maximum": 16777215,
+                    "minimum": 0,
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "background colour",
+                "foreground colour"
+            ],
+            "type": "object"
         }
     },
     "host": "127.0.0.1:5000",
@@ -194,6 +220,65 @@
                     "example"
                 ]
             }
+        },
+        "/scenes/{int_id}": {
+            "get": {
+                "operationId": "get_scene_resource",
+                "parameters": [
+                    {
+                        "description": "An optional fields mask",
+                        "format": "mask",
+                        "in": "header",
+                        "name": "X-Fields",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/Scene"
+                        }
+                    },
+                    "404": {
+                        "description": "Scene doesn't exist."
+                    }
+                },
+                "summary": "Return the scene for the ID",
+                "tags": [
+                    "scenes"
+                ]
+            },
+            "parameters": [
+                {
+                    "in": "path",
+                    "name": "int_id",
+                    "required": true,
+                    "type": "integer"
+                }
+            ],
+            "put": {
+                "operationId": "put_scene_resource",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "payload",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Scene"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Scene successfully updated."
+                    }
+                },
+                "summary": "Set the scene for the ID",
+                "tags": [
+                    "scenes"
+                ]
+            }
         }
     },
     "produces": [
@@ -223,6 +308,10 @@
         {
             "description": "Example operations",
             "name": "example"
+        },
+        {
+            "description": "Scene operations",
+            "name": "scenes"
         }
     ]
 }

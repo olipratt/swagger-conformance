@@ -46,6 +46,20 @@ class ColourObjTemplate(HexColourStrTemplate):
         return super().hypothesize().map(Colour)
 
 
+class SceneTemplate(swaggerconformance.valuetemplates.ValueTemplate):
+    """Template for a Scene object."""
+
+    def __init__(self, swagger_definition, factory):
+        super().__init__(swagger_definition, factory)
+        self._foreground = ColourObjTemplate(swagger_definition, factory)
+        self._background = ColourObjTemplate(swagger_definition, factory)
+
+    def hypothesize(self):
+        return hy_st.builds(Scene,
+                            self._foreground.hypothesize(),
+                            self._background.hypothesize())
+
+
 class Colour:
     """Simple representation of a colour."""
     def __init__(self, value):
@@ -82,6 +96,40 @@ class ColourIntCodec(Colour):
 
     def to_json(self):
         return self.int
+
+
+class Scene:
+    """Object to contain subobjects for testing."""
+    def __init__(self, foreground_colour, background_colour):
+        self.foreground_colour = foreground_colour
+        self.background_colour = background_colour
+
+    def __eq__(self, other):
+        if not isinstance(other, Scene):
+            return NotImplemented
+        return (self.foreground_colour == other.foreground_colour and
+                self.background_colour == other.background_colour)
+
+
+class SceneCodec(Scene):
+    def __init__(self, swagger_definition, value, factory):
+        if isinstance(value, Scene):
+            fore_value = value.foreground_colour
+            back_value = value.background_colour
+        elif isinstance(value, dict):
+            fore_value = value['foreground colour']
+            back_value = value['background colour']
+        else:
+            raise AssertionError("Invalid parameters")
+
+        fore_def = swagger_definition.properties.get('foreground colour')
+        back_def = swagger_definition.properties.get('background colour')
+        super().__init__(factory.produce(fore_def, fore_value),
+                         factory.produce(back_def, back_value))
+
+    def to_json(self):
+        return {'foreground colour': self.foreground_colour.to_json(),
+                'background colour': self.background_colour.to_json()}
 
 
 class CustomTypeTestCase(unittest.TestCase):
@@ -168,7 +216,7 @@ class CustomTypeTestCase(unittest.TestCase):
         single_operation_test(client, put_operation, get_operation) # pylint: disable=E1120
 
 
-class CustomCodecTestCase(unittest.TestCase):
+class ValueCodecTestCase(unittest.TestCase):
     """Test that custom types can be mapped to/from and used correctly."""
 
     def test_colour_int_codec(self):
@@ -200,7 +248,6 @@ class CustomCodecTestCase(unittest.TestCase):
             # Respond with the previously received body value.
             int_val = json.loads(responses.calls[-1].request.body)["intcolour"]
             assert isinstance(int_val, int)
-            # int_val = int(raw_val.lstrip('#'), 16)
             return 200, {}, json.dumps({'intcolour': int_val})
 
         responses.add_callback(responses.PUT,
@@ -244,6 +291,88 @@ class CustomCodecTestCase(unittest.TestCase):
             out_data = result.data.intcolour
             assert isinstance(out_data, Colour)
             in_data = put_params["payload"]["intcolour"]
+            assert out_data == in_data, \
+                "{!r} != {!r}".format(out_data, in_data)
+
+        single_operation_test(client, put_operation, get_operation) # pylint: disable=E1120
+
+class ObjectCodecTestCase(unittest.TestCase):
+    """Test that custom types can be mapped to/from and used correctly."""
+
+    def test_scene_codec(self):
+        value_factory = swaggerconformance.valuetemplates.ValueFactory()
+        value_factory.register("integer", "intcolour", ColourObjTemplate)
+        value_factory.register("object", "scene", SceneTemplate)
+
+        codec = swaggerconformance.codec.SwaggerCodec()
+        codec.register("integer", "intcolour", ColourIntCodec)
+        codec.register("object", "scene", SceneCodec)
+
+        self._run_test_colour_type(codec, value_factory)
+
+    # def test_colour_int_codec_with_hex(self):
+    #     value_factory = swaggerconformance.valuetemplates.ValueFactory()
+    #     value_factory.register("integer", "intcolour", HexColourStrTemplate)
+
+    #     codec = swaggerconformance.codec.SwaggerCodec()
+    #     codec.register("integer", "intcolour", ColourIntCodec)
+
+    #     self._run_test_colour_type(codec, value_factory)
+
+    @responses.activate
+    def _run_test_colour_type(self, codec, value_factory):
+        """Test just to show how tests using multiple requests work."""
+
+        def _put_request_callback(request):
+            return 204, {}, None
+
+        def _get_request_callback(_):
+            # Respond with the previously received body value.
+            # int_val = json.loads(responses.calls[-1].request.body)["intcolour"]
+            # assert isinstance(int_val, int)
+            # int_val = int(raw_val.lstrip('#'), 16)
+            return 200, {}, responses.calls[-1].request.body
+
+        responses.add_callback(responses.PUT,
+                               SCHEMA_URL_BASE + '/scenes/1',
+                               callback=_put_request_callback,
+                               content_type=CONTENT_TYPE_JSON)
+        responses.add_callback(responses.GET,
+                               SCHEMA_URL_BASE + '/scenes/1',
+                               callback=_get_request_callback,
+                               content_type=CONTENT_TYPE_JSON)
+
+        client = swaggerconformance.client.SwaggerClient(
+            COLOUR_TYPE_SCHEMA_PATH, codec)
+        api_template = swaggerconformance.apitemplates.APITemplate(client)
+        put_operation = api_template.endpoints["/scenes/{int_id}"]["put"]
+        put_strategy = put_operation.hypothesize_parameters(value_factory)
+        get_operation = api_template.endpoints["/scenes/{int_id}"]["get"]
+
+        @hypothesis.settings(
+            max_examples=50,
+            suppress_health_check=[hypothesis.HealthCheck.too_slow])
+        @hypothesis.given(put_strategy)
+        def single_operation_test(client, put_operation, get_operation,
+                                  put_params):
+            """PUT an colour in hex, then GET it again as an int."""
+            put_params['int_id'] = 1
+            result = client.request(put_operation, put_params)
+            assert result.status in put_operation.response_codes, \
+                "{} not in {}".format(result.status,
+                                      put_operation.response_codes)
+
+            result = client.request(get_operation, {"int_id": 1})
+            assert result.status in get_operation.response_codes, \
+                "{} not in {}".format(result.status,
+                                      get_operation.response_codes)
+
+            # Compare JSON representations of the data - as Python objects they
+            # may contain NAN, instances of which are not equal to one another.
+            out_data = result.data
+            assert isinstance(out_data, Scene)
+            in_data = put_params["payload"]
+            assert isinstance(in_data, Scene)
             assert out_data == in_data, \
                 "{!r} != {!r}".format(out_data, in_data)
 
