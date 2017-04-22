@@ -63,9 +63,7 @@ class SceneTemplate(swaggerconformance.valuetemplates.ValueTemplate):
 class Colour:
     """Simple representation of a colour."""
     def __init__(self, value):
-        if isinstance(value, Colour):
-            self._int_value = value.int
-        elif isinstance(value, str):
+        if isinstance(value, str):
             self._int_value = int(value.lstrip('#'), base=16)
         elif isinstance(value, int):
             self._int_value = value
@@ -92,6 +90,8 @@ class Colour:
 
 class ColourIntCodec(Colour):
     def __init__(self, _, value, __):
+        if isinstance(value, Colour):
+            value = value.int
         super().__init__(value)
 
     def to_json(self):
@@ -149,9 +149,6 @@ class CustomTypeTestCase(unittest.TestCase):
     def _run_test_colour_type(self, value_factory):
         """Test just to show how tests using multiple requests work."""
 
-        def _put_request_callback(request):
-            return 204, {}, None
-
         def _get_request_callback(_):
             # Respond with the previously received body value.
             raw_val = json.loads(responses.calls[-1].request.body)["hexcolour"]
@@ -160,11 +157,9 @@ class CustomTypeTestCase(unittest.TestCase):
 
         responses.add(responses.POST, SCHEMA_URL_BASE + '/example',
                       json={'id': 1}, content_type=CONTENT_TYPE_JSON)
+        responses.add(responses.PUT, SCHEMA_URL_BASE + '/example/1/hexcolour',
+                      content_type=CONTENT_TYPE_JSON, status=204)
 
-        responses.add_callback(responses.PUT,
-                               SCHEMA_URL_BASE + '/example/1/hexcolour',
-                               callback=_put_request_callback,
-                               content_type=CONTENT_TYPE_JSON)
         responses.add_callback(responses.GET,
                                SCHEMA_URL_BASE + '/example/1/intcolour',
                                callback=_get_request_callback,
@@ -241,19 +236,14 @@ class ValueCodecTestCase(unittest.TestCase):
     def _run_test_colour_type(self, codec, value_factory):
         """Test just to show how tests using multiple requests work."""
 
-        def _put_request_callback(request):
-            return 204, {}, None
-
         def _get_request_callback(_):
             # Respond with the previously received body value.
             int_val = json.loads(responses.calls[-1].request.body)["intcolour"]
             assert isinstance(int_val, int)
             return 200, {}, json.dumps({'intcolour': int_val})
 
-        responses.add_callback(responses.PUT,
-                               SCHEMA_URL_BASE + '/example/1/intcolour',
-                               callback=_put_request_callback,
-                               content_type=CONTENT_TYPE_JSON)
+        responses.add(responses.PUT, SCHEMA_URL_BASE + '/example/1/intcolour',
+                      content_type=CONTENT_TYPE_JSON, status=204)
         responses.add_callback(responses.GET,
                                SCHEMA_URL_BASE + '/example/1/intcolour',
                                callback=_get_request_callback,
@@ -286,8 +276,6 @@ class ValueCodecTestCase(unittest.TestCase):
                 "{} not in {}".format(result.status,
                                       get_operation.response_codes)
 
-            # Compare JSON representations of the data - as Python objects they
-            # may contain NAN, instances of which are not equal to one another.
             out_data = result.data.intcolour
             assert isinstance(out_data, Colour)
             in_data = put_params["payload"]["intcolour"]
@@ -310,15 +298,6 @@ class ObjectCodecTestCase(unittest.TestCase):
 
         self._run_test_colour_type(codec, value_factory)
 
-    # def test_colour_int_codec_with_hex(self):
-    #     value_factory = swaggerconformance.valuetemplates.ValueFactory()
-    #     value_factory.register("integer", "intcolour", HexColourStrTemplate)
-
-    #     codec = swaggerconformance.codec.SwaggerCodec()
-    #     codec.register("integer", "intcolour", ColourIntCodec)
-
-    #     self._run_test_colour_type(codec, value_factory)
-
     @responses.activate
     def _run_test_colour_type(self, codec, value_factory):
         """Test just to show how tests using multiple requests work."""
@@ -328,9 +307,6 @@ class ObjectCodecTestCase(unittest.TestCase):
 
         def _get_request_callback(_):
             # Respond with the previously received body value.
-            # int_val = json.loads(responses.calls[-1].request.body)["intcolour"]
-            # assert isinstance(int_val, int)
-            # int_val = int(raw_val.lstrip('#'), 16)
             return 200, {}, responses.calls[-1].request.body
 
         responses.add_callback(responses.PUT,
@@ -355,7 +331,7 @@ class ObjectCodecTestCase(unittest.TestCase):
         @hypothesis.given(put_strategy)
         def single_operation_test(client, put_operation, get_operation,
                                   put_params):
-            """PUT an colour in hex, then GET it again as an int."""
+            """PUT a scene object, then GET it again as a scene object."""
             put_params['int_id'] = 1
             result = client.request(put_operation, put_params)
             assert result.status in put_operation.response_codes, \
@@ -367,8 +343,6 @@ class ObjectCodecTestCase(unittest.TestCase):
                 "{} not in {}".format(result.status,
                                       get_operation.response_codes)
 
-            # Compare JSON representations of the data - as Python objects they
-            # may contain NAN, instances of which are not equal to one another.
             out_data = result.data
             assert isinstance(out_data, Scene)
             in_data = put_params["payload"]
