@@ -4,10 +4,10 @@ A client for accessing a remote swagger-defined API.
 import logging
 
 from pyswagger import App, Security
-from pyswagger.primitives import SwaggerPrimitive
-from pyswagger.primitives._int import validate_int, create_int
-from pyswagger.primitives._float import validate_float, create_float
 from pyswagger.contrib.client.requests import Client
+
+from .codec import SwaggerCodec
+
 # pyswagger and requests make INFO level logs regularly by default, so lower
 # their logging levels to prevent the spam.
 logging.getLogger("pyswagger").setLevel(logging.WARNING)
@@ -24,13 +24,18 @@ class SwaggerClient:
 
     :param schema_path: The URL of or file path to the API definition.
     :type schema_path: str
+    :param codec: Used to convert between JSON and objects.
+    :type codec: codec.SwaggerCodec
     """
 
-    def __init__(self, schema_path):
+    def __init__(self, schema_path, codec=None):
         """Create a new Swagger API client."""
         self._schema_path = schema_path
 
-        self._prim_factory = self._create_prim_factory()
+        if codec is None:
+            codec = SwaggerCodec()
+
+        self._prim_factory = codec.swagger_factory
 
         self._app = App.load(schema_path, prim=self._prim_factory)
         self._app.prepare()
@@ -61,30 +66,3 @@ class SwaggerClient:
         result = client.request(operation.operation(**parameters))
 
         return result
-
-    def _create_prim_factory(self):
-        class SwaggerPrimitiveDefaults(SwaggerPrimitive):
-            """An enhanced primitive factory which can handle default types."""
-
-            def get(self, _type, _format=None):
-                """If we don't understand the format, fallback to the most
-                basic version for the type, and if we don't know the type, then
-                that is an error as the allowed types are strictly specified,
-                so just let that be handled as normal.
-                """
-                result = super().get(_type, _format)
-                if result == (None, None):
-                    result = super().get(_type, None)
-
-                return result
-
-        # Pyswagger doesn't support integers or floats without a 'format', even
-        # though it does seem valid for a spec to not have one.
-        # We work around this by adding support for these types without format.
-        # See here: https://github.com/mission-liao/pyswagger/issues/65
-        factory = SwaggerPrimitiveDefaults()
-        factory.register('integer', None, create_int, validate_int)
-        factory.register('number', None, create_float, validate_float)
-
-        return factory
-
