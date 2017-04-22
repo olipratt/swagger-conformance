@@ -7,6 +7,9 @@ import logging
 from pyswagger.primitives import SwaggerPrimitive
 from pyswagger.primitives._int import validate_int, create_int
 from pyswagger.primitives._float import validate_float, create_float
+
+from .apitemplates import SwaggerParameter
+
 # pyswagger and requests make INFO level logs regularly by default, so lower
 # their logging levels to prevent the spam.
 logging.getLogger("pyswagger").setLevel(logging.WARNING)
@@ -47,16 +50,19 @@ class SwaggerCodec:
         self._factory.register('integer', None, create_int, validate_int)
         self._factory.register('number', None, create_float, validate_float)
 
-    @property
-    def swagger_factory(self):
-        """The underlying pyswagger primitive factory.
-
-        :rtype: pyswagger.primitives.SwaggerPrimitive
-        """
-        return self._factory
-
     def register(self, type_str, format_str, creator):
         """Register a new creator for objects of the given type and format.
+
+        The ``creator`` parameter must be a `callable` which takes the
+        following paramters in order:
+
+        - `swaggerconformance.apitemplates.SwaggerParameter` - the Swagger
+          schema for the object being handled.
+        - The value to use to build the object - may be the applicable portion
+          of JSON after `json.loads` processing, or any supported input value
+          for the relevant object.
+        - `SwaggerCodec` - this factory, to be used to generate child objects
+          if required, by calling the ``produce`` method on it.
 
         :param type_str: The Swagger schema type to register for.
         :type type_str: str
@@ -65,4 +71,30 @@ class SwaggerCodec:
         :param creator: The callable to create an object of the desired type.
         :type creator: callable
         """
-        self._factory.register(type_str, format_str, creator)
+        # Map from the internal pyswagger call and paramters to the one we want
+        # to expose to users.
+        internal_creator = lambda obj, val, ctx: creator(SwaggerParameter(obj),
+                                                         val,
+                                                         self)
+        self._factory.register(type_str, format_str, internal_creator)
+
+    def produce(self, swagger_definition, value):
+        """Construct an object with the given value, represented by the given
+        schema portion using the registered type/format mappings.
+
+        :param swagger_definition: The Swagger schema type to register for.
+        :type swagger_definition: apitemplates.SwaggerParameter
+        :param value: The value to use to build the object - may be the
+                      applicable portion of JSON after `json.loads` processing,
+                      or any supported input value for the relevant object.
+        """
+        return self._factory.produce(swagger_definition._pyswagger_definition,
+                                     value)
+
+    @property
+    def _swagger_factory(self):
+        """The underlying pyswagger primitive factory.
+
+        :rtype: pyswagger.primitives.SwaggerPrimitive
+        """
+        return self._factory

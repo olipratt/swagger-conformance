@@ -35,7 +35,7 @@ class SwaggerClient:
         if codec is None:
             codec = SwaggerCodec()
 
-        self._prim_factory = codec.swagger_factory
+        self._prim_factory = codec._swagger_factory
 
         self._app = App.load(schema_path, prim=self._prim_factory)
         self._app.prepare()

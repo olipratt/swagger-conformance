@@ -77,7 +77,7 @@ class Colour:
 
 
 class ColourIntCodec(Colour):
-    def __init__(self, _, value, *args):
+    def __init__(self, _, value, __):
         super().__init__(value)
 
     def to_json(self):

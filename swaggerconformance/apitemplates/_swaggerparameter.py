@@ -27,19 +27,14 @@ class SwaggerParameter:
                               pyswagger.spec.v2_0.objects.Schema
     """
 
-    def __init__(self, swagger_app, swagger_definition):
-        self._swagger_app = swagger_app
-        self._swagger_definition = self._resolve(swagger_app,
-                                                 swagger_definition)
+    def __init__(self, swagger_definition):
+        self._swagger_definition = self._resolve(swagger_definition)
 
-    def _resolve(self, app, definition):
+    def _resolve(self, definition):
         """If the schema for this parameter is a reference, dereference it."""
-        ref = getattr(definition, '$ref', None)
-        log.debug("Ref is: %r", ref)
-        if ref is not None:
-            definition = app.resolve(ref)
-            log.debug("Schema: %r", definition)
-            log.debug("Schema name: %r", definition.name)
+        while getattr(definition, 'ref_obj', None) is not None:
+            log.debug("New definition is: %r", definition)
+            definition = definition.ref_obj
 
         return definition
 
@@ -101,8 +96,7 @@ class SwaggerParameter:
         :rtype: SwaggerParameter or None
         """
         items = self._swagger_definition.items
-        return None if items is None else self.__class__(self._swagger_app,
-                                                         items)
+        return None if items is None else self.__class__(items)
 
     @property
     def properties(self):
@@ -113,7 +107,7 @@ class SwaggerParameter:
         # This attribute is only present on `Schema` objects.
         if not hasattr(self._swagger_definition, 'properties'):
             return None  # pragma: no cover - means called on wrong obect type
-        return {prop_name: self.__class__(self._swagger_app, prop_value)
+        return {prop_name: self.__class__(prop_value)
                 for prop_name, prop_value in
                 self._swagger_definition.properties.items()}
 
@@ -256,3 +250,14 @@ class SwaggerParameter:
         :rtype: list
         """
         return self._swagger_definition.enum
+
+    @property
+    def _pyswagger_definition(self):
+        """The underlying pyswagger definition - useful elsewhere internally
+        but not expected to be referenced external to the package.
+
+        :rtype swagger_definition: pyswagger.spec.v2_0.objects.Parameter or
+                                   pyswagger.spec.v2_0.objects.Items or
+                                   pyswagger.spec.v2_0.objects.Schema
+        """
+        return self._swagger_definition

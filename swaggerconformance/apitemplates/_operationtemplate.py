@@ -101,11 +101,10 @@ class OperationTemplate:
             # defined by a schema.
             if parameter.schema is None:
                 log.debug("Fully defined parameter")
-                param_template = ParameterTemplate(
-                    SwaggerParameter(self._app, parameter))
+                param_template = ParameterTemplate(SwaggerParameter(parameter))
                 self._parameters[parameter.name] = param_template
             else:
                 log.debug("Schema defined parameter")
                 model_template = ParameterTemplate(
-                    SwaggerParameter(self._app, parameter.schema))
+                    SwaggerParameter(parameter.schema))
                 self._parameters[parameter.name] = model_template
