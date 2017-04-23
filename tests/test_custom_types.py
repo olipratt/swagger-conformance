@@ -89,12 +89,14 @@ class Colour:
 
 
 class ColourIntCodec(Colour):
+    """Codec for translating between `Colour` and JSON."""
     def __init__(self, _, value, __):
         if isinstance(value, Colour):
             value = value.int
         super().__init__(value)
 
     def to_json(self):
+        """Return the appropriate JSON representation of the `Colour` ."""
         return self.int
 
 
@@ -112,6 +114,7 @@ class Scene:
 
 
 class SceneCodec(Scene):
+    """Codec for translating between `Scene` and JSON."""
     def __init__(self, swagger_definition, value, factory):
         if isinstance(value, Scene):
             fore_value = value.foreground_colour
@@ -128,6 +131,7 @@ class SceneCodec(Scene):
                          factory.produce(back_def, back_value))
 
     def to_json(self):
+        """Return the appropriate JSON representation of the `Scene` ."""
         return {'foreground colour': self.foreground_colour.to_json(),
                 'background colour': self.background_colour.to_json()}
 
@@ -136,11 +140,13 @@ class CustomTypeTestCase(unittest.TestCase):
     """Test that custom types can be registered and used correctly."""
 
     def test_colour_type_reg_for_fmt(self):
+        """Test registering a template for a specific type/format works."""
         value_factory = swaggerconformance.valuetemplates.ValueFactory()
         value_factory.register("string", "hexcolour", HexColourStrTemplate)
         self._run_test_colour_type(value_factory)
 
     def test_colour_type_default_fmt(self):
+        """Test registering a default template for a type works."""
         value_factory = swaggerconformance.valuetemplates.ValueFactory()
         value_factory.register_type_default("string", HexColourStrTemplate)
         self._run_test_colour_type(value_factory)
@@ -215,6 +221,9 @@ class ValueCodecTestCase(unittest.TestCase):
     """Test that custom types can be mapped to/from and used correctly."""
 
     def test_colour_int_codec(self):
+        """Generate `Colour` objects and translate them to `int` at the point
+        of building the JSON body, so the test only accesses `Colour` objects.
+        """
         value_factory = swaggerconformance.valuetemplates.ValueFactory()
         value_factory.register("integer", "intcolour", ColourObjTemplate)
 
@@ -224,6 +233,9 @@ class ValueCodecTestCase(unittest.TestCase):
         self._run_test_colour_type(codec, value_factory)
 
     def test_colour_int_codec_with_hex(self):
+        """Generating hex strings for '`intcolour`' fields still means they are
+        converted to `Colour` objects and then to `int` inside the JSON.
+        """
         value_factory = swaggerconformance.valuetemplates.ValueFactory()
         value_factory.register("integer", "intcolour", HexColourStrTemplate)
 
@@ -288,6 +300,7 @@ class ObjectCodecTestCase(unittest.TestCase):
     """Test that custom types can be mapped to/from and used correctly."""
 
     def test_scene_codec(self):
+        """Test that JSON objects can be converted at both test edges."""
         value_factory = swaggerconformance.valuetemplates.ValueFactory()
         value_factory.register("integer", "intcolour", ColourObjTemplate)
         value_factory.register("object", "scene", SceneTemplate)
@@ -302,17 +315,12 @@ class ObjectCodecTestCase(unittest.TestCase):
     def _run_test_colour_type(self, codec, value_factory):
         """Test just to show how tests using multiple requests work."""
 
-        def _put_request_callback(request):
-            return 204, {}, None
-
         def _get_request_callback(_):
             # Respond with the previously received body value.
             return 200, {}, responses.calls[-1].request.body
 
-        responses.add_callback(responses.PUT,
-                               SCHEMA_URL_BASE + '/scenes/1',
-                               callback=_put_request_callback,
-                               content_type=CONTENT_TYPE_JSON)
+        responses.add(responses.PUT, SCHEMA_URL_BASE + '/scenes/1',
+                      content_type=CONTENT_TYPE_JSON, status=204)
         responses.add_callback(responses.GET,
                                SCHEMA_URL_BASE + '/scenes/1',
                                callback=_get_request_callback,
@@ -344,9 +352,9 @@ class ObjectCodecTestCase(unittest.TestCase):
                                       get_operation.response_codes)
 
             out_data = result.data
-            assert isinstance(out_data, Scene)
+            self.assertIsInstance(out_data, Scene)
             in_data = put_params["payload"]
-            assert isinstance(in_data, Scene)
+            self.assertIsInstance(in_data, Scene)
             assert out_data == in_data, \
                 "{!r} != {!r}".format(out_data, in_data)
 
