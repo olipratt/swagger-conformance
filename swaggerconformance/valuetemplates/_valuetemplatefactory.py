@@ -46,11 +46,12 @@ class ValueFactory:
                                  [(None, vts.ArrayTemplate)]),
             'object': defaultdict(lambda: vts.ObjectTemplate,
                                   [(None, vts.ObjectTemplate)]),
-            'string': defaultdict(lambda: self._create_default_string_value,
+            'string': defaultdict(lambda: create_string_value,
                                   [(None, create_string_value),
                                    ('byte', vts.BytesTemplate),
                                    ('date', vts.DateTemplate),
                                    ('date-time', vts.DateTimeTemplate),
+                                   ('mask', vts.XFieldsHeaderStringTemplate),
                                    ('uuid', vts.UUIDTemplate)])
         }
 
@@ -112,12 +113,3 @@ class ValueFactory:
         :type creator: callable
         """
         self._set_default(type_str, creator)
-
-    def _create_default_string_value(self, swagger_definition, _):
-        if (swagger_definition.location == "header" and
-                swagger_definition.name == "X-Fields"):
-            creator = vts.XFieldsHeaderStringTemplate
-        else:
-            creator = self._get(swagger_definition.type, None)
-
-        return creator(swagger_definition, self)
