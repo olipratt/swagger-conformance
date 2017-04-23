@@ -173,13 +173,12 @@ class CustomTypeTestCase(unittest.TestCase):
 
         client = swaggerconformance.client.SwaggerClient(
             COLOUR_TYPE_SCHEMA_PATH)
-        api_template = swaggerconformance.apitemplates.APITemplate(client)
-        post_operation = api_template.endpoints["/example"]["post"]
+        post_operation = client.api.endpoints["/example"]["post"]
         put_operation = \
-            api_template.endpoints["/example/{int_id}/hexcolour"]["put"]
+            client.api.endpoints["/example/{int_id}/hexcolour"]["put"]
         put_strategy = put_operation.hypothesize_parameters(value_factory)
         get_operation = \
-            api_template.endpoints["/example/{int_id}/intcolour"]["get"]
+            client.api.endpoints["/example/{int_id}/intcolour"]["get"]
         get_strategy = get_operation.hypothesize_parameters(value_factory)
 
         @hypothesis.settings(
@@ -263,12 +262,11 @@ class ValueCodecTestCase(unittest.TestCase):
 
         client = swaggerconformance.client.SwaggerClient(
             COLOUR_TYPE_SCHEMA_PATH, codec)
-        api_template = swaggerconformance.apitemplates.APITemplate(client)
         put_operation = \
-            api_template.endpoints["/example/{int_id}/intcolour"]["put"]
+            client.api.endpoints["/example/{int_id}/intcolour"]["put"]
         put_strategy = put_operation.hypothesize_parameters(value_factory)
         get_operation = \
-            api_template.endpoints["/example/{int_id}/intcolour"]["get"]
+            client.api.endpoints["/example/{int_id}/intcolour"]["get"]
 
         @hypothesis.settings(
             max_examples=50,
@@ -328,10 +326,9 @@ class ObjectCodecTestCase(unittest.TestCase):
 
         client = swaggerconformance.client.SwaggerClient(
             COLOUR_TYPE_SCHEMA_PATH, codec)
-        api_template = swaggerconformance.apitemplates.APITemplate(client)
-        put_operation = api_template.endpoints["/scenes/{int_id}"]["put"]
+        put_operation = client.api.endpoints["/scenes/{int_id}"]["put"]
         put_strategy = put_operation.hypothesize_parameters(value_factory)
-        get_operation = api_template.endpoints["/scenes/{int_id}"]["get"]
+        get_operation = client.api.endpoints["/scenes/{int_id}"]["get"]
 
         @hypothesis.settings(
             max_examples=50,

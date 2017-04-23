@@ -7,6 +7,7 @@ from pyswagger import App, Security
 from pyswagger.contrib.client.requests import Client
 
 from .codec import SwaggerCodec
+from .apitemplates import APITemplate
 
 # pyswagger and requests make INFO level logs regularly by default, so lower
 # their logging levels to prevent the spam.
@@ -40,6 +41,8 @@ class SwaggerClient:
         self._app = App.load(schema_path, prim=self._prim_factory)
         self._app.prepare()
 
+        self._api = APITemplate(self)
+
     def __repr__(self):
         return "{}(schema_path={!r})".format(self.__class__.__name__,
                                              self._schema_path)
@@ -51,6 +54,14 @@ class SwaggerClient:
         :rtype: pyswagger.core.App
         """
         return self._app
+
+    @property
+    def api(self):
+        """The API accessible from this client.
+
+        :rtype: `APITemplate`
+        """
+        return self._api
 
     def request(self, operation, parameters):
         """Make a request against a certain operation on the API.

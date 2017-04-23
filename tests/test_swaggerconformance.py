@@ -303,8 +303,7 @@ class CompareResponsesTestCase(unittest.TestCase):
         my_val_factory = swaggerconformance.valuetemplates.ValueFactory()
         client = \
             swaggerconformance.client.SwaggerClient(MIRROR_REQS_SCHEMA_PATH)
-        api_template = swaggerconformance.apitemplates.APITemplate(client)
-        operation = api_template.endpoints["/example/{in_str}"]["get"]
+        operation = client.api.endpoints["/example/{in_str}"]["get"]
         strategy = operation.hypothesize_parameters(my_val_factory)
 
         @hypothesis.settings(
@@ -350,10 +349,9 @@ class MultiRequestTestCase(unittest.TestCase):
 
         my_val_factory = swaggerconformance.valuetemplates.ValueFactory()
         client = swaggerconformance.client.SwaggerClient(TEST_SCHEMA_PATH)
-        api_template = swaggerconformance.apitemplates.APITemplate(client)
-        put_operation = api_template.endpoints["/apps/{appid}"]["put"]
+        put_operation = client.api.endpoints["/apps/{appid}"]["put"]
         put_strategy = put_operation.hypothesize_parameters(my_val_factory)
-        get_operation = api_template.endpoints["/apps/{appid}"]["get"]
+        get_operation = client.api.endpoints["/apps/{appid}"]["get"]
         get_strategy = get_operation.hypothesize_parameters(my_val_factory)
 
         @hypothesis.settings(

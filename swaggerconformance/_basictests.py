@@ -6,7 +6,6 @@ import logging
 import hypothesis
 
 from .client import SwaggerClient
-from .apitemplates import APITemplate
 from .valuetemplates import ValueFactory
 
 __all__ = ["api_conformance_test", "operation_conformance_test"]
@@ -26,11 +25,10 @@ def api_conformance_test(schema_path, num_tests_per_op=20, cont_on_err=True):
     :type cont_on_err: bool
     """
     client = SwaggerClient(schema_path)
-    api_template = APITemplate(client)
-    log.debug("Expanded endpoints as: %r", api_template)
+    log.debug("Expanded endpoints as: %r", client.api)
 
     num_errors = 0
-    for operation in api_template.template_operations():
+    for operation in client.api.template_operations():
         try:
             operation_conformance_test(client, operation, num_tests_per_op)
         except:

@@ -54,21 +54,20 @@ The first part of the setup involves creating a client that will make requests a
 import hypothesis
 import swaggerconformance
 
-# Create the client to access the API, and templates for the API operations.
+# Create the client to access the API and to template the API operations.
 schema_url = 'http://127.0.0.1:5000/api/schema'
 client = swaggerconformance.client.SwaggerClient(schema_url)
-api_template = swaggerconformance.apitemplates.APITemplate(client)
 ```
 
-The next step pulls out the operations that will be tested, and creates `hypothesis` strategies for generating inputs to them. Here specific operations are accessed, but it's possible to just iterate through all operations in `api_template.template_operations()`. The `value_factory` generates strategies for individual data types being used - we'll just use the defaults, but the next section covers adding your own extra data types.
+The next step pulls out the operations that will be tested, and creates `hypothesis` strategies for generating inputs to them. Here specific operations are accessed, but it's possible to just iterate through all operations in `client.api.template_operations()`. The `value_factory` generates strategies for individual data types being used - we'll just use the defaults, but the next section covers adding your own extra data types.
 
 ```python
 # Get references to the operations we'll use for testing, and strategies for
 # generating inputs to those operations.
 value_factory = swaggerconformance.valuetemplates.ValueFactory()
-put_operation = api_template.endpoints["/apps/{appid}"]["put"]
+put_operation = client.api.endpoints["/apps/{appid}"]["put"]
 put_strategy = put_operation.hypothesize_parameters(value_factory)
-get_operation = api_template.endpoints["/apps/{appid}"]["get"]
+get_operation = client.api.endpoints["/apps/{appid}"]["get"]
 get_strategy = get_operation.hypothesize_parameters(value_factory)
 ```
 
@@ -191,10 +190,9 @@ Now whenever creating strategies for generating parameters for operations, use t
 ```python
 schema_url = 'http://example.com/api/schema.json'
 client = swaggerconformance.client.SwaggerClient(schema_url)
-api_template = swaggerconformance.apitemplates.APITemplate(client)
 
 value_factory = HexColourValueFactory()  # Use enhanced factory for values.
-put_operation = api_template.endpoints["/apps/{appid}"]["put"]
+put_operation = client.api.endpoints["/apps/{appid}"]["put"]
 put_strategy = put_operation.hypothesize_parameters(value_factory)
 ...
 ```
