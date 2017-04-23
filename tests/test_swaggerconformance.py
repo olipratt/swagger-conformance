@@ -158,7 +158,6 @@ class ParameterTypesTestCase(unittest.TestCase):
     def test_full_put(self):
         """A PUT request containing all different parameter types."""
         # Handle all the basic endpoints.
-        respond_to_get('/schema')
         respond_to_get('/example')
         respond_to_delete('/example', status=204)
         respond_to_put(r'/example/-?\d+', status=204)

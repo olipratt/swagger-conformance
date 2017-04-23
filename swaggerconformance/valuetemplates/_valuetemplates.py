@@ -143,6 +143,33 @@ class StringTemplate(ValueTemplate):
         return strategy
 
 
+class BytesTemplate(ValueTemplate):
+    """Template for a bytes string value.
+
+    Assume the lengths refer to the number of bytes, rather than the length of
+    some representation of them.
+    """
+
+    def __init__(self, swagger_definition, factory):
+        super().__init__(swagger_definition, factory)
+        self._max_length = swagger_definition.maxLength
+        self._min_length = swagger_definition.minLength
+        self._enum = swagger_definition.enum
+
+        if self._min_length is None:
+            self._min_length = 1
+        assert self._min_length >= 1, "Byte parameters must be at least 1 byte"
+
+    def hypothesize(self):
+        if self._enum is not None:
+            return hy_st.sampled_from(self._enum)
+
+        strategy = hy_st.binary(min_size=self._min_length,
+                                max_size=self._max_length)
+
+        return strategy
+
+
 class URLPathStringTemplate(StringTemplate):
     """Template for a string value which must be valid in a URL path."""
 

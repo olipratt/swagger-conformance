@@ -16,6 +16,11 @@ log = logging.getLogger(__name__)
 example_ns = api.namespace('example', description="Example operations")
 
 
+# Define some custom fields (actually just still swagger specified ones).
+class ByteField(fields.String):
+    __schema_format__ = 'byte'
+
+
 # Specifications of the objects accepted/returned by the API.
 ExampleObj = api.model('Example', {
     'raw': fields.Raw(required=True,
@@ -30,6 +35,13 @@ ExampleObj = api.model('Example', {
     'data': fields.String(required=True,
                           description='String data',
                           example="Some string"),
+    'b64bytes': ByteField(required=True,
+                          description='Some bytes',
+                          example="c3dhZ2dlcg=="),
+    'b64bytesenum': ByteField(required=True,
+                              description='Some bytes',
+                              enum=['QQ==', 'Qg==', 'Qw==', 'RA=='],
+                              example="QQ=="),
     'enumeration': fields.String(required=True,
                                  description='Specific string from enum',
                                  enum=['A', 'B', 'C', 'D'],

@@ -48,6 +48,7 @@ class ValueFactory:
                                   [(None, vts.ObjectTemplate)]),
             'string': defaultdict(lambda: self._create_default_string_value,
                                   [(None, create_string_value),
+                                   ('byte', vts.BytesTemplate),
                                    ('date', vts.DateTemplate),
                                    ('date-time', vts.DateTimeTemplate),
                                    ('uuid', vts.UUIDTemplate)])

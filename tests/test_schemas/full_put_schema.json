@@ -6,6 +6,24 @@
     "definitions": {
         "Example": {
             "properties": {
+                "b64bytes": {
+                    "description": "Some bytes",
+                    "example": "c3dhZ2dlcg==",
+                    "format": "byte",
+                    "type": "string"
+                },
+                "b64bytesenum": {
+                    "description": "Some bytes",
+                    "enum": [
+                        "QQ==",
+                        "Qg==",
+                        "Qw==",
+                        "RA=="
+                    ],
+                    "example": "QQ==",
+                    "format": "byte",
+                    "type": "string"
+                },
                 "data": {
                     "description": "String data",
                     "example": "Some string",
@@ -70,6 +88,8 @@
                 }
             },
             "required": [
+                "b64bytes",
+                "b64bytesenum",
                 "data",
                 "enumeration",
                 "isod",
@@ -145,20 +165,6 @@
                 "summary": "Takes in data",
                 "tags": [
                     "example"
-                ]
-            }
-        },
-        "/schema": {
-            "get": {
-                "operationId": "get_schema_resource",
-                "responses": {
-                    "200": {
-                        "description": "Success"
-                    }
-                },
-                "summary": "Return the OpenAPI schema",
-                "tags": [
-                    "schema"
                 ]
             }
         }
