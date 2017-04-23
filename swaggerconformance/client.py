@@ -74,6 +74,6 @@ class SwaggerClient:
         :rtype: pyswagger.io.Response
         """
         client = Client(Security(self._app))
-        result = client.request(operation.operation(**parameters))
+        result = client.request(operation._swagger_operation(**parameters))
 
         return result

@@ -36,7 +36,16 @@ class APITemplate:
         """
         return self._endpoints_map
 
-    def template_operations(self):
+    def operation(self, operation_id):
+        """Access a single operation by its unique operation ID.
+
+        :rtype: OperationTemplate
+        """
+        # Defer to the underlying pyswagger library to do the lookup.
+        raw_op = self._app.op[operation_id]
+        return self.endpoints[raw_op.path][raw_op.method]
+
+    def operations(self):
         """All operations of the API across all endpoints.
 
         :rtype: iter(OperationTemplate)
@@ -55,8 +64,7 @@ class APITemplate:
             operation = getattr(operations_defs, operation_name)
             if operation is not None:
                 log.debug("Have operation")
-                operations_map[operation_name] = OperationTemplate(self._app,
-                                                                   operation)
+                operations_map[operation_name] = OperationTemplate(operation)
 
         log.debug("Expanded path as: %r", operations_map)
         return operations_map

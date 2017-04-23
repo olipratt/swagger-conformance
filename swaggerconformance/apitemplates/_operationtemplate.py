@@ -17,14 +17,11 @@ log = logging.getLogger(__name__)
 class OperationTemplate:
     """Template for an operation on an endpoint.
 
-    :param app: The app representing the API.
-    :type app: pyswagger.core.App
     :param operation: The definition of the operation in the API schema.
     :type operation: pyswagger.spec.v2_0.objects.Operation
     """
 
-    def __init__(self, app, operation):
-        self._app = app
+    def __init__(self, operation):
         self._operation = operation
         self._response_codes = None
         self._parameters = {}
@@ -33,9 +30,9 @@ class OperationTemplate:
         self._populate_parameters()
 
     def __repr__(self):
-        return "{}(method={!r}, path={!r}, params={!r})".format(
-            self.__class__.__name__, self._operation.method,
-            self._operation.path, self._parameters)
+        return "{}(id={!r}, method={!r}, path={!r}, params={!r})".format(
+            self.__class__.__name__, self.id, self.method, self.path,
+            self._parameters)
 
     def hypothesize_parameters(self, value_factory):
         """Generate hypothesis fixed dictionary mapping of parameters.
@@ -53,12 +50,28 @@ class OperationTemplate:
         return merge_optional_dict_strategy(req_params, opt_params)
 
     @property
-    def operation(self):
-        """The actual API operation this template represents.
+    def id(self):
+        """The Swagger operationId of this operation.
 
-        :rtype: pyswagger.spec.v2_0.objects.Operation
+        :rtype: str
         """
-        return self._operation
+        return self._operation.operationId
+
+    @property
+    def path(self):
+        """The path of this operation.
+
+        :rtype: str
+        """
+        return self._operation.path
+
+    @property
+    def method(self):
+        """The method of this operation.
+
+        :rtype: str
+        """
+        return self._operation.method
 
     @property
     def parameters(self):
@@ -101,10 +114,18 @@ class OperationTemplate:
             # defined by a schema.
             if parameter.schema is None:
                 log.debug("Fully defined parameter")
-                param_template = ParameterTemplate(SwaggerParameter(parameter))
-                self._parameters[parameter.name] = param_template
+                template = ParameterTemplate(SwaggerParameter(parameter))
             else:
                 log.debug("Schema defined parameter")
-                model_template = ParameterTemplate(
+                template = ParameterTemplate(
                     SwaggerParameter(parameter.schema))
-                self._parameters[parameter.name] = model_template
+
+            self._parameters[parameter.name] = template
+
+    @property
+    def _swagger_operation(self):
+        """The actual API operation this template represents.
+
+        :rtype: pyswagger.spec.v2_0.objects.Operation
+        """
+        return self._operation

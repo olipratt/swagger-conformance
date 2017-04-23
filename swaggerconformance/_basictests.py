@@ -28,7 +28,7 @@ def api_conformance_test(schema_path, num_tests_per_op=20, cont_on_err=True):
     log.debug("Expanded endpoints as: %r", client.api)
 
     num_errors = 0
-    for operation in client.api.template_operations():
+    for operation in client.api.operations():
         try:
             operation_conformance_test(client, operation, num_tests_per_op)
         except:

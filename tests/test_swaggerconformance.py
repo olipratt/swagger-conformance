@@ -79,9 +79,9 @@ class APITemplateTestCase(unittest.TestCase):
 
         # Find the template GET operation on the /apps/{appid} endpoint.
         app_id_get_op = None
-        for operation_template in api_template.template_operations():
-            if (operation_template.operation.method == 'get' and
-                    operation_template.operation.path == '/apps/{appid}'):
+        for operation_template in api_template.operations():
+            if (operation_template.method == 'get' and
+                    operation_template.path == '/apps/{appid}'):
                 self.assertIsNone(app_id_get_op)
                 app_id_get_op = operation_template
         self.assertIsNotNone(app_id_get_op)
@@ -99,6 +99,11 @@ class APITemplateTestCase(unittest.TestCase):
         result = self.client.request(app_id_get_op, params)
         self.assertEqual(result.status, 404)
 
+    def test_operation_access(self):
+        """Test access to operations by ID or path."""
+        api_template = swaggerconformance.apitemplates.APITemplate(self.client)
+        self.assertEqual(api_template.endpoints['/apps/{appid}']['get'],
+                         api_template.operation('get_apps_resource'))
 
 class BasicConformanceAPITestCase(unittest.TestCase):
     """Tests of the basic conformance testing API itself."""
@@ -328,22 +333,17 @@ class MultiRequestTestCase(unittest.TestCase):
     @responses.activate
     def test_put_get_combined(self):
         """Test just to show how tests using multiple requests work."""
-        body = []
-        single_app_url_base = SCHEMA_URL_BASE + '/apps/'
-        def _put_request_callback(request):
-            # Save off body to respond with.
-            body.append(json.loads(request.body))
-            return 204, {}, None
-        def _get_request_callback(_):
-            # Respond with the last saved body.
-            data = body.pop()
-            data["name"] = "example"
-            return 200, {}, json.dumps(data)
 
-        responses.add_callback(responses.PUT, re.compile(single_app_url_base),
-                               callback=_put_request_callback,
-                               content_type=CONTENT_TYPE_JSON)
-        responses.add_callback(responses.GET, re.compile(single_app_url_base),
+        def _get_request_callback(_):
+            # Respond with the previously received body value.
+            new_body = json.loads(responses.calls[-1].request.body)
+            new_body["name"] = "example"
+            return 200, {}, json.dumps(new_body)
+
+        respond_to_put(r'/apps/.*', status=204)
+
+        responses.add_callback(responses.GET,
+                               re.compile(SCHEMA_URL_BASE + '/apps/'),
                                callback=_get_request_callback,
                                content_type=CONTENT_TYPE_JSON)
 
