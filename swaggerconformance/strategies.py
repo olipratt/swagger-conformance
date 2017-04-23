@@ -85,11 +85,11 @@ def merge_optional_dict_strategy(required_fields, optional_fields):
     # Create a strategy for a set of keys from the optional dict strategy, then
     # a strategy to build those back into a dictionary.
     # Finally, merge the strategy of selected optionals with the required one.
-    optional_keys = hy_st.sets(hy_st.sampled_from(optional_fields.keys()))
+    opt_keys = hy_st.sets(hy_st.sampled_from(list(optional_fields.keys())))
     selected_optionals = hy_st.builds(
         lambda dictionary, keys: {key: dictionary[key] for key in keys},
         hy_st.fixed_dictionaries(optional_fields),
-        optional_keys)
+        opt_keys)
     result = merge_dicts_strategy(hy_st.fixed_dictionaries(required_fields),
                                   selected_optionals)
     return result
