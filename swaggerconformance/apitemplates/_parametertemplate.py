@@ -34,9 +34,8 @@ class ParameterTemplate:
         :type value_factory: swaggerconformance.valuetemplates.ValueFactory
         """
         value_template = value_factory.create_value(self._swagger_definition)
-        result = value_template.hypothesize()
 
-        return result
+        return value_template.hypothesize()
 
     @property
     def name(self):

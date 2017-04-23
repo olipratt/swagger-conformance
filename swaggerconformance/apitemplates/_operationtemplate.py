@@ -123,8 +123,10 @@ class OperationTemplate:
             self._parameters[parameter.name] = template
 
     @property
-    def _swagger_operation(self):
-        """The actual API operation this template represents.
+    def _pyswagger_operation(self):
+        """The underlying pyswagger definition of the operation - useful
+        elsewhere internally but not expected to be referenced external to the
+        package.
 
         :rtype: pyswagger.spec.v2_0.objects.Operation
         """

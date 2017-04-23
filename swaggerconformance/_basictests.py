@@ -39,7 +39,7 @@ def api_conformance_test(schema_path, num_tests_per_op=20, cont_on_err=True):
 
     if num_errors > 0:
         raise Exception("{} operation(s) failed conformance tests - check "
-                        "output for details".format(num_errors))
+                        "logging output for details".format(num_errors))
 
 
 def operation_conformance_test(client, operation, num_tests=20):

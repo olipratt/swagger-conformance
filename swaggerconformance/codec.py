@@ -92,8 +92,9 @@ class SwaggerCodec:
                                      value)
 
     @property
-    def _swagger_factory(self):
-        """The underlying pyswagger primitive factory.
+    def _pyswagger_factory(self):
+        """The underlying pyswagger primitive factory - useful elsewhere
+        internally but not expected to be referenced external to the package.
 
         :rtype: pyswagger.primitives.SwaggerPrimitive
         """

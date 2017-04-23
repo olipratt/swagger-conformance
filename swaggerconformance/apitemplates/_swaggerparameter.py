@@ -256,8 +256,8 @@ class SwaggerParameter:
         """The underlying pyswagger definition - useful elsewhere internally
         but not expected to be referenced external to the package.
 
-        :rtype swagger_definition: pyswagger.spec.v2_0.objects.Parameter or
-                                   pyswagger.spec.v2_0.objects.Items or
-                                   pyswagger.spec.v2_0.objects.Schema
+        :rtype: pyswagger.spec.v2_0.objects.Parameter or
+                pyswagger.spec.v2_0.objects.Items or
+                pyswagger.spec.v2_0.objects.Schema
         """
         return self._swagger_definition

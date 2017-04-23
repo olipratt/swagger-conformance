@@ -26,7 +26,7 @@ class SwaggerClient:
     :param schema_path: The URL of or file path to the API definition.
     :type schema_path: str
     :param codec: Used to convert between JSON and objects.
-    :type codec: codec.SwaggerCodec
+    :type codec: codec.SwaggerCodec or None
     """
 
     def __init__(self, schema_path, codec=None):
@@ -36,7 +36,7 @@ class SwaggerClient:
         if codec is None:
             codec = SwaggerCodec()
 
-        self._prim_factory = codec._swagger_factory
+        self._prim_factory = codec._pyswagger_factory
 
         self._app = App.load(schema_path, prim=self._prim_factory)
         self._app.prepare()
@@ -46,14 +46,6 @@ class SwaggerClient:
     def __repr__(self):
         return "{}(schema_path={!r})".format(self.__class__.__name__,
                                              self._schema_path)
-
-    @property
-    def app(self):
-        """The App representing the API of the server.
-
-        :rtype: pyswagger.core.App
-        """
-        return self._app
 
     @property
     def api(self):
@@ -74,6 +66,15 @@ class SwaggerClient:
         :rtype: pyswagger.io.Response
         """
         client = Client(Security(self._app))
-        result = client.request(operation._swagger_operation(**parameters))
+        result = client.request(operation._pyswagger_operation(**parameters))
 
         return result
+
+    @property
+    def _pyswagger_app(self):
+        """The underlying pyswagger definition of the app - useful elsewhere
+        internally but not expected to be referenced external to the package.
+
+        :rtype: pyswagger.core.App
+        """
+        return self._app
