@@ -5,7 +5,7 @@ import logging
 
 import hypothesis
 
-from .client import SwaggerClient
+from .client import Client
 from .valuetemplates import ValueFactory
 
 __all__ = ["api_conformance_test", "operation_conformance_test"]
@@ -24,7 +24,7 @@ def api_conformance_test(schema_path, num_tests_per_op=20, cont_on_err=True):
     :param cont_on_err: Validate all operations, or drop out on first error.
     :type cont_on_err: bool
     """
-    client = SwaggerClient(schema_path)
+    client = Client(schema_path)
     log.debug("Expanded endpoints as: %r", client.api)
 
     num_errors = 0
@@ -46,7 +46,7 @@ def operation_conformance_test(client, operation, num_tests=20):
     """Test the conformance of the given operation using the provided client.
 
     :param client: The client to use to access the API.
-    :type client: client.SwaggerClient
+    :type client: client.Client
     :param operation: The operation to test.
     :type operation: apitemplates.OperationTemplate
     :param num_tests: How many tests to run of each API operation.
@@ -63,7 +63,7 @@ def operation_conformance_test(client, operation, num_tests=20):
         """Test an operation fully.
 
         :param client: The client to use to access the API.
-        :type client: client.SwaggerClient
+        :type client: client.Client
         :param operation: The operation to test.
         :type operation: apitemplates.OperationTemplate
         :param params: The dictionary of parameters to use on the operation.
@@ -74,8 +74,8 @@ def operation_conformance_test(client, operation, num_tests=20):
         assert result.status in operation.response_codes, \
             "Response code {} not in {}".format(result.status,
                                                 operation.response_codes)
-        assert 'application/json' in result.header['Content-Type'], \
-            "application/json not in {}".format(result.header['Content-Type'])
+        assert 'application/json' in result.headers['Content-Type'], \
+            "application/json not in {}".format(result.headers['Content-Type'])
 
     # Run the test, which takes one less parameter than expected due to the
     # hypothesis decorator providing the last one.

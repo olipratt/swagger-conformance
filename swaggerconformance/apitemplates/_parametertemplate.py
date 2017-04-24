@@ -33,7 +33,7 @@ class ParameterTemplate:
         :param value_factory: Factory to generate strategies for values.
         :type value_factory: swaggerconformance.valuetemplates.ValueFactory
         """
-        value_template = value_factory.create_value(self._swagger_definition)
+        value_template = value_factory.produce(self._swagger_definition)
 
         return value_template.hypothesize()
 

@@ -59,7 +59,7 @@ class APITemplateTestCase(unittest.TestCase):
     """Simple tests working with the `APITemplate` class directly."""
 
     def setUp(self):
-        self.client = swaggerconformance.client.SwaggerClient(TEST_SCHEMA_PATH)
+        self.client = swaggerconformance.client.Client(TEST_SCHEMA_PATH)
 
     def tearDown(self):
         # No teardown of test fixtures required.
@@ -95,9 +95,12 @@ class APITemplateTestCase(unittest.TestCase):
         # Send an example parameter in to the endpoint manually, catch the
         # request, and respond.
         params = {'appid': 'test_string'}
-        respond_to_get('/apps/test_string', response_json={}, status=404)
+        respond_to_get('/apps/test_string',
+                       response_json={'name': 'abc', 'data': {}},
+                       status=200)
         result = self.client.request(app_id_get_op, params)
-        self.assertEqual(result.status, 404)
+        self.assertEqual(result.status, 200)
+        self.assertEqual(json.loads(result.raw.decode('utf-8')), result.body)
 
     def test_operation_access(self):
         """Test access to operations by ID or path."""
@@ -306,8 +309,7 @@ class CompareResponsesTestCase(unittest.TestCase):
                                content_type=CONTENT_TYPE_JSON)
 
         my_val_factory = swaggerconformance.valuetemplates.ValueFactory()
-        client = \
-            swaggerconformance.client.SwaggerClient(MIRROR_REQS_SCHEMA_PATH)
+        client = swaggerconformance.client.Client(MIRROR_REQS_SCHEMA_PATH)
         operation = client.api.endpoints["/example/{in_str}"]["get"]
         strategy = operation.hypothesize_parameters(my_val_factory)
 
@@ -321,8 +323,8 @@ class CompareResponsesTestCase(unittest.TestCase):
                 "{} not in {}".format(result.status,
                                       operation.response_codes)
 
-            assert result.data.in_str == params["in_str"], \
-                "{} != {}".format(result.data.in_str, params["in_str"])
+            assert result.body.in_str == params["in_str"], \
+                "{} != {}".format(result.body.in_str, params["in_str"])
 
         _single_operation_test(client, operation) # pylint: disable=I0011,E1120
 
@@ -348,7 +350,7 @@ class MultiRequestTestCase(unittest.TestCase):
                                content_type=CONTENT_TYPE_JSON)
 
         my_val_factory = swaggerconformance.valuetemplates.ValueFactory()
-        client = swaggerconformance.client.SwaggerClient(TEST_SCHEMA_PATH)
+        client = swaggerconformance.client.Client(TEST_SCHEMA_PATH)
         put_operation = client.api.endpoints["/apps/{appid}"]["put"]
         put_strategy = put_operation.hypothesize_parameters(my_val_factory)
         get_operation = client.api.endpoints["/apps/{appid}"]["get"]
@@ -371,7 +373,7 @@ class MultiRequestTestCase(unittest.TestCase):
 
             # Compare JSON representations of the data - as Python objects they
             # may contain NAN, instances of which are not equal to one another.
-            out_data = json.dumps(result.data.data, sort_keys=True)
+            out_data = json.dumps(result.body.data, sort_keys=True)
             in_data = json.dumps(put_params["payload"]["data"], sort_keys=True)
             assert out_data == in_data, \
                 "{!r} != {!r}".format(out_data, in_data)

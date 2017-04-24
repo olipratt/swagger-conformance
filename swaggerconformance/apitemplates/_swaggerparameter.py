@@ -63,7 +63,7 @@ class SwaggerParameter:
     def format(self):
         """The format of this parameter.
 
-        :rtype: str
+        :rtype: str or None
         """
         return self._swagger_definition.format
 
@@ -127,7 +127,7 @@ class SwaggerParameter:
     def additionalProperties(self):
         """Whether this paramater is a dict that accepts arbitrary entries.
 
-        :rtype: bool
+        :rtype: bool or None
         """
         # This attribute is only present on `Schema` objects.
         if not hasattr(self._swagger_definition, 'additionalProperties'):
@@ -139,7 +139,7 @@ class SwaggerParameter:
     def maxProperties(self):
         """The maximum number of properties in this parameter if it's a dict.
 
-        :rtype: int
+        :rtype: int or None
         """
         if not hasattr(self._swagger_definition, 'maxProperties'):
             return None  # pragma: no cover - means called on wrong obect type
@@ -149,7 +149,7 @@ class SwaggerParameter:
     def minProperties(self):
         """The minimum number of properties in this parameter if it's a dict.
 
-        :rtype: int
+        :rtype: int or None
         """
         if not hasattr(self._swagger_definition, 'minProperties'):
             return None  # pragma: no cover - means called on wrong obect type
@@ -159,7 +159,7 @@ class SwaggerParameter:
     def maximum(self):
         """The maximum value of this parameter.
 
-        :rtype: float
+        :rtype: float or None
         """
         return self._swagger_definition.maximum
 
@@ -175,7 +175,7 @@ class SwaggerParameter:
     def minimum(self):
         """The minimum value of this parameter.
 
-        :rtype: float
+        :rtype: float or None
         """
         return self._swagger_definition.minimum
 
@@ -199,7 +199,7 @@ class SwaggerParameter:
     def maxLength(self):
         """The maximum length of this parameter.
 
-        :rtype: int
+        :rtype: int or None
         """
         return self._swagger_definition.maxLength
 
@@ -207,7 +207,7 @@ class SwaggerParameter:
     def minLength(self):
         """The minimum length of this parameter.
 
-        :rtype: int
+        :rtype: int or None
         """
         return self._swagger_definition.minLength
 
@@ -215,7 +215,7 @@ class SwaggerParameter:
     def pattern(self):
         """The regex pattern for this parameter.
 
-        :rtype: string
+        :rtype: string or None
         """
         return self._swagger_definition.pattern
 
@@ -223,7 +223,7 @@ class SwaggerParameter:
     def maxItems(self):
         """The maximum number of items in this parameter if it's an array.
 
-        :rtype: int
+        :rtype: int or None
         """
         return self._swagger_definition.maxItems
 
@@ -231,7 +231,7 @@ class SwaggerParameter:
     def minItems(self):
         """The minimum number of items in this parameter if it's an array.
 
-        :rtype: int
+        :rtype: int or None
         """
         return self._swagger_definition.minItems
 
@@ -247,7 +247,7 @@ class SwaggerParameter:
     def enum(self):
         """List of valid values for this paramater.
 
-        :rtype: list
+        :rtype: list or None
         """
         return self._swagger_definition.enum
 

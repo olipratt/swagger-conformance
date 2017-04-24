@@ -64,7 +64,7 @@ class ValueFactory:
     def _set_default(self, type_str, creator):
         self._map[type_str].default_factory = lambda: creator
 
-    def create_value(self, swagger_definition):
+    def produce(self, swagger_definition):
         """Create a template for the value specified by the definition.
 
         :param swagger_definition: The schema of the parameter to create.

@@ -171,8 +171,7 @@ class CustomTypeTestCase(unittest.TestCase):
                                callback=_get_request_callback,
                                content_type=CONTENT_TYPE_JSON)
 
-        client = swaggerconformance.client.SwaggerClient(
-            COLOUR_TYPE_SCHEMA_PATH)
+        client = swaggerconformance.client.Client(COLOUR_TYPE_SCHEMA_PATH)
         post_operation = client.api.endpoints["/example"]["post"]
         put_operation = \
             client.api.endpoints["/example/{int_id}/hexcolour"]["put"]
@@ -193,7 +192,7 @@ class CustomTypeTestCase(unittest.TestCase):
                 "{} not in {}".format(result.status,
                                       post_operation.response_codes)
 
-            int_id = result.data.id
+            int_id = result.body.id
             put_params['int_id'] = int_id
             result = client.request(put_operation, put_params)
             assert result.status in put_operation.response_codes, \
@@ -208,7 +207,7 @@ class CustomTypeTestCase(unittest.TestCase):
 
             # Compare JSON representations of the data - as Python objects they
             # may contain NAN, instances of which are not equal to one another.
-            out_data = result.data.intcolour
+            out_data = result.body.intcolour
             in_data = int(put_params["payload"]["hexcolour"].lstrip('#'), 16)
             assert out_data == in_data, \
                 "{!r} != {!r}".format(out_data, in_data)
@@ -260,8 +259,8 @@ class ValueCodecTestCase(unittest.TestCase):
                                callback=_get_request_callback,
                                content_type=CONTENT_TYPE_JSON)
 
-        client = swaggerconformance.client.SwaggerClient(
-            COLOUR_TYPE_SCHEMA_PATH, codec)
+        client = swaggerconformance.client.Client(COLOUR_TYPE_SCHEMA_PATH,
+                                                  codec)
         put_operation = \
             client.api.endpoints["/example/{int_id}/intcolour"]["put"]
         put_strategy = put_operation.hypothesize_parameters(value_factory)
@@ -286,7 +285,7 @@ class ValueCodecTestCase(unittest.TestCase):
                 "{} not in {}".format(result.status,
                                       get_operation.response_codes)
 
-            out_data = result.data.intcolour
+            out_data = result.body.intcolour
             assert isinstance(out_data, Colour)
             in_data = put_params["payload"]["intcolour"]
             assert out_data == in_data, \
@@ -324,8 +323,8 @@ class ObjectCodecTestCase(unittest.TestCase):
                                callback=_get_request_callback,
                                content_type=CONTENT_TYPE_JSON)
 
-        client = swaggerconformance.client.SwaggerClient(
-            COLOUR_TYPE_SCHEMA_PATH, codec)
+        client = swaggerconformance.client.Client(COLOUR_TYPE_SCHEMA_PATH,
+                                                  codec)
         put_operation = client.api.endpoints["/scenes/{int_id}"]["put"]
         put_strategy = put_operation.hypothesize_parameters(value_factory)
         get_operation = client.api.endpoints["/scenes/{int_id}"]["get"]
@@ -348,7 +347,7 @@ class ObjectCodecTestCase(unittest.TestCase):
                 "{} not in {}".format(result.status,
                                       get_operation.response_codes)
 
-            out_data = result.data
+            out_data = result.body
             self.assertIsInstance(out_data, Scene)
             in_data = put_params["payload"]
             self.assertIsInstance(in_data, Scene)

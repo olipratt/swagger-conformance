@@ -4,23 +4,24 @@ A client for accessing a remote swagger-defined API.
 import logging
 
 from pyswagger import App, Security
-from pyswagger.contrib.client.requests import Client
+from pyswagger.contrib.client.requests import Client as PyswaggerClient
 
 from .codec import SwaggerCodec
 from .apitemplates import APITemplate
+from .response import Response
 
 # pyswagger and requests make INFO level logs regularly by default, so lower
 # their logging levels to prevent the spam.
 logging.getLogger("pyswagger").setLevel(logging.WARNING)
 logging.getLogger("requests").setLevel(logging.WARNING)
 
-__all__ = ["SwaggerClient"]
+__all__ = ["Client"]
 
 
 log = logging.getLogger(__name__)
 
 
-class SwaggerClient:
+class Client:
     """Client to use to access the Swagger application according to its schema.
 
     :param schema_path: The URL of or file path to the API definition.
@@ -30,7 +31,6 @@ class SwaggerClient:
     """
 
     def __init__(self, schema_path, codec=None):
-        """Create a new Swagger API client."""
         self._schema_path = schema_path
 
         if codec is None:
@@ -65,10 +65,10 @@ class SwaggerClient:
 
         :rtype: pyswagger.io.Response
         """
-        client = Client(Security(self._app))
+        client = PyswaggerClient(Security(self._app))
         result = client.request(operation._pyswagger_operation(**parameters))
 
-        return result
+        return Response(result)
 
     @property
     def _pyswagger_app(self):

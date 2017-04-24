@@ -254,8 +254,7 @@ class ArrayTemplate(ValueTemplate):
     def __init__(self, swagger_definition, factory):
         super().__init__(swagger_definition, factory)
 
-        self._elements = \
-            self._factory.create_value(self._swagger_definition.items)
+        self._elements = self._factory.produce(self._swagger_definition.items)
 
         self._max_items = swagger_definition.maxItems
         self._min_items = swagger_definition.minItems
@@ -281,7 +280,7 @@ class ObjectTemplate(ValueTemplate):
     def __init__(self, swagger_definition, factory):
         super().__init__(swagger_definition, factory)
 
-        self._properties = {prop_name: self._factory.create_value(prop_defn)
+        self._properties = {prop_name: self._factory.produce(prop_defn)
                             for prop_name, prop_defn in
                             self._swagger_definition.properties.items()}
 
