@@ -21,7 +21,7 @@ class ValueTemplate:
     """Template for a single value of any specified type.
 
     :param swagger_definition: The Swagger spec for this parameter.
-    :type swagger_definition: apitemplates.SwaggerParameter
+    :type swagger_definition: apitemplates.SwaggerDefinition
     :param factory: The factory used to generate child `ValueTemplate` s.
     :type factory: valuetemplates.ValueFactory
     """

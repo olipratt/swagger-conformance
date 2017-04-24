@@ -3,14 +3,14 @@ Wrapper around a Swagger definition of a paramater for an operation.
 """
 import logging
 
-__all__ = ["SwaggerParameter"]
+__all__ = ["SwaggerDefinition"]
 
 
 log = logging.getLogger(__name__)
 
 
-class SwaggerParameter:
-    """Wrapper around a parameter to pass to an operation on an endpoint.
+class SwaggerDefinition:
+    """Wrapper around a section of swagger schema.
 
     This may be a `Parameter` or a `Schema` object, either passed directly as
     a parameter to an operation as a child of one.
@@ -93,7 +93,7 @@ class SwaggerParameter:
     def items(self):
         """The Parameter elements of this Parameter if it's an array.
 
-        :rtype: SwaggerParameter or None
+        :rtype: SwaggerDefinition or None
         """
         items = self._swagger_definition.items
         return None if items is None else self.__class__(items)
@@ -102,7 +102,7 @@ class SwaggerParameter:
     def properties(self):
         """The dict of Parameter elements of this Parameter if it's an object.
 
-        :rtype: dict(str, SwaggerParameter) or None
+        :rtype: dict(str, SwaggerDefinition) or None
         """
         # This attribute is only present on `Schema` objects.
         if not hasattr(self._swagger_definition, 'properties'):

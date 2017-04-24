@@ -5,7 +5,7 @@ specific API requests adhering to the definition.
 import logging
 
 from ._parametertemplate import ParameterTemplate
-from ._swaggerparameter import SwaggerParameter
+from ._swaggerdefinition import SwaggerDefinition
 from ..strategies import merge_optional_dict_strategy
 
 __all__ = ["OperationTemplate"]
@@ -114,11 +114,11 @@ class OperationTemplate:
             # defined by a schema.
             if parameter.schema is None:
                 log.debug("Fully defined parameter")
-                template = ParameterTemplate(SwaggerParameter(parameter))
+                template = ParameterTemplate(SwaggerDefinition(parameter))
             else:
                 log.debug("Schema defined parameter")
                 template = ParameterTemplate(
-                    SwaggerParameter(parameter.schema))
+                    SwaggerDefinition(parameter.schema))
 
             self._parameters[parameter.name] = template
 

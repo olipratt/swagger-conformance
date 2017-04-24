@@ -13,7 +13,7 @@ class ParameterTemplate:
     """A Swagger API operation parameter.
 
     :param swagger_definition: The swagger spec portion defining the parameter.
-    :type swagger_definition: SwaggerParameter
+    :type swagger_definition: SwaggerDefinition
     """
 
     def __init__(self, swagger_definition):

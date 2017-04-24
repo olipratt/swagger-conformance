@@ -225,7 +225,7 @@ class ValueCodecTestCase(unittest.TestCase):
         value_factory = swaggerconformance.valuetemplates.ValueFactory()
         value_factory.register("integer", "intcolour", ColourObjTemplate)
 
-        codec = swaggerconformance.codec.SwaggerCodec()
+        codec = swaggerconformance.codec.CodecFactory()
         codec.register("integer", "intcolour", ColourIntCodec)
 
         self._run_test_colour_type(codec, value_factory)
@@ -237,7 +237,7 @@ class ValueCodecTestCase(unittest.TestCase):
         value_factory = swaggerconformance.valuetemplates.ValueFactory()
         value_factory.register("integer", "intcolour", HexColourStrTemplate)
 
-        codec = swaggerconformance.codec.SwaggerCodec()
+        codec = swaggerconformance.codec.CodecFactory()
         codec.register("integer", "intcolour", ColourIntCodec)
 
         self._run_test_colour_type(codec, value_factory)
@@ -302,7 +302,7 @@ class ObjectCodecTestCase(unittest.TestCase):
         value_factory.register("integer", "intcolour", ColourObjTemplate)
         value_factory.register("object", "scene", SceneTemplate)
 
-        codec = swaggerconformance.codec.SwaggerCodec()
+        codec = swaggerconformance.codec.CodecFactory()
         codec.register("integer", "intcolour", ColourIntCodec)
         codec.register("object", "scene", SceneCodec)
 

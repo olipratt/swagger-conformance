@@ -15,7 +15,7 @@ log = logging.getLogger(__name__)
 class APITemplate:
     """Template for an entire Swagger API.
 
-    :type client: client.SwaggerClient
+    :type client: client.Client
     """
 
     _OPERATIONS = ["get", "put", "post", "delete"]

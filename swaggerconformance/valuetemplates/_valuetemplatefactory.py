@@ -17,7 +17,7 @@ def create_string_value(swagger_definition, factory):
     on the location of the string parameter.
 
     :param swagger_definition: The schema of the parameter to create.
-    :type swagger_definition: apitemplates.SwaggerParameter
+    :type swagger_definition: apitemplates.SwaggerDefinition
     :rtype: ValueTemplate
     """
     if swagger_definition.location == 'path':
@@ -68,7 +68,7 @@ class ValueFactory:
         """Create a template for the value specified by the definition.
 
         :param swagger_definition: The schema of the parameter to create.
-        :type swagger_definition: apitemplates.SwaggerParameter
+        :type swagger_definition: apitemplates.SwaggerDefinition
         :rtype: ValueTemplate
         """
         log.debug("Creating value for: %r", swagger_definition)
@@ -86,7 +86,7 @@ class ValueFactory:
 
         The function signature of the ``creator`` parameter must be:
 
-        ``def fn(`` `apitemplates.SwaggerParameter` , `ValueFactory` ``) ->``
+        ``def fn(`` `apitemplates.SwaggerDefinition` , `ValueFactory` ``) ->``
         `ValueTemplate`
 
         :param type_str: The Swagger schema type to register for.
@@ -104,7 +104,7 @@ class ValueFactory:
 
         The function signature of the ``creator`` parameter must be:
 
-        ``def fn(`` `apitemplates.SwaggerParameter` , `ValueFactory` ``) ->``
+        ``def fn(`` `apitemplates.SwaggerDefinition` , `ValueFactory` ``) ->``
         `ValueTemplate`
 
         :param type_str: The Swagger schema type to register for.

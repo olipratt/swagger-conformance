@@ -8,14 +8,14 @@ from pyswagger.primitives import SwaggerPrimitive
 from pyswagger.primitives._int import validate_int, create_int
 from pyswagger.primitives._float import validate_float, create_float
 
-from .apitemplates import SwaggerParameter
+from .apitemplates import SwaggerDefinition
 
 # pyswagger and requests make INFO level logs regularly by default, so lower
 # their logging levels to prevent the spam.
 logging.getLogger("pyswagger").setLevel(logging.WARNING)
 logging.getLogger("requests").setLevel(logging.WARNING)
 
-__all__ = ["SwaggerCodec"]
+__all__ = ["CodecFactory"]
 
 
 log = logging.getLogger(__name__)
@@ -37,8 +37,10 @@ class _SwaggerPrimitiveDefaults(SwaggerPrimitive):
         return result
 
 
-class SwaggerCodec:
-    """Encodes objects as JSON and decodes JSON back into objects."""
+class CodecFactory:
+    """Produces codecs that encode objects as JSON and decode JSON back into
+    objects.
+    """
 
     def __init__(self):
         self._factory = _SwaggerPrimitiveDefaults()
@@ -56,12 +58,12 @@ class SwaggerCodec:
         The ``creator`` parameter must be a `callable` which takes the
         following paramters in order:
 
-        - `swaggerconformance.apitemplates.SwaggerParameter` - the Swagger
+        - `swaggerconformance.apitemplates.SwaggerDefinition` - the Swagger
           schema for the object being handled.
         - The value to use to build the object - may be the applicable portion
           of JSON after `json.loads` processing, or any supported input value
           for the relevant object.
-        - `SwaggerCodec` - this factory, to be used to generate child objects
+        - `CodecFactory` - this factory, to be used to generate child objects
           if required, by calling the ``produce`` method on it.
 
         :param type_str: The Swagger schema type to register for.
@@ -73,9 +75,8 @@ class SwaggerCodec:
         """
         # Map from the internal pyswagger call and paramters to the one we want
         # to expose to users.
-        internal_creator = lambda obj, val, ctx: creator(SwaggerParameter(obj),
-                                                         val,
-                                                         self)
+        internal_creator = \
+            lambda obj, val, ctx: creator(SwaggerDefinition(obj), val, self)
         self._factory.register(type_str, format_str, internal_creator)
 
     def produce(self, swagger_definition, value):
@@ -83,7 +84,7 @@ class SwaggerCodec:
         schema portion using the registered type/format mappings.
 
         :param swagger_definition: The Swagger schema type to register for.
-        :type swagger_definition: apitemplates.SwaggerParameter
+        :type swagger_definition: apitemplates.SwaggerDefinition
         :param value: The value to use to build the object - may be the
                       applicable portion of JSON after `json.loads` processing,
                       or any supported input value for the relevant object.

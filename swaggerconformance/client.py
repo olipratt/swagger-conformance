@@ -6,7 +6,7 @@ import logging
 from pyswagger import App, Security
 from pyswagger.contrib.client.requests import Client as PyswaggerClient
 
-from .codec import SwaggerCodec
+from .codec import CodecFactory
 from .apitemplates import APITemplate
 from .response import Response
 
@@ -27,14 +27,14 @@ class Client:
     :param schema_path: The URL of or file path to the API definition.
     :type schema_path: str
     :param codec: Used to convert between JSON and objects.
-    :type codec: codec.SwaggerCodec or None
+    :type codec: codec.CodecFactory or None
     """
 
     def __init__(self, schema_path, codec=None):
         self._schema_path = schema_path
 
         if codec is None:
-            codec = SwaggerCodec()
+            codec = CodecFactory()
 
         self._prim_factory = codec._pyswagger_factory
 
