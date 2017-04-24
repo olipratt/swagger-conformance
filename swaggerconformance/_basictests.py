@@ -2,6 +2,7 @@
 Main high-level entrypoints for validating swagger conformance.
 """
 import logging
+import traceback
 
 import hypothesis
 
@@ -27,19 +28,21 @@ def api_conformance_test(schema_path, num_tests_per_op=20, cont_on_err=True):
     client = Client(schema_path)
     log.debug("Expanded endpoints as: %r", client.api)
 
-    num_errors = 0
+    hit_errors = []
     for operation in client.api.operations():
         try:
             operation_conformance_test(client, operation, num_tests_per_op)
-        except:
+        except Exception as e:
             log.exception("Validation falied of operation: %r", operation)
-            num_errors += 1
+            hit_errors.append(traceback.format_exc())
             if not cont_on_err:
                 raise
 
-    if num_errors > 0:
+    if len(hit_errors) > 0:
         raise Exception("{} operation(s) failed conformance tests - check "
-                        "logging output for details".format(num_errors))
+                        "output in logging and tracebacks below for "
+                        "details\n{}".format(len(hit_errors),
+                                             '\n'.join(hit_errors)))
 
 
 def operation_conformance_test(client, operation, num_tests=20):
