@@ -49,11 +49,11 @@ With just a little code, we can load in the swagger schema for that API, access 
 ```python
 >>> import swaggerconformance
 >>>
->>> client = swaggerconformance.client.SwaggerClient('http://petstore.swagger.io/v2/swagger.json')
+>>> client = swaggerconformance.client.Client('http://petstore.swagger.io/v2/swagger.json')
 >>>
->>> value_factory = swaggerconformance.valuetemplates.ValueFactory()
+>>> strategy_factory = swaggerconformance.strategies.StrategyFactory()
 >>> operation = client.api.endpoints["/pet"]["put"]
->>> strategy = operation.hypothesize_parameters(value_factory)
+>>> strategy = operation.parameters_strategy(strategy_factory)
 >>> strategy.example()
 {
   'body':{

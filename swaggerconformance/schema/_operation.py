@@ -4,17 +4,17 @@ specific API requests adhering to the definition.
 """
 import logging
 
-from ._parametertemplate import ParameterTemplate
-from ._swaggerdefinition import SwaggerDefinition
-from ..strategies import merge_optional_dict_strategy
+from ._parameter import Parameter
+from ._primitive import Primitive
+from ..strategies.basestrategies import merge_optional_dict_strategy
 
-__all__ = ["OperationTemplate"]
+__all__ = ["Operation"]
 
 
 log = logging.getLogger(__name__)
 
 
-class OperationTemplate:
+class Operation:
     """Template for an operation on an endpoint.
 
     :param operation: The definition of the operation in the API schema.
@@ -34,16 +34,16 @@ class OperationTemplate:
             self.__class__.__name__, self.id, self.method, self.path,
             self._parameters)
 
-    def hypothesize_parameters(self, value_factory):
+    def parameters_strategy(self, value_factory):
         """Generate hypothesis fixed dictionary mapping of parameters.
 
         :param value_factory: Factory to generate strategies for values.
-        :type value_factory: swaggerconformance.valuetemplates.ValueFactory
+        :type value_factory: strategies.StrategyFactory
         """
-        req_params = {param_name: param_template.hypothesize(value_factory)
+        req_params = {param_name: param_template.strategy(value_factory)
                       for param_name, param_template in self.parameters.items()
                       if param_template.required}
-        opt_params = {param_name: param_template.hypothesize(value_factory)
+        opt_params = {param_name: param_template.strategy(value_factory)
                       for param_name, param_template in self.parameters.items()
                       if not param_template.required}
 
@@ -77,7 +77,7 @@ class OperationTemplate:
     def parameters(self):
         """Mapping of the names of the parameters to their templates.
 
-        :rtype: dict(str, ParameterTemplate)
+        :rtype: dict(str, Parameter)
         """
         return self._parameters
 
@@ -114,11 +114,10 @@ class OperationTemplate:
             # defined by a schema.
             if parameter.schema is None:
                 log.debug("Fully defined parameter")
-                template = ParameterTemplate(SwaggerDefinition(parameter))
+                template = Parameter(Primitive(parameter))
             else:
                 log.debug("Schema defined parameter")
-                template = ParameterTemplate(
-                    SwaggerDefinition(parameter.schema))
+                template = Parameter(Primitive(parameter.schema))
 
             self._parameters[parameter.name] = template
 

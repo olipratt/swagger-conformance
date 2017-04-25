@@ -20,14 +20,15 @@ SCHEMA_URL_BASE = 'http://127.0.0.1:5000/api'
 CONTENT_TYPE_JSON = 'application/json'
 
 
-class HexColourStrTemplate(swaggerconformance.valuetemplates.ValueTemplate):
+class HexColourStrTemplate(
+        swaggerconformance.strategies.primitivestrategies.PrimitiveStrategy):
     """Template for a hex colour value."""
 
     def __init__(self, swagger_definition, factory):
         super().__init__(swagger_definition, factory)
         self._enum = swagger_definition.enum
 
-    def hypothesize(self):
+    def strategy(self):
         if self._enum is not None:
             return hy_st.sampled_from(self._enum)
         strategy = hy_st.text(alphabet=set(string.hexdigits),
@@ -42,11 +43,12 @@ class HexColourStrTemplate(swaggerconformance.valuetemplates.ValueTemplate):
 class ColourObjTemplate(HexColourStrTemplate):
     """Template for a hex colour value."""
 
-    def hypothesize(self):
-        return super().hypothesize().map(Colour)
+    def strategy(self):
+        return super().strategy().map(Colour)
 
 
-class SceneTemplate(swaggerconformance.valuetemplates.ValueTemplate):
+class SceneTemplate(
+        swaggerconformance.strategies.primitivestrategies.PrimitiveStrategy):
     """Template for a Scene object."""
 
     def __init__(self, swagger_definition, factory):
@@ -54,10 +56,10 @@ class SceneTemplate(swaggerconformance.valuetemplates.ValueTemplate):
         self._foreground = ColourObjTemplate(swagger_definition, factory)
         self._background = ColourObjTemplate(swagger_definition, factory)
 
-    def hypothesize(self):
+    def strategy(self):
         return hy_st.builds(Scene,
-                            self._foreground.hypothesize(),
-                            self._background.hypothesize())
+                            self._foreground.strategy(),
+                            self._background.strategy())
 
 
 class Colour:
@@ -141,13 +143,13 @@ class CustomTypeTestCase(unittest.TestCase):
 
     def test_colour_type_reg_for_fmt(self):
         """Test registering a template for a specific type/format works."""
-        value_factory = swaggerconformance.valuetemplates.ValueFactory()
+        value_factory = swaggerconformance.strategies.StrategyFactory()
         value_factory.register("string", "hexcolour", HexColourStrTemplate)
         self._run_test_colour_type(value_factory)
 
     def test_colour_type_default_fmt(self):
         """Test registering a default template for a type works."""
-        value_factory = swaggerconformance.valuetemplates.ValueFactory()
+        value_factory = swaggerconformance.strategies.StrategyFactory()
         value_factory.register_type_default("string", HexColourStrTemplate)
         self._run_test_colour_type(value_factory)
 
@@ -175,10 +177,10 @@ class CustomTypeTestCase(unittest.TestCase):
         post_operation = client.api.endpoints["/example"]["post"]
         put_operation = \
             client.api.endpoints["/example/{int_id}/hexcolour"]["put"]
-        put_strategy = put_operation.hypothesize_parameters(value_factory)
+        put_strategy = put_operation.parameters_strategy(value_factory)
         get_operation = \
             client.api.endpoints["/example/{int_id}/intcolour"]["get"]
-        get_strategy = get_operation.hypothesize_parameters(value_factory)
+        get_strategy = get_operation.parameters_strategy(value_factory)
 
         @hypothesis.settings(
             max_examples=50,
@@ -222,7 +224,7 @@ class ValueCodecTestCase(unittest.TestCase):
         """Generate `Colour` objects and translate them to `int` at the point
         of building the JSON body, so the test only accesses `Colour` objects.
         """
-        value_factory = swaggerconformance.valuetemplates.ValueFactory()
+        value_factory = swaggerconformance.strategies.StrategyFactory()
         value_factory.register("integer", "intcolour", ColourObjTemplate)
 
         codec = swaggerconformance.codec.CodecFactory()
@@ -234,7 +236,7 @@ class ValueCodecTestCase(unittest.TestCase):
         """Generating hex strings for '`intcolour`' fields still means they are
         converted to `Colour` objects and then to `int` inside the JSON.
         """
-        value_factory = swaggerconformance.valuetemplates.ValueFactory()
+        value_factory = swaggerconformance.strategies.StrategyFactory()
         value_factory.register("integer", "intcolour", HexColourStrTemplate)
 
         codec = swaggerconformance.codec.CodecFactory()
@@ -263,7 +265,7 @@ class ValueCodecTestCase(unittest.TestCase):
                                                   codec)
         put_operation = \
             client.api.endpoints["/example/{int_id}/intcolour"]["put"]
-        put_strategy = put_operation.hypothesize_parameters(value_factory)
+        put_strategy = put_operation.parameters_strategy(value_factory)
         get_operation = \
             client.api.endpoints["/example/{int_id}/intcolour"]["get"]
 
@@ -298,7 +300,7 @@ class ObjectCodecTestCase(unittest.TestCase):
 
     def test_scene_codec(self):
         """Test that JSON objects can be converted at both test edges."""
-        value_factory = swaggerconformance.valuetemplates.ValueFactory()
+        value_factory = swaggerconformance.strategies.StrategyFactory()
         value_factory.register("integer", "intcolour", ColourObjTemplate)
         value_factory.register("object", "scene", SceneTemplate)
 
@@ -326,7 +328,7 @@ class ObjectCodecTestCase(unittest.TestCase):
         client = swaggerconformance.client.Client(COLOUR_TYPE_SCHEMA_PATH,
                                                   codec)
         put_operation = client.api.endpoints["/scenes/{int_id}"]["put"]
-        put_strategy = put_operation.hypothesize_parameters(value_factory)
+        put_strategy = put_operation.parameters_strategy(value_factory)
         get_operation = client.api.endpoints["/scenes/{int_id}"]["get"]
 
         @hypothesis.settings(

@@ -10,5 +10,4 @@ control over value generation and test procedures.
 """
 from ._basictests import api_conformance_test, operation_conformance_test
 
-__all__ = ["api_conformance_test",
-           "operation_conformance_test"]
+__all__ = ["api_conformance_test", "operation_conformance_test"]

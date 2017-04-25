@@ -7,7 +7,7 @@ from pyswagger import App, Security
 from pyswagger.contrib.client.requests import Client as PyswaggerClient
 
 from .codec import CodecFactory
-from .apitemplates import APITemplate
+from .schema import Api
 from .response import Response
 
 # pyswagger and requests make INFO level logs regularly by default, so lower
@@ -41,7 +41,7 @@ class Client:
         self._app = App.load(schema_path, prim=self._prim_factory)
         self._app.prepare()
 
-        self._api = APITemplate(self)
+        self._api = Api(self)
 
     def __repr__(self):
         return "{}(schema_path={!r})".format(self.__class__.__name__,
@@ -51,7 +51,7 @@ class Client:
     def api(self):
         """The API accessible from this client.
 
-        :rtype: `APITemplate`
+        :rtype: `schema.Api`
         """
         return self._api
 
@@ -59,7 +59,7 @@ class Client:
         """Make a request against a certain operation on the API.
 
         :param operation: The operation to perform.
-        :type operation: apitemplates.OperationTemplate
+        :type operation: schema.Operation
         :param parameters: The parameters to use on the operation.
         :type parameters: dict
 

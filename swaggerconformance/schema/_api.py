@@ -4,15 +4,15 @@ specific API requests adhering to the definition.
 """
 import logging
 
-from ._operationtemplate import OperationTemplate
+from ._operation import Operation
 
-__all__ = ["APITemplate"]
+__all__ = ["Api"]
 
 
 log = logging.getLogger(__name__)
 
 
-class APITemplate:
+class Api:
     """Template for an entire Swagger API.
 
     :type client: client.Client
@@ -32,14 +32,14 @@ class APITemplate:
     def endpoints(self):
         """Mapping of the endpoints of this API to their operations.
 
-        :rtype: dict(str, dict(str, OperationTemplate))
+        :rtype: dict(str, dict(str, schema.Operation))
         """
         return self._endpoints_map
 
     def operation(self, operation_id):
         """Access a single operation by its unique operation ID.
 
-        :rtype: OperationTemplate
+        :rtype: schema.Operation
         """
         # Defer to the underlying pyswagger library to do the lookup.
         raw_op = self._app.op[operation_id]
@@ -48,7 +48,7 @@ class APITemplate:
     def operations(self):
         """All operations of the API across all endpoints.
 
-        :rtype: Generator(OperationTemplate)
+        :rtype: Generator(schema.Operation)
         """
         return (self.endpoints[endpoint][operation_type]
                 for endpoint in self.endpoints
@@ -64,7 +64,7 @@ class APITemplate:
             operation = getattr(operations_defs, operation_name)
             if operation is not None:
                 log.debug("Have operation")
-                operations_map[operation_name] = OperationTemplate(operation)
+                operations_map[operation_name] = Operation(operation)
 
         log.debug("Expanded path as: %r", operations_map)
         return operations_map

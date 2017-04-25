@@ -7,7 +7,7 @@ import traceback
 import hypothesis
 
 from .client import Client
-from .valuetemplates import ValueFactory
+from .strategies import StrategyFactory
 
 __all__ = ["api_conformance_test", "operation_conformance_test"]
 
@@ -51,12 +51,12 @@ def operation_conformance_test(client, operation, num_tests=20):
     :param client: The client to use to access the API.
     :type client: client.Client
     :param operation: The operation to test.
-    :type operation: apitemplates.OperationTemplate
+    :type operation: schema.Operation
     :param num_tests: How many tests to run of each API operation.
     :type num_tests: int
     """
     log.info("Testing operation: %r", operation)
-    strategy = operation.hypothesize_parameters(ValueFactory())
+    strategy = operation.parameters_strategy(StrategyFactory())
 
     @hypothesis.settings(
         max_examples=num_tests,
@@ -68,7 +68,7 @@ def operation_conformance_test(client, operation, num_tests=20):
         :param client: The client to use to access the API.
         :type client: client.Client
         :param operation: The operation to test.
-        :type operation: apitemplates.OperationTemplate
+        :type operation: schema.Operation
         :param params: The dictionary of parameters to use on the operation.
         :type params: dict
         """

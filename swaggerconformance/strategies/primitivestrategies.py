@@ -1,48 +1,48 @@
 """
-Templates for values of various data types.
+Strategys for values of various data types.
 """
 import logging
 import math
 
 import hypothesis.strategies as hy_st
-from .. import strategies as sw_st
+from . import basestrategies as base_st
 
-__all__ = ["ValueTemplate", "BooleanTemplate", "NumericTemplate",
-           "IntegerTemplate", "FloatTemplate", "StringTemplate",
-           "URLPathStringTemplate", "HTTPHeaderStringTemplate",
-           "XFieldsHeaderStringTemplate", "DateTemplate", "DateTimeTemplate",
-           "UUIDTemplate", "FileTemplate", "ArrayTemplate", "ObjectTemplate"]
+__all__ = ["PrimitiveStrategy", "BooleanStrategy", "NumericStrategy",
+           "IntegerStrategy", "FloatStrategy", "StringStrategy",
+           "URLPathStringStrategy", "HTTPHeaderStringStrategy",
+           "XFieldsHeaderStringStrategy", "DateStrategy", "DateTimeStrategy",
+           "UUIDStrategy", "FileStrategy", "ArrayStrategy", "ObjectStrategy"]
 
 
 log = logging.getLogger(__name__)
 
 
-class ValueTemplate:
-    """Template for a single value of any specified type.
+class PrimitiveStrategy:
+    """Strategy for a single value of any specified type.
 
     :param swagger_definition: The Swagger spec for this parameter.
-    :type swagger_definition: apitemplates.SwaggerDefinition
-    :param factory: The factory used to generate child `ValueTemplate` s.
-    :type factory: valuetemplates.ValueFactory
+    :type swagger_definition: schema.Primitive
+    :param factory: The factory used to generate child `PrimitiveStrategy` s.
+    :type factory: strategies.StrategyFactory
     """
 
     def __init__(self, swagger_definition, factory):
         self._swagger_definition = swagger_definition
         self._factory = factory
 
-    def hypothesize(self):
+    def strategy(self):
         """Return a hypothesis strategy defining this value."""
         raise NotImplementedError("Abstract method")
 
 
-class BooleanTemplate(ValueTemplate):
-    """Template for a Boolean value."""
+class BooleanStrategy(PrimitiveStrategy):
+    """Strategy for a Boolean value."""
 
-    def hypothesize(self):
+    def strategy(self):
         return hy_st.booleans()
 
 
-class NumericTemplate(ValueTemplate):
+class NumericStrategy(PrimitiveStrategy):
     """Abstract template for a numeric value."""
 
     def __init__(self, swagger_definition, factory):
@@ -59,14 +59,14 @@ class NumericTemplate(ValueTemplate):
         self._exclusive_minimum = swagger_definition.exclusiveMinimum
         self._multiple_of = swagger_definition.multipleOf
 
-    def hypothesize(self):
+    def strategy(self):
         raise NotImplementedError("Abstract method")
 
 
-class IntegerTemplate(NumericTemplate):
-    """Template for an integer value."""
+class IntegerStrategy(NumericStrategy):
+    """Strategy for an integer value."""
 
-    def hypothesize(self):
+    def strategy(self):
         # Note that hypotheis requires integer bounds, but we may be provided
         # with float values.
         inclusive_max = self._maximum
@@ -93,10 +93,10 @@ class IntegerTemplate(NumericTemplate):
         return strategy
 
 
-class FloatTemplate(NumericTemplate):
-    """Template for a floating point value."""
+class FloatStrategy(NumericStrategy):
+    """Strategy for a floating point value."""
 
-    def hypothesize(self):
+    def strategy(self):
         if self._multiple_of is not None:
             maximum = self._maximum
             if maximum is not None:
@@ -117,8 +117,8 @@ class FloatTemplate(NumericTemplate):
         return strategy
 
 
-class StringTemplate(ValueTemplate):
-    """Template for a string value."""
+class StringStrategy(PrimitiveStrategy):
+    """Strategy for a string value."""
 
     def __init__(self, swagger_definition, factory, blacklist_chars=None):
         super().__init__(swagger_definition, factory)
@@ -128,7 +128,7 @@ class StringTemplate(ValueTemplate):
         self._pattern = swagger_definition.pattern
         self._blacklist_chars = blacklist_chars
 
-    def hypothesize(self):
+    def strategy(self):
         if self._enum is not None:
             return hy_st.sampled_from(self._enum)
 
@@ -143,8 +143,8 @@ class StringTemplate(ValueTemplate):
         return strategy
 
 
-class BytesTemplate(ValueTemplate):
-    """Template for a bytes string value.
+class BytesStrategy(PrimitiveStrategy):
+    """Strategy for a bytes string value.
 
     Assume the lengths refer to the number of bytes, rather than the length of
     some representation of them.
@@ -160,7 +160,7 @@ class BytesTemplate(ValueTemplate):
             self._min_length = 1
         assert self._min_length >= 1, "Byte parameters must be at least 1 byte"
 
-    def hypothesize(self):
+    def strategy(self):
         if self._enum is not None:
             return hy_st.sampled_from(self._enum)
 
@@ -170,8 +170,8 @@ class BytesTemplate(ValueTemplate):
         return strategy
 
 
-class URLPathStringTemplate(StringTemplate):
-    """Template for a string value which must be valid in a URL path."""
+class URLPathStringStrategy(StringStrategy):
+    """Strategy for a string value which must be valid in a URL path."""
 
     def __init__(self, swagger_definition, factory):
         super().__init__(swagger_definition, factory)
@@ -180,21 +180,21 @@ class URLPathStringTemplate(StringTemplate):
         assert self._min_length >= 1, "Path parameters must be at least 1 char"
 
 
-class HTTPHeaderStringTemplate(StringTemplate):
-    """Template for a string value which must be valid in a HTTP header."""
+class HTTPHeaderStringStrategy(StringStrategy):
+    """Strategy for a string value which must be valid in a HTTP header."""
 
     def __init__(self, swagger_definition, factory):
         # Header values are strings but cannot contain newlines.
         super().__init__(
             swagger_definition, factory, blacklist_chars=['\r', '\n'])
 
-    def hypothesize(self):
+    def strategy(self):
         # Header values shouldn't have surrounding whitespace.
-        return super().hypothesize().map(str.strip)
+        return super().strategy().map(str.strip)
 
 
-class XFieldsHeaderStringTemplate(ValueTemplate):
-    """Template for a string value which must be valid in the X-Fields header.
+class XFieldsHeaderStringStrategy(PrimitiveStrategy):
+    """Strategy for a string value which must be valid in the X-Fields header.
 
     The ``X-Fields`` parameter lets you specify a mask of fields to be returned
     by the application. The format is a comma-separated list of fields to
@@ -216,40 +216,40 @@ class XFieldsHeaderStringTemplate(ValueTemplate):
     are safe values that shouldn't interfere with other testing.
     """
 
-    def hypothesize(self):
+    def strategy(self):
         return hy_st.sampled_from(("*", ''))
 
 
-class DateTemplate(ValueTemplate):
-    """Template for a Date value."""
+class DateStrategy(PrimitiveStrategy):
+    """Strategy for a Date value."""
 
-    def hypothesize(self):
-        return sw_st.dates()
-
-
-class DateTimeTemplate(ValueTemplate):
-    """Template for a Date-Time value."""
-
-    def hypothesize(self):
-        return sw_st.datetimes()
+    def strategy(self):
+        return base_st.dates()
 
 
-class UUIDTemplate(ValueTemplate):
-    """Template for a UUID value."""
+class DateTimeStrategy(PrimitiveStrategy):
+    """Strategy for a Date-Time value."""
 
-    def hypothesize(self):
+    def strategy(self):
+        return base_st.datetimes()
+
+
+class UUIDStrategy(PrimitiveStrategy):
+    """Strategy for a UUID value."""
+
+    def strategy(self):
         return hy_st.uuids()
 
 
-class FileTemplate(ValueTemplate):
-    """Template for a File value."""
+class FileStrategy(PrimitiveStrategy):
+    """Strategy for a File value."""
 
-    def hypothesize(self):
-        return sw_st.files()
+    def strategy(self):
+        return base_st.files()
 
 
-class ArrayTemplate(ValueTemplate):
-    """Template for an array collection."""
+class ArrayStrategy(PrimitiveStrategy):
+    """Strategy for an array collection."""
 
     def __init__(self, swagger_definition, factory):
         super().__init__(swagger_definition, factory)
@@ -260,16 +260,16 @@ class ArrayTemplate(ValueTemplate):
         self._min_items = swagger_definition.minItems
         self._unique_items = swagger_definition.uniqueItems
 
-    def hypothesize(self):
+    def strategy(self):
         """Return a hypothesis strategy defining this collection."""
-        return hy_st.lists(elements=self._elements.hypothesize(),
+        return hy_st.lists(elements=self._elements.strategy(),
                            min_size=self._min_items,
                            max_size=self._max_items,
                            unique=self._unique_items)
 
 
-class ObjectTemplate(ValueTemplate):
-    """Template for a JSON object collection.
+class ObjectStrategy(PrimitiveStrategy):
+    """Strategy for a JSON object collection.
 
     `MAX_ADDITIONAL_PROPERTIES` is a limit on the number of additional
     properties to add to objects. Setting this too high might cause data
@@ -291,7 +291,7 @@ class ObjectTemplate(ValueTemplate):
         self._min_properties = swagger_definition.minProperties
         self._additional_properties = additional
 
-    def hypothesize(self):
+    def strategy(self):
         """Return a hypothesis strategy defining this collection, including
         random additional properties if the object supports them.
 
@@ -304,17 +304,17 @@ class ObjectTemplate(ValueTemplate):
         :type optional_properties: dict
         """
         required_properties = {
-            name: field.hypothesize()
+            name: field.strategy()
             for name, field in self._properties.items()
             if name in self._swagger_definition.required_properties}
         optional_properties = {
-            name: field.hypothesize()
+            name: field.strategy()
             for name, field in self._properties.items()
             if name not in self._swagger_definition.required_properties}
 
         # The result must contain the specified propereties.
-        result = sw_st.merge_optional_dict_strategy(required_properties,
-                                                    optional_properties)
+        result = base_st.merge_optional_dict_strategy(required_properties,
+                                                      optional_properties)
 
         # If we allow arbitrary additional properties, create a dict with some
         # then update it with the fixed ones to ensure they are retained.
@@ -336,14 +336,14 @@ class ObjectTemplate(ValueTemplate):
                                        optional_properties.keys())
             extra = hy_st.dictionaries(
                 hy_st.text().filter(lambda x: x not in forbidden_prop_names),
-                sw_st.json(),
+                base_st.json(),
                 min_size=min_properties,
                 max_size=max_properties)
 
             if self._max_properties is not None:
-                result = sw_st.merge_dicts_max_size_strategy(
+                result = base_st.merge_dicts_max_size_strategy(
                     result, extra, self._max_properties)
             else:
-                result = sw_st.merge_dicts_strategy(result, extra)
+                result = base_st.merge_dicts_strategy(result, extra)
 
         return result

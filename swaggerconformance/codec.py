@@ -8,7 +8,7 @@ from pyswagger.primitives import SwaggerPrimitive
 from pyswagger.primitives._int import validate_int, create_int
 from pyswagger.primitives._float import validate_float, create_float
 
-from .apitemplates import SwaggerDefinition
+from .schema import Primitive
 
 # pyswagger and requests make INFO level logs regularly by default, so lower
 # their logging levels to prevent the spam.
@@ -58,8 +58,7 @@ class CodecFactory:
         The ``creator`` parameter must be a `callable` which takes the
         following paramters in order:
 
-        - `swaggerconformance.apitemplates.SwaggerDefinition` - the Swagger
-          schema for the object being handled.
+        - `schema.Primitive` - the Swagger schema for the object being handled.
         - The value to use to build the object - may be the applicable portion
           of JSON after `json.loads` processing, or any supported input value
           for the relevant object.
@@ -76,7 +75,7 @@ class CodecFactory:
         # Map from the internal pyswagger call and paramters to the one we want
         # to expose to users.
         internal_creator = \
-            lambda obj, val, ctx: creator(SwaggerDefinition(obj), val, self)
+            lambda obj, val, ctx: creator(Primitive(obj), val, self)
         self._factory.register(type_str, format_str, internal_creator)
 
     def produce(self, swagger_definition, value):
@@ -84,7 +83,7 @@ class CodecFactory:
         schema portion using the registered type/format mappings.
 
         :param swagger_definition: The Swagger schema type to register for.
-        :type swagger_definition: apitemplates.SwaggerDefinition
+        :type swagger_definition: schema.Primitive
         :param value: The value to use to build the object - may be the
                       applicable portion of JSON after `json.loads` processing,
                       or any supported input value for the relevant object.

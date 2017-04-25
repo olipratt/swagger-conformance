@@ -3,17 +3,17 @@ Template for parameters of a Swagger-defined API operation.
 """
 import logging
 
-__all__ = ["ParameterTemplate"]
+__all__ = ["Parameter"]
 
 
 log = logging.getLogger(__name__)
 
 
-class ParameterTemplate:
+class Parameter:
     """A Swagger API operation parameter.
 
     :param swagger_definition: The swagger spec portion defining the parameter.
-    :type swagger_definition: SwaggerDefinition
+    :type swagger_definition: schema.Primitive
     """
 
     def __init__(self, swagger_definition):
@@ -27,15 +27,15 @@ class ParameterTemplate:
             self.__class__.__name__, self.name, self.type, self.format,
             self.required)
 
-    def hypothesize(self, value_factory):
+    def strategy(self, value_factory):
         """Generate a hypothesis strategy representing this parameter.
 
         :param value_factory: Factory to generate strategies for values.
-        :type value_factory: swaggerconformance.valuetemplates.ValueFactory
+        :type value_factory: strategies.StrategyFactory
         """
         value_template = value_factory.produce(self._swagger_definition)
 
-        return value_template.hypothesize()
+        return value_template.strategy()
 
     @property
     def name(self):

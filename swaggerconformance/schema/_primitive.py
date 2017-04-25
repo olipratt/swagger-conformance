@@ -3,24 +3,22 @@ Wrapper around a Swagger definition of a paramater for an operation.
 """
 import logging
 
-__all__ = ["SwaggerDefinition"]
+__all__ = ["Primitive"]
 
 
 log = logging.getLogger(__name__)
 
 
-class SwaggerDefinition:
-    """Wrapper around a section of swagger schema.
+class Primitive:
+    """Wrapper around a primitive in a swagger schema.
 
-    This may be a `Parameter` or a `Schema` object, either passed directly as
-    a parameter to an operation as a child of one.
+    This may be a Parameter or a Schema Swagger object, either passed directly
+    as a parameter to an operation as a child of one.
 
-    Since a Swagger `Items` object may be a child of a `Parameter`, treat that
-    as a parameter as well since it's sufficiently similar we don't care about
-    the distinction. `Items` don't have names though, so be careful of that.
+    Since a Swagger Items object may be a child of a Parameter or schema, treat
+    that the same as well since it's sufficiently similar we don't care about
+    the distinction. Items don't have names though, so be careful of that.
 
-    :param swagger_app: The API the parameter is part of.
-    :type swagger_app: pyswagger.core.App
     :param swagger_definition: The swagger spec definition of this parameter.
     :type swagger_definition: pyswagger.spec.v2_0.objects.Parameter or
                               pyswagger.spec.v2_0.objects.Items or
@@ -93,7 +91,7 @@ class SwaggerDefinition:
     def items(self):
         """The Parameter elements of this Parameter if it's an array.
 
-        :rtype: SwaggerDefinition or None
+        :rtype: Primitive or None
         """
         items = self._swagger_definition.items
         return None if items is None else self.__class__(items)
@@ -102,7 +100,7 @@ class SwaggerDefinition:
     def properties(self):
         """The dict of Parameter elements of this Parameter if it's an object.
 
-        :rtype: dict(str, SwaggerDefinition) or None
+        :rtype: dict(str, Primitive) or None
         """
         # This attribute is only present on `Schema` objects.
         if not hasattr(self._swagger_definition, 'properties'):
