@@ -9,6 +9,7 @@ the constraints of the schema in these tests - the `pyswagger` module used to
 drive the API does all the validation of input required for us.
 """
 import unittest
+import unittest.mock
 import re
 import os.path as osp
 import json
@@ -18,6 +19,7 @@ import responses
 import hypothesis
 
 import swaggerconformance
+import swaggerconformance.response
 
 
 TEST_SCHEMA_DIR = osp.relpath(osp.join(osp.dirname(osp.realpath(__file__)),
@@ -379,6 +381,23 @@ class MultiRequestTestCase(unittest.TestCase):
                 "{!r} != {!r}".format(out_data, in_data)
 
         single_operation_test(client, put_operation, get_operation) # pylint: disable=E1120
+
+
+class ResponseTestCase(unittest.TestCase):
+    """Test the Response class."""
+
+    def test_insensitive_headers(self):
+        """
+        Verify that headers are case insensitive (See http://www.ietf.org/rfc/rfc2616.txt)...
+
+             'Each header field consists of a name followed by a colon (":") and the field value.
+              Field names are case-insensitive.'
+        """
+        raw_response = unittest.mock.Mock()
+        content_type = 'application/json'
+        raw_response.header = {'content-type': [content_type]}
+        response = swaggerconformance.response.Response(raw_response)
+        assert response.headers['CoNTenT-tyPe'] == [content_type]
 
 
 if __name__ == '__main__':
