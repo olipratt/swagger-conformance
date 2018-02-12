@@ -85,7 +85,6 @@ package: test
 	$(PYTHONCMD) setup.py sdist bdist_wheel
 
 package_upload: package
-	twine register dist/swagger_conformance-*-py3-none-any.whl
 	twine upload dist/*
 
 publish: package_upload docs_upload
