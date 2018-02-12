@@ -32,8 +32,8 @@ def api_conformance_test(schema_path, num_tests_per_op=20, cont_on_err=True):
     for operation in client.api.operations():
         try:
             operation_conformance_test(client, operation, num_tests_per_op)
-        except Exception as e:
-            log.exception("Validation falied of operation: %r", operation)
+        except Exception:
+            log.exception("Validation failed of operation: %r", operation)
             hit_errors.append(traceback.format_exc())
             if not cont_on_err:
                 raise
