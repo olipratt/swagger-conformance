@@ -9,6 +9,11 @@ __all__ = ["Response"]
 log = logging.getLogger(__name__)
 
 
+class CaseInsensitiveDict(dict):
+    def __getitem__(self, key):
+        return {k.lower(): v for k, v in self.items()}[key.lower()]
+
+
 class Response:
     """A response received to a Swagger API operation.
 
@@ -46,6 +51,8 @@ class Response:
 
         Example format is ``{'Content-Type': [xxx, xxx]}``
 
+        Header field names are case insensitive (See http://www.ietf.org/rfc/rfc2616.txt)
+
         :rtype: dict(str, list(str))
         """
-        return self._raw_response.header
+        return CaseInsensitiveDict(self._raw_response.header)
