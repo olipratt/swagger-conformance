@@ -1,6 +1,8 @@
 """
-Strategys for values of various data types.
+Strategies for values of various data types.
 """
+# The classes in this file ahve a single public method by design.
+# pylint: disable=too-few-public-methods
 import logging
 import math
 

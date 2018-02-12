@@ -1,5 +1,11 @@
 [BASIC]
-good-names=i,j,k,ex,Run,_,log,app,api
+good-names=i,j,k,ex,Run,_,log,app,api,id
+
+[MESSAGES CONTROL]
+# I much prefer `if len(SEQUENCE):` to `if SEQUENCE`.
+# The code duplication warning can't be disabled per-file, so disable it
+# globally.
+disable=len-as-condition,duplicate-code
 
 [TYPECHECK]
 ignored-classes=responses

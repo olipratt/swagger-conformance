@@ -31,6 +31,8 @@ help:
 	@echo "Available targets:"
 	@echo "    help"
 	@echo "        Print this message."
+	@echo "    lint"
+	@echo "        Run pylint over the package's source code."
 	@echo "    test"
 	@echo "        Run all tests."
 	@echo "    test_coverage"
@@ -48,7 +50,10 @@ help:
 	@echo "    publish"
 	@echo "        Build and publish docs and packages to PyPI."
 
-test:
+lint:
+	$(PYTHONCMD) -m pylint $(PKGSOURCEDIR)
+
+test: lint
 	$(PYTHONCMD) -m unittest discover $(PYTHONUTOPTS)
 
 test_coverage: test

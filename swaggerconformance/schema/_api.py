@@ -23,7 +23,7 @@ class Api:
     def __init__(self, client):
         log.debug("Creating new endpoint collection for: %r", client)
         self._client = client
-        self._app = client._pyswagger_app
+        self._app = client._pyswagger_app  # pylint: disable=protected-access
 
         self._endpoints_map = {path: self._method_to_op_map(path)
                                for path in self._app.root.paths}

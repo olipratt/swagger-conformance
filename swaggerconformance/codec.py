@@ -88,7 +88,7 @@ class CodecFactory:
                       applicable portion of JSON after `json.loads` processing,
                       or any supported input value for the relevant object.
         """
-        return self._factory.produce(swagger_definition._pyswagger_definition,
+        return self._factory.produce(swagger_definition._pyswagger_definition,  # pylint: disable=protected-access
                                      value)
 
     @property

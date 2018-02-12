@@ -19,9 +19,6 @@ class Parameter:
     def __init__(self, swagger_definition):
         self._swagger_definition = swagger_definition
 
-        self._items = None
-        self._properties = None
-
     def __repr__(self):
         return "{}(name={!r}, type={!r}, format={!r}, required={!r})".format(
             self.__class__.__name__, self.name, self.type, self.format,

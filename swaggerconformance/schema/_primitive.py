@@ -1,6 +1,11 @@
 """
 Wrapper around a Swagger definition of a paramater for an operation.
 """
+# This class exposes swagger format named properties which pylint objects to.
+# There's also a few properties duplicated from the Parameter class it doesn't
+# like, so disable that warning too, except it can't be disabled locally so
+# has to be disabled globally.
+# pylint: disable=invalid-name,too-many-public-methods
 import logging
 
 __all__ = ["Primitive"]
@@ -28,8 +33,9 @@ class Primitive:
     def __init__(self, swagger_definition):
         self._swagger_definition = self._resolve(swagger_definition)
 
-    def _resolve(self, definition):
-        """If the schema for this parameter is a reference, dereference it."""
+    @staticmethod
+    def _resolve(definition):
+        """If the schema for this Primitive is a reference, dereference it."""
         while getattr(definition, 'ref_obj', None) is not None:
             log.debug("New definition is: %r", definition)
             definition = definition.ref_obj
@@ -43,7 +49,7 @@ class Primitive:
 
     @property
     def name(self):
-        """The name of this parameter, if it has one.
+        """The name of this Primitive, if it has one.
 
         :rtype: str or None
         """
@@ -51,7 +57,7 @@ class Primitive:
 
     @property
     def type(self):
-        """The type of this parameter.
+        """The type of this Primitive.
 
         :rtype: str
         """
@@ -59,7 +65,7 @@ class Primitive:
 
     @property
     def format(self):
-        """The format of this parameter.
+        """The format of this Primitive.
 
         :rtype: str or None
         """
@@ -67,7 +73,7 @@ class Primitive:
 
     @property
     def required(self):
-        """Whether this parameter is required.
+        """Whether this Primitive is required.
 
         :rtype: bool
         """
@@ -80,8 +86,8 @@ class Primitive:
 
     @property
     def location(self):
-        """The location of this parameter - e.g. 'header' or 'body', or `None`
-        if not a top-level parameter.
+        """The location of this Primitive - e.g. 'header' or 'body', or `None`
+        if not a top-level primitive.
 
         :rtype: str or None
         """
@@ -89,7 +95,7 @@ class Primitive:
 
     @property
     def items(self):
-        """The Parameter elements of this Parameter if it's an array.
+        """The Parameter elements of this Primitive if it's an array.
 
         :rtype: Primitive or None
         """
@@ -98,7 +104,7 @@ class Primitive:
 
     @property
     def properties(self):
-        """The dict of Parameter elements of this Parameter if it's an object.
+        """The dict of Primitive elements of this Primitive if it's an object.
 
         :rtype: dict(str, Primitive) or None
         """
@@ -111,7 +117,7 @@ class Primitive:
 
     @property
     def required_properties(self):
-        """Set of required property names of this Parameter if it's an object.
+        """Set of required property names of this Primitive if it's an object.
 
         :rtype: set(str) or None
         """
@@ -123,7 +129,7 @@ class Primitive:
 
     @property
     def additionalProperties(self):
-        """Whether this paramater is a dict that accepts arbitrary entries.
+        """Whether this Primitive is a dict that accepts arbitrary entries.
 
         :rtype: bool or None
         """
@@ -135,7 +141,7 @@ class Primitive:
 
     @property
     def maxProperties(self):
-        """The maximum number of properties in this parameter if it's a dict.
+        """The maximum number of properties in this Primitive if it's a dict.
 
         :rtype: int or None
         """
@@ -145,7 +151,7 @@ class Primitive:
 
     @property
     def minProperties(self):
-        """The minimum number of properties in this parameter if it's a dict.
+        """The minimum number of properties in this Primitive if it's a dict.
 
         :rtype: int or None
         """
@@ -155,7 +161,7 @@ class Primitive:
 
     @property
     def maximum(self):
-        """The maximum value of this parameter.
+        """The maximum value of this Primitive.
 
         :rtype: float or None
         """
@@ -163,7 +169,7 @@ class Primitive:
 
     @property
     def exclusiveMaximum(self):
-        """Whether the maximum value of this parameter is allowed.
+        """Whether the maximum value of this Primitive is allowed.
 
         :rtype: bool
         """
@@ -171,7 +177,7 @@ class Primitive:
 
     @property
     def minimum(self):
-        """The minimum value of this parameter.
+        """The minimum value of this Primitive.
 
         :rtype: float or None
         """
@@ -179,7 +185,7 @@ class Primitive:
 
     @property
     def exclusiveMinimum(self):
-        """Whether the minimum value of this parameter is allowed.
+        """Whether the minimum value of this Primitive is allowed.
 
         :rtype: bool
         """
@@ -187,7 +193,7 @@ class Primitive:
 
     @property
     def multipleOf(self):
-        """The value of this parameter must be a multiple of this value.
+        """The value of this Primitive must be a multiple of this value.
 
         :rtype: float or None
         """
@@ -195,7 +201,7 @@ class Primitive:
 
     @property
     def maxLength(self):
-        """The maximum length of this parameter.
+        """The maximum length of this Primitive.
 
         :rtype: int or None
         """
@@ -203,7 +209,7 @@ class Primitive:
 
     @property
     def minLength(self):
-        """The minimum length of this parameter.
+        """The minimum length of this Primitive.
 
         :rtype: int or None
         """
@@ -211,7 +217,7 @@ class Primitive:
 
     @property
     def pattern(self):
-        """The regex pattern for this parameter.
+        """The regex pattern for this Primitive.
 
         :rtype: string or None
         """
@@ -219,7 +225,7 @@ class Primitive:
 
     @property
     def maxItems(self):
-        """The maximum number of items in this parameter if it's an array.
+        """The maximum number of items in this Primitive if it's an array.
 
         :rtype: int or None
         """
@@ -227,7 +233,7 @@ class Primitive:
 
     @property
     def minItems(self):
-        """The minimum number of items in this parameter if it's an array.
+        """The minimum number of items in this Primitive if it's an array.
 
         :rtype: int or None
         """
@@ -235,7 +241,7 @@ class Primitive:
 
     @property
     def uniqueItems(self):
-        """Whether the items in this parameter are unique if it's an array.
+        """Whether the items in this Primitive are unique if it's an array.
 
         :rtype: bool
         """
@@ -243,7 +249,7 @@ class Primitive:
 
     @property
     def enum(self):
-        """List of valid values for this paramater.
+        """List of valid values for this Primitive.
 
         :rtype: list or None
         """

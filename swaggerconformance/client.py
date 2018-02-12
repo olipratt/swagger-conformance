@@ -36,7 +36,8 @@ class Client:
         if codec is None:
             codec = CodecFactory()
 
-        self._prim_factory = codec._pyswagger_factory
+        self._prim_factory = \
+            codec._pyswagger_factory  # pylint: disable=protected-access
 
         self._app = App.load(schema_path, prim=self._prim_factory)
         self._app.prepare()
@@ -66,7 +67,7 @@ class Client:
         :rtype: pyswagger.io.Response
         """
         client = PyswaggerClient(Security(self._app))
-        result = client.request(operation._pyswagger_operation(**parameters))
+        result = client.request(operation._pyswagger_operation(**parameters))  # pylint: disable=protected-access
 
         return Response(result)
 
