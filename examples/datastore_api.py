@@ -23,11 +23,14 @@ app.config['RESTPLUS_VALIDATE'] = True
 # becomes '//<endpoint>' (because they are always prefixed themselves with a
 # '/') and that is not equivalent to '/<endpoint'.
 API_URL_PREFIX = '/api'
+# Configure the API to handle 404 errors so that we get JSON responses rather
+# than HTML error pages from flask for non-existent endpoints.
 api = Api(app,
           version='1.0',
           title='Simple Datastore API',
           description='A simple REST datastore API',
-          prefix='/api')
+          prefix='/api',
+          catch_all_404s=True)
 
 # Simple global dict to store data.
 GLOBAL_DATASTORE = {}
