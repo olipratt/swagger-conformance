@@ -3,7 +3,7 @@
 [![PyPI version](https://badge.fury.io/py/swagger-conformance.svg)](https://badge.fury.io/py/swagger-conformance)
 [![Build Status](https://travis-ci.org/olipratt/swagger-conformance.svg?branch=master)](https://travis-ci.org/olipratt/swagger-conformance)
 [![codecov](https://codecov.io/gh/olipratt/swagger-conformance/branch/master/graph/badge.svg)](https://codecov.io/gh/olipratt/swagger-conformance)
-[![docs](https://img.shields.io/travis/olipratt/swagger-conformance.svg?style=flat)](http://swagger-conformance.readthedocs.io/en/latest/)
+[![docs](https://readthedocs.org/projects/swagger-conformance/badge/?version=latest)](http://swagger-conformance.readthedocs.io/en/latest/)
 
 [![PyPI Versions](https://img.shields.io/pypi/pyversions/swagger-conformance.svg)](https://pypi.python.org/pypi/swagger-conformance)
 [![PyPI License](https://img.shields.io/pypi/l/swagger-conformance.svg)](https://pypi.python.org/pypi/swagger-conformance)
