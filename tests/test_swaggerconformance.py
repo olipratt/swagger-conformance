@@ -35,26 +35,34 @@ SCHEMA_URL_BASE = 'http://127.0.0.1:5000/api'
 CONTENT_TYPE_JSON = 'application/json'
 
 
-def _respond_to_method(method, path, response_json=None, status=200):
+def _respond_to_method(method, path, response_json, status, content_type):
     url_re = re.compile(SCHEMA_URL_BASE + path + '$')
     responses.add(method, url_re, json=response_json, status=status,
-                  content_type=CONTENT_TYPE_JSON)
+                  content_type=content_type)
 
-def respond_to_get(path, response_json=None, status=200):
+def respond_to_get(path, response_json=None, status=200,
+                   content_type=CONTENT_TYPE_JSON):
     """Respond to a GET request to the provided path."""
-    _respond_to_method(responses.GET, path, response_json, status)
+    _respond_to_method(responses.GET, path, response_json, status,
+                       content_type)
 
-def respond_to_post(path, response_json=None, status=200):
+def respond_to_post(path, response_json=None, status=200,
+                    content_type=CONTENT_TYPE_JSON):
     """Respond to a POST request to the provided path."""
-    _respond_to_method(responses.POST, path, response_json, status)
+    _respond_to_method(responses.POST, path, response_json, status,
+                       content_type)
 
-def respond_to_put(path, response_json=None, status=200):
+def respond_to_put(path, response_json=None, status=200,
+                   content_type=CONTENT_TYPE_JSON):
     """Respond to a PUT request to the provided path."""
-    _respond_to_method(responses.PUT, path, response_json, status)
+    _respond_to_method(responses.PUT, path, response_json, status,
+                       content_type)
 
-def respond_to_delete(path, response_json=None, status=200):
+def respond_to_delete(path, response_json=None, status=200,
+                      content_type=CONTENT_TYPE_JSON):
     """Respond to a DELETE request to the provided path."""
-    _respond_to_method(responses.DELETE, path, response_json, status)
+    _respond_to_method(responses.DELETE, path, response_json, status,
+                       content_type)
 
 
 class APITemplateTestCase(unittest.TestCase):
@@ -159,6 +167,24 @@ class BasicConformanceAPITestCase(unittest.TestCase):
                                r"3 operation\(s\) failed",
                                dunder_main,
                                [TEST_SCHEMA_PATH])
+
+    @responses.activate
+    def test_content_type_header_with_parameters(self):
+        """Content type header parameters should be allowed."""
+        content_type_extra = 'application/json; charset=utf-8'
+        respond_to_get('/schema')
+        respond_to_get('/apps',
+                       response_json=[{'name': 'test'}],
+                       content_type=content_type_extra)
+        respond_to_get(r'/apps/.+', status=404,
+                       content_type=content_type_extra)
+        respond_to_put(r'/apps/.+', status=204,
+                       content_type=content_type_extra)
+        respond_to_delete(r'/apps/.+', status=204,
+                          content_type=content_type_extra)
+
+        swaggerconformance.api_conformance_test(TEST_SCHEMA_PATH,
+                                                cont_on_err=False)
 
 
 class ParameterTypesTestCase(unittest.TestCase):

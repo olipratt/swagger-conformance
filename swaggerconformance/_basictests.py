@@ -77,9 +77,11 @@ def operation_conformance_test(client, operation, num_tests=20):
         assert result.status in operation.response_codes, \
             "Response code {} not in {}".format(result.status,
                                                 operation.response_codes)
-        assert 'application/json' in result.headers['Content-Type'], \
-            "application/json not in {}".format(result.headers['Content-Type'])
+        assert any(entry.strip().startswith('application/json') \
+                   for entry in result.headers['Content-Type']), \
+            "'application/json' not in 'Content-Type' header: {}" \
+            .format(result.headers['Content-Type'])
 
     # Run the test, which takes one less parameter than expected due to the
     # hypothesis decorator providing the last one.
-    single_operation_test(client, operation) # pylint: disable=E1120
+    single_operation_test(client, operation)  # pylint: disable=E1120
