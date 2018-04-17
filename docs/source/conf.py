@@ -16,6 +16,12 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('../../'))
 
+import shutil
+from recommonmark.parser import CommonMarkParser
+
+# Put other docs files into this source location.
+shutil.copyfile('../../readme.md', 'readme.md')
+shutil.copyfile('../../examples/readme.md', 'examples.md')
 
 # -- General configuration ------------------------------------------------
 
@@ -37,7 +43,12 @@ templates_path = []
 # You can specify multiple suffix as a list of string:
 #
 # source_suffix = ['.rst', '.md']
-source_suffix = '.rst'
+source_suffix = ['.rst', '.md']
+
+# Support markdown docs.
+source_parsers = {
+    '.md': CommonMarkParser,
+}
 
 # The master toctree document.
 master_doc = 'index'
@@ -172,3 +183,16 @@ intersphinx_mapping = {'https://docs.python.org/3': None,
 # object of unspecified type' so that Sphinx will try and match it to some
 # available class/function/constant/etc.
 default_role = 'py:obj'
+
+# Generate API documentation as part of the standard docs build.
+def run_apidoc(_):
+	from sphinx.ext.apidoc import main
+	import os
+	import sys
+	cur_dir = os.path.abspath(os.path.dirname(__file__))
+	package_dir = os.path.join(cur_dir, "../..", project)
+	api_out_dir = os.path.join(cur_dir, "modules")
+	main(['--separate', '--force', '--no-toc', '-o', api_out_dir, package_dir])
+
+def setup(app):
+	app.connect('builder-inited', run_apidoc)

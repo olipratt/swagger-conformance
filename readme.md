@@ -3,7 +3,7 @@
 [![PyPI version](https://badge.fury.io/py/swagger-conformance.svg)](https://badge.fury.io/py/swagger-conformance)
 [![Build Status](https://travis-ci.org/olipratt/swagger-conformance.svg?branch=master)](https://travis-ci.org/olipratt/swagger-conformance)
 [![codecov](https://codecov.io/gh/olipratt/swagger-conformance/branch/master/graph/badge.svg)](https://codecov.io/gh/olipratt/swagger-conformance)
-[![docs](https://img.shields.io/badge/docs-latest-brightgreen.svg)](https://pythonhosted.org/swagger-conformance/index.html)
+[![docs](https://img.shields.io/travis/olipratt/swagger-conformance.svg?style=flat)](http://swagger-conformance.readthedocs.io/en/latest/)
 
 [![PyPI Versions](https://img.shields.io/pypi/pyversions/swagger-conformance.svg)](https://pypi.python.org/pypi/swagger-conformance)
 [![PyPI License](https://img.shields.io/pypi/l/swagger-conformance.svg)](https://pypi.python.org/pypi/swagger-conformance)
@@ -36,7 +36,7 @@ This basic test tries all your API operations looking for errors. For explanatio
 
 ## Documentation
 
-Full documentation, including the example walkthroughs mentioned above and API documentation, is [available here](https://pythonhosted.org/swagger-conformance/index.html).
+Full documentation, including the example walkthroughs mentioned above and API documentation, is [available here](http://swagger-conformance.readthedocs.io/en/latest/).
 
 ## Wait, I don't get it, what does this thing do?
 

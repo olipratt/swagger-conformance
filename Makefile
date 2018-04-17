@@ -12,10 +12,6 @@ DOCSHTMLDIR = $(DOCSBUILDDIR)/html
 SPHINXBUILDOPTS = -E -W
 SPHINXBUILD = sphinx-build
 SPHINXBUILDTARGET = html
-SPHINXAPIDOC = sphinx-apidoc
-SPHINXAPIDOCOPTS = -e -f -T
-# Pandoc documentation commands.
-PANDOC = pandoc
 
 # Python commands.
 PYTHONCMD = python3
@@ -63,27 +59,11 @@ test_coverage: test
 docs_clean:
 	rm -rf "$(DOCSBUILDDIR)"
 
-docs_api:
-	rm -rf "$(SPHINXAPIOUT)"
-	$(SPHINXAPIDOC) $(SPHINXAPIDOCOPTS) -o "$(SPHINXAPIOUT)" "$(PKGSOURCEDIR)"
-
-docs_md_convert:
-	$(PANDOC) readme.md -o $(DOCSSOURCEDIR)/readme.rst
-	$(PANDOC) examples/readme.md -o $(DOCSSOURCEDIR)/examples.rst
-
-docs_sphinx: docs_clean docs_api docs_md_convert
+docs_sphinx: docs_clean
 	@$(SPHINXBUILD) -M "$(SPHINXBUILDTARGET)" "$(DOCSSOURCEDIR)" \
 		"$(DOCSBUILDDIR)" $(SPHINXBUILDOPTS)
 
 docs: docs_sphinx
-
-# zip up docs for manual upload to PyPI - deprecated in favour of docs_upload.
-# docs_bundle: docs
-# 	cd $(DOCSHTMLDIR) ; zip -r docs.zip .
-# 	@echo "Docs are bundled up in $(DOCSHTMLDIR)/docs.zip"
-
-docs_upload: docs
-	$(PYTHONCMD) setup.py upload_docs --upload-dir=$(DOCSHTMLDIR)
 
 package: test
 	rm -rf "$(DISTSDIR)"
@@ -92,9 +72,9 @@ package: test
 package_upload: package
 	twine upload dist/*
 
-publish: package_upload docs_upload
+publish: package_upload
 
 all: docs test_coverage package
 
-.PHONY: help test docs_clean docs_api docs_md_convert docs_sphinx docs \
-	docs_bundle package package_upload all
+.PHONY: help lint test test_coverage docs_clean docs_sphinx docs package \
+	package_upload publish all
