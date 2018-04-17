@@ -26,4 +26,4 @@ def main(raw_args):
 
 
 if __name__ == "__main__":
-    main(sys.argv)  # pragma: no cover - We import this module to test it
+    main(sys.argv[1:])  # pragma: no cover - We import this module to test it.
