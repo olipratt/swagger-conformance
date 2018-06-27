@@ -32,7 +32,9 @@ else:
 setup(
     name='swagger-conformance',
     packages=find_packages(exclude=['examples', 'docs', 'tests']),
-    install_requires=['hypothesis', 'pyswagger>=0.8.29', 'requests'],
+    install_requires=['hypothesis>=3.4.2',
+                      'pyswagger>=0.8.38',
+                      'requests>=2.13.0'],
     version=VERSION,
     description=SHORT_DESC,
     long_description=LONG_DESC,
