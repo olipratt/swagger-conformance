@@ -19,7 +19,7 @@ try:
 except ImportError:
     pypandoc = None
 
-VERSION = '0.2.4'
+VERSION = '0.2.5'
 URL = 'https://github.com/olipratt/swagger-conformance'
 SHORT_DESC = ("Tool for testing whether your API conforms to its swagger "
               "specification")
