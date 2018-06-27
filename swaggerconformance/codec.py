@@ -21,29 +21,13 @@ __all__ = ["CodecFactory"]
 log = logging.getLogger(__name__)
 
 
-class _SwaggerPrimitiveDefaults(SwaggerPrimitive):
-    """An enhanced primitive factory which can handle default types."""
-
-    def get(self, _type, _format=None):
-        """If we don't understand the format, fallback to the most
-        basic version for the type, and if we don't know the type, then
-        that is an error as the allowed types are strictly specified,
-        so just let that be handled as normal.
-        """
-        result = super().get(_type, _format)
-        if result == (None, None):
-            result = super().get(_type, None)
-
-        return result
-
-
 class CodecFactory:
     """Produces codecs that encode objects as JSON and decode JSON back into
     objects.
     """
 
     def __init__(self):
-        self._factory = _SwaggerPrimitiveDefaults()
+        self._factory = SwaggerPrimitive()
 
         # Pyswagger doesn't support integers or floats without a 'format', even
         # though it does seem valid for a spec to not have one.
