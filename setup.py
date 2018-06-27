@@ -13,15 +13,20 @@ To push a new release, assuming running on Windows:
 5. Upload the new packages:
     twine upload dist\*
 """
-import os.path as osp
 from setuptools import find_packages, setup
-import pypandoc
+try:
+    import pypandoc
+except:
+    pypandoc = None
 
-VERSION_FILE = osp.relpath(osp.join(osp.dirname(osp.realpath(__file__)),
-                                    'VERSION.txt'))
-VERSION = open(VERSION_FILE).read().strip()
+VERSION = '0.2.4'
 URL = 'https://github.com/olipratt/swagger-conformance'
-LONG_DESC = pypandoc.convert('readme.md', 'rst').replace('\r\n', '\n')
+SHORT_DESC = ("Tool for testing whether your API conforms to its swagger "
+              "specification")
+if pypandoc is not None:
+    LONG_DESC = pypandoc.convert('readme.md', 'rst').replace('\r\n', '\n')
+else:
+    LONG_DESC = SHORT_DESC
 
 
 setup(
@@ -29,8 +34,7 @@ setup(
     packages=find_packages(exclude=['examples', 'docs', 'tests']),
     install_requires=['hypothesis', 'pyswagger>=0.8.29', 'requests'],
     version=VERSION,
-    description="Tool for testing whether your API conforms to its swagger "
-                "specification",
+    description=SHORT_DESC,
     long_description=LONG_DESC,
     author='Oli Pratt',
     author_email='olipratt@users.noreply.github.com',

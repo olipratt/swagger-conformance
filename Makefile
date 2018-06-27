@@ -46,10 +46,16 @@ help:
 	@echo "    publish"
 	@echo "        Build and publish docs and packages to PyPI."
 
+# The version number is duplicated in two places - this check makes sure they
+# are kept in sync.
+version_check:
+	@[ "$$(sed -n 's/version = //p' docs/source/conf.py)" = \
+	   "$$(sed -n 's/VERSION = //p' setup.py)" ]
+
 lint:
 	$(PYTHONCMD) -m pylint $(PKGSOURCEDIR)
 
-test: lint
+test: lint version_check
 	$(PYTHONCMD) -m unittest discover $(PYTHONUTOPTS)
 
 test_coverage: test
