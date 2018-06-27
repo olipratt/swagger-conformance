@@ -16,7 +16,7 @@ To push a new release, assuming running on Windows:
 from setuptools import find_packages, setup
 try:
     import pypandoc
-except:
+except ImportError:
     pypandoc = None
 
 VERSION = '0.2.4'
