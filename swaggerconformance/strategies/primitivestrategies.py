@@ -343,8 +343,10 @@ class ObjectStrategy(PrimitiveStrategy):
                 max_size=max_properties)
 
             if self._max_properties is not None:
-                result = base_st.merge_dicts_max_size_strategy(
-                    result, extra, self._max_properties)
+                merge = base_st.merge_dicts_max_size_strategy
+                result = merge(  # pylint: disable=no-value-for-parameter
+                    result, extra, self._max_properties
+                )
             else:
                 result = base_st.merge_dicts_strategy(result, extra)
 
