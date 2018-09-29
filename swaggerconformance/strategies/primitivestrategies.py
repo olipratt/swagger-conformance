@@ -226,14 +226,14 @@ class DateStrategy(PrimitiveStrategy):
     """Strategy for a Date value."""
 
     def strategy(self):
-        return base_st.dates()
+        return hy_st.dates()
 
 
 class DateTimeStrategy(PrimitiveStrategy):
     """Strategy for a Date-Time value."""
 
     def strategy(self):
-        return base_st.datetimes()
+        return hy_st.datetimes()
 
 
 class UUIDStrategy(PrimitiveStrategy):

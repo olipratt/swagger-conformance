@@ -4,12 +4,11 @@ helper functions for merging dictionary type strategies and dictionaries of
 strategies.
 """
 import logging
-import datetime
 import io
 
 import hypothesis.strategies as hy_st
 
-__all__ = ["json", "dates", "times", "datetimes", "file_objects", "files",
+__all__ = ["json", "file_objects", "files",
            "merge_dicts_strategy", "merge_dicts_max_size_strategy",
            "merge_optional_dict_strategy"]
 
@@ -30,28 +29,6 @@ def json(value_limit=5):
         hy_st.none() | hy_st.booleans() | hy_st.floats() | hy_st.text(),
         lambda children: hy_st.dictionaries(hy_st.text(), children),
         max_leaves=value_limit)
-
-
-def dates():
-    """Hypothesis strategy for generating `datetime.date` values."""
-    return hy_st.builds(
-        datetime.date.fromordinal,
-        hy_st.integers(min_value=1, max_value=datetime.date.max.toordinal()))
-
-
-def times():
-    """Hypothesis strategy for generating `datetime.time` values."""
-    return hy_st.builds(
-        datetime.time,
-        hour=hy_st.integers(min_value=0, max_value=23),
-        minute=hy_st.integers(min_value=0, max_value=59),
-        second=hy_st.integers(min_value=0, max_value=59),
-        microsecond=hy_st.integers(min_value=0, max_value=999999))
-
-
-def datetimes():
-    """Hypothesis strategy for generating `datetime.datetime` values."""
-    return hy_st.builds(datetime.datetime.combine, dates(), times())
 
 
 def file_objects():
