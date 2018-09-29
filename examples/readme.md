@@ -147,9 +147,7 @@ class HexColourTemplate(valuetemplates.ValueTemplate):
 
         # We'll generate values as strings, but we could generate integers and
         # convert those to hex instead.
-        strategy = hy_st.text(alphabet=set(string.hexdigits),
-                              min_size=6,
-                              max_size=6)
+        strategy = hy_st.text(alphabet=string.hexdigits, min_size=6, max_size=6)
         # Don't forget to add the leading `#`.
         strategy = strategy.map(lambda x: "#" + x)
 

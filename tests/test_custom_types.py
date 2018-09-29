@@ -31,9 +31,7 @@ class HexColourStrTemplate(
     def strategy(self):
         if self._enum is not None:
             return hy_st.sampled_from(self._enum)
-        strategy = hy_st.text(alphabet=set(string.hexdigits),
-                              min_size=6,
-                              max_size=6)
+        strategy = hy_st.text(string.hexdigits, min_size=6, max_size=6)
         # Don't forget to add the leading `#`.
         strategy = strategy.map(lambda x: "#" + x)
 

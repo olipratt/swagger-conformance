@@ -27,7 +27,7 @@ def json(value_limit=5):
     :type value_limit: int
     """
     return hy_st.recursive(
-        hy_st.floats() | hy_st.booleans() | hy_st.text() | hy_st.none(),
+        hy_st.none() | hy_st.booleans() | hy_st.floats() | hy_st.text(),
         lambda children: hy_st.dictionaries(hy_st.text(), children),
         max_leaves=value_limit)
 
